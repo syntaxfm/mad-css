@@ -1,0 +1,19 @@
+.header {
+	background-image:
+		linear-gradient(to bottom, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0)),
+		url("../../public/celebration.jpg");
+
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: cover;
+	text-align: center;
+	min-height: 600px;
+}
+
+.logo {
+	margin: 0 auto;
+	display: inline-block;
+	img {
+		max-width: 350px;
+	}
+}

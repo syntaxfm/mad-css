@@ -1,0 +1,60 @@
+@import "./reset.css";
+
+:root {
+	--orange: #f3370e;
+	--yellow: #ffae00;
+	--black: #000;
+	--white: #fff;
+	--beige: #f5eeda;
+	/* TODO: Add web fonts */
+	--font-serif: "Kaltjer", serif;
+	--font-block: "CollegiateBlackFLF", sans-serif;
+	--font-sans: "Inter", sans-serif;
+}
+
+html {
+	color-scheme: dark;
+	scrollbar-color: var(--black) transparent;
+}
+body {
+	min-height: 100vh;
+	background: var(--orange);
+	background-image: url("./assets/textures/dots005.svg");
+	background-size: cover;
+	background-repeat: no-repeat;
+	color: var(--white);
+	font-family: var(--font-sans);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.heading {
+	font-family: var(--font-serif);
+	font-size: 300;
+	font-weight: 100;
+}
+
+p {
+	font-family: var(--font-sans);
+}
+
+.font_block {
+	font-family: var(--font-block);
+}
+.font_serif {
+	font-family: var(--font-serif);
+}
+.font_sans {
+	font-family: var(--font-sans);
+}
+.uppercase {
+	text-transform: uppercase;
+}
+
+.center {
+	text-align: center;
+}

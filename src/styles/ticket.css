@@ -1,0 +1,167 @@
+.ticket {
+	--padding: 20px;
+	--notch-size: 15px;
+	--stub-width: 100px;
+	background: var(--beige);
+	display: grid;
+	grid-template-columns: 1fr auto auto;
+	color: var(--black);
+	max-width: 800px;
+	margin: 0 auto;
+	margin-top: -100px;
+	container-type: inline-size;
+	container-name: ticket;
+	border-radius: 10px;
+	box-shadow:
+		0 0 10px 0 rgba(0, 0, 0, 1),
+		0 0 20px 0 rgba(0, 0, 0, 0.5);
+	z-index: 1;
+	position: relative;
+	/* Mask for ticket cutouts - semicircle notches */
+	/* Top notch cutout */
+	mask-image:
+		radial-gradient(
+			circle var(--notch-size) at calc(100% - var(--stub-width)) 0,
+			transparent 100%,
+			black 100%
+		),
+		/* Bottom notch cutout */
+		radial-gradient(
+			circle var(--notch-size) at calc(100% - var(--stub-width)) 100%,
+			transparent 100%,
+			black 100%
+		);
+	mask-composite: intersect;
+	/* Dashed tear line - full height so it extends through the notches */
+	&::after {
+		content: "";
+		position: absolute;
+		right: var(--stub-width);
+		top: calc(-1 * var(--notch-size));
+		bottom: calc(-1 * var(--notch-size));
+		width: 0;
+		border-right: 2px dashed var(--black);
+	}
+}
+
+/* Text Selection color */
+::selection {
+	background: var(--orange);
+	color: var(--white);
+}
+
+.ticket_body {
+	display: grid;
+	grid-template-columns: auto auto auto;
+	align-items: center;
+	align-content: center;
+	h2 {
+		grid-column: 1 / -1;
+		text-transform: uppercase;
+		font-size: 6cqi;
+		color: var(--orange);
+		padding: var(--padding);
+		line-height: 1;
+		text-box: trim-both cap alphabetic;
+	}
+	p.battle {
+		text-box: trim-both cap alphabetic;
+		grid-column: 1 / -1;
+		border-block: 1.5px solid var(--black);
+		text-transform: uppercase;
+		font-size: 4.5cqi;
+		font-family: var(--font-block);
+		padding: var(--padding);
+		line-height: 1;
+	}
+}
+
+.presented {
+	text-align: center;
+	padding-block: 10px;
+	display: grid;
+	gap: 5px;
+	& + .presented {
+		border-left: 1.5px solid var(--black);
+	}
+	p {
+		font-weight: 900;
+	}
+	img {
+		height: 70px;
+		max-width: 200px;
+		object-fit: contain;
+		margin: 0 auto;
+	}
+}
+
+.ticket_tear {
+	background: var(--white);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	writing-mode: sideways-lr;
+	text-align: center;
+	text-orientation: sideways-right;
+	border-block: 1.5px solid var(--black);
+	padding-block: 15px;
+	p {
+		font-family: var(--font-block);
+		font-size: 4.5cqb;
+		line-height: 1;
+		text-box: trim-both cap alphabetic;
+	}
+}
+
+.ticket_stub {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 20px;
+}
+.barcode {
+	height: 100%;
+	width: 60px;
+	--white: transparent;
+	background: repeating-linear-gradient(
+		0deg,
+		var(--black) 0px,
+		var(--black) 2px,
+		var(--white) 2px,
+		var(--white) 4px,
+		var(--black) 4px,
+		var(--black) 5px,
+		var(--white) 5px,
+		var(--white) 8px,
+		var(--black) 8px,
+		var(--black) 11px,
+		var(--white) 11px,
+		var(--white) 13px,
+		var(--black) 13px,
+		var(--black) 14px,
+		var(--white) 14px,
+		var(--white) 16px,
+		var(--black) 16px,
+		var(--black) 19px,
+		var(--white) 19px,
+		var(--white) 20px,
+		var(--black) 20px,
+		var(--black) 22px,
+		var(--white) 22px,
+		var(--white) 26px,
+		var(--black) 26px,
+		var(--black) 28px,
+		var(--white) 28px,
+		var(--white) 29px,
+		var(--black) 29px,
+		var(--black) 32px,
+		var(--white) 32px,
+		var(--white) 34px,
+		var(--black) 34px,
+		var(--black) 35px,
+		var(--white) 35px,
+		var(--white) 38px,
+		var(--black) 38px,
+		var(--black) 40px
+	);
+}
