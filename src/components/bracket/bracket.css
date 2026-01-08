@@ -1,0 +1,212 @@
+/* Player Node Base Styles */
+.player-node {
+	display: flex;
+	align-items: center;
+	gap: 0;
+	position: relative;
+}
+
+.player-photo-ring {
+	--ring-color: var(--orange);
+	--ring-thickness: 4px;
+	--gold-ring-thickness: 3px;
+	--photo-size: 50px;
+
+	position: relative;
+	z-index: 2;
+	width: calc(
+		var(--photo-size) +
+		var(--ring-thickness) *
+		2 +
+		var(--gold-ring-thickness) *
+		2
+	);
+	height: calc(
+		var(--photo-size) +
+		var(--ring-thickness) *
+		2 +
+		var(--gold-ring-thickness) *
+		2
+	);
+	border-radius: 50%;
+	background:
+		linear-gradient(var(--ring-color), var(--ring-color)) padding-box,
+		linear-gradient(var(--ring-color), var(--ring-color)) border-box;
+	padding: var(--ring-thickness);
+	flex-shrink: 0;
+}
+
+.player-photo-ring::before {
+	content: "";
+	position: absolute;
+	inset: var(--ring-thickness);
+	border-radius: 50%;
+	background: var(--yellow);
+	padding: var(--gold-ring-thickness);
+}
+
+.player-photo {
+	position: relative;
+	z-index: 1;
+	width: 100%;
+	height: 100%;
+	border-radius: 50%;
+	object-fit: cover;
+	border: var(--gold-ring-thickness) solid var(--yellow);
+	filter: grayscale(100%);
+}
+
+.player-info {
+	background: var(--beige);
+	padding: 10px 20px 10px 24px;
+	margin-left: -16px;
+	position: relative;
+	z-index: 1;
+	min-width: 180px;
+	border-top: 3px solid var(--black);
+	border-bottom: 3px solid var(--black);
+}
+
+.player-name {
+	font-family: var(--font-block), "Impact", sans-serif;
+	font-size: 1.1rem;
+	font-weight: 700;
+	color: var(--black);
+	margin: 0;
+	line-height: 1.1;
+	text-transform: uppercase;
+	letter-spacing: 0.02em;
+}
+
+.player-byline {
+	display: none;
+}
+
+/* Winner State */
+.player-node--winner .player-photo {
+	filter: grayscale(0%);
+}
+
+/* Eliminated State - no opacity change, just grayscale */
+.player-node--eliminated .player-photo-ring {
+	--ring-color: #666;
+}
+
+.player-node--eliminated .player-photo-ring::before {
+	background: #888;
+}
+
+.player-node--eliminated .player-photo {
+	border-color: #888;
+}
+
+/* Empty Slot Styles */
+.empty-slot {
+	display: flex;
+	align-items: center;
+	gap: 0;
+	position: relative;
+	min-width: 250px;
+	height: 50px;
+}
+
+.empty-slot-ring {
+	display: none;
+}
+
+.empty-slot-info {
+	background: #4a4a4a;
+	padding: 10px 20px;
+	position: relative;
+	z-index: 1;
+	width: 100%;
+	height: 100%;
+	border-top: 3px solid var(--black);
+	border-bottom: 3px solid var(--black);
+	display: flex;
+	align-items: center;
+}
+
+.empty-slot-text {
+	display: none;
+}
+
+/* React Flow Container */
+.bracket-container {
+	width: 100%;
+	height: 100vh;
+	background: transparent;
+}
+
+.bracket-container .react-flow__node {
+	background: transparent;
+	border: none;
+	padding: 0;
+}
+
+/* Edge/Connector Styles - Force visibility */
+.bracket-container .react-flow__edges {
+	z-index: 5 !important;
+	pointer-events: none;
+}
+
+.bracket-container .react-flow__nodes {
+	z-index: 10 !important;
+}
+
+.bracket-container .react-flow__edge path,
+.bracket-container .react-flow__edge-path,
+.bracket-container svg path {
+	stroke: #000000 !important;
+	stroke-width: 3px !important;
+	fill: none !important;
+	opacity: 1 !important;
+	visibility: visible !important;
+}
+
+.bracket-container svg.react-flow__edges {
+	overflow: visible !important;
+}
+
+/* Debug - make edges very visible */
+.react-flow__edge {
+	stroke: #000 !important;
+}
+
+.react-flow__edge-path {
+	stroke: #000 !important;
+	stroke-width: 3px !important;
+}
+
+/* Hide default React Flow UI elements for cleaner look */
+.bracket-container .react-flow__attribution {
+	display: none;
+}
+
+.bracket-container .react-flow__controls {
+	background: var(--beige);
+	border: 2px solid var(--black);
+	border-radius: 8px;
+}
+
+.bracket-container .react-flow__controls-button {
+	background: var(--beige);
+	border-bottom: 1px solid var(--black);
+}
+
+.bracket-container .react-flow__controls-button:hover {
+	background: var(--yellow);
+}
+
+.bracket-container .react-flow__controls-button svg {
+	fill: var(--black);
+}
+
+/* Handles */
+.bracket-handle {
+	width: 10px !important;
+	height: 10px !important;
+	background: red !important;
+	border: 2px solid black !important;
+	border-radius: 50% !important;
+}
