@@ -57,3 +57,9 @@ p {
 .center {
 	text-align: center;
 }
+
+/* Fixes bug in react flow edges not showing up */
+
+.react-flow .react-flow__edges {
+	width: 100%;
+}

@@ -60,7 +60,7 @@ export function PlayerNodeFlow({ data }: { data: PlayerData }) {
 				type="target"
 				position={Position.Left}
 				className="bracket-handle"
-				style={{ left: -5 }}
+				style={{ left: '320px' }}
 			/>
 			<PlayerNode
 				photo={data.photo}
@@ -75,6 +75,14 @@ export function PlayerNodeFlow({ data }: { data: PlayerData }) {
 				position={Position.Right}
 				className="bracket-handle"
 				style={{ right: -5 }}
+        id="out-right"
+			/>
+			<Handle
+				type="source"
+				position={Position.Left}
+				className="bracket-handle"
+				style={{ right: -5 }}
+        id="out-left"
 			/>
 		</div>
 	);
@@ -94,7 +102,7 @@ export function EmptySlot() {
 // React Flow wrapper for EmptySlot
 export function EmptySlotFlow() {
 	return (
-		<div style={{ position: 'relative' }}>
+		<div style={{ position: "relative" }}>
 			<Handle
 				type="target"
 				position={Position.Left}
@@ -107,6 +115,14 @@ export function EmptySlotFlow() {
 				position={Position.Right}
 				className="bracket-handle"
 				style={{ right: -5 }}
+				id="out-right"
+			/>
+			<Handle
+				type="source"
+				position={Position.Left}
+				className="bracket-handle"
+				style={{ right: -5 }}
+				id="out-left"
 			/>
 		</div>
 	);

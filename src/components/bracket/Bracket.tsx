@@ -6,13 +6,25 @@ import {
 	type Node,
 	Position,
 	ReactFlow,
-} from '@xyflow/react';
-import { useEffect, useState } from 'react';
-import '@xyflow/react/dist/style.css';
-import { EmptySlotFlow, type PlayerData, PlayerNodeFlow } from './PlayerNode';
-import './bracket.css';
+} from "@xyflow/react";
+import { useEffect, useState } from "react";
+import "@xyflow/react/dist/style.css";
+import {
+	bracket,
+	type Game,
+	isLoser,
+	isWinner,
+	type Player,
+	splitForDisplay,
+} from "@/data/players";
+import { EmptySlotFlow, PlayerNodeFlow } from "./PlayerNode";
+import "./bracket.css";
 
-// Custom edge that's guaranteed to be visible
+// Ring colors for each side
+const LEFT_RING_COLOR = "#f3370e";
+const RIGHT_RING_COLOR = "#5CE1E6";
+
+// Custom edge component
 function BracketEdge({
 	sourceX,
 	sourceY,
@@ -31,14 +43,7 @@ function BracketEdge({
 		borderRadius: 0,
 	});
 
-	return (
-		<path
-			d={edgePath}
-			fill="none"
-			stroke="#000000"
-			strokeWidth={3}
-		/>
-	);
+	return <path d={edgePath} fill="none" stroke="#000000" strokeWidth={3} />;
 }
 
 // Register custom node types
@@ -52,394 +57,409 @@ const edgeTypes = {
 	bracket: BracketEdge,
 };
 
-// Mock player data - West Side (orange/yellow themed)
-const westPlayers: PlayerData[] = [
-	{
-		photo: '/cards/wes.jpg',
-		name: 'Wes Bos',
-		byline: 'Syntax.fm',
-		ringColor: '#f3370e',
-		isWinner: true,
-	},
-	{
-		photo: '/cards/kevin.jpg',
-		name: 'Kevin Powell',
-		byline: 'CSS Evangelist',
-		ringColor: '#f3370e',
-		isEliminated: true,
-	},
-	{
-		photo: '/cards/scott.jpg',
-		name: 'Scott Tolinski',
-		byline: 'Level Up Tuts',
-		ringColor: '#ffae00',
-		isWinner: true,
-	},
-	{
-		photo: '/cards/wes.jpg',
-		name: 'Adam Wathan',
-		byline: 'Tailwind CSS',
-		ringColor: '#ffae00',
-		isEliminated: true,
-	},
-	{
-		photo: '/cards/kevin.jpg',
-		name: 'Jhey Tompkins',
-		byline: 'CSS Wizard',
-		ringColor: '#f3370e',
-		isEliminated: true,
-	},
-	{
-		photo: '/cards/scott.jpg',
-		name: 'Una Kravets',
-		byline: 'Google Chrome',
-		ringColor: '#f3370e',
-		isWinner: true,
-	},
-	{
-		photo: '/cards/wes.jpg',
-		name: 'Josh Comeau',
-		byline: 'CSS for JS Devs',
-		ringColor: '#ffae00',
-		isWinner: true,
-	},
-	{
-		photo: '/cards/kevin.jpg',
-		name: 'Miriam Suzanne',
-		byline: 'OddBird',
-		ringColor: '#ffae00',
-		isEliminated: true,
-	},
-];
-
-// Mock player data - East Side (cyan/teal themed)
-const eastPlayers: PlayerData[] = [
-	{
-		photo: '/cards/scott.jpg',
-		name: 'Lea Verou',
-		byline: 'CSS WG',
-		ringColor: '#5CE1E6',
-		isWinner: true,
-	},
-	{
-		photo: '/cards/wes.jpg',
-		name: 'Bramus',
-		byline: 'Google Chrome',
-		ringColor: '#5CE1E6',
-		isEliminated: true,
-	},
-	{
-		photo: '/cards/kevin.jpg',
-		name: 'Adam Argyle',
-		byline: 'Open UI',
-		ringColor: '#00CED1',
-		isEliminated: true,
-	},
-	{
-		photo: '/cards/scott.jpg',
-		name: 'Stephanie Eckles',
-		byline: 'ModernCSS.dev',
-		ringColor: '#00CED1',
-		isWinner: true,
-	},
-	{
-		photo: '/cards/wes.jpg',
-		name: 'Rachel Andrew',
-		byline: 'Google Chrome',
-		ringColor: '#5CE1E6',
-		isWinner: true,
-	},
-	{
-		photo: '/cards/kevin.jpg',
-		name: 'Chen Hui Jing',
-		byline: 'Mozilla',
-		ringColor: '#5CE1E6',
-		isEliminated: true,
-	},
-	{
-		photo: '/cards/scott.jpg',
-		name: 'Sara Soueidan',
-		byline: 'Accessibility',
-		ringColor: '#00CED1',
-		isEliminated: true,
-	},
-	{
-		photo: '/cards/wes.jpg',
-		name: 'Cassie Evans',
-		byline: 'GSAP',
-		ringColor: '#00CED1',
-		isWinner: true,
-	},
-];
-
 // Node dimensions for positioning
 const NODE_HEIGHT = 70;
 const VERTICAL_GAP = 15;
-const ROUND_GAP = 320;
+const MATCH_GAP = NODE_HEIGHT + VERTICAL_GAP;
+const ROUND_GAP = 400;
 
-// Generate nodes for the bracket
+// Convert a Player to PlayerData for the node
+function playerToNodeData(
+	player: Player,
+	game: Game,
+	ringColor: string,
+): {
+	photo: string;
+	name: string;
+	byline: string;
+	ringColor: string;
+	isWinner: boolean;
+	isEliminated: boolean;
+} {
+	return {
+		photo: player.photo,
+		name: player.name,
+		byline: player.byline,
+		ringColor,
+		isWinner: isWinner(game, player),
+		isEliminated: isLoser(game, player),
+	};
+}
+
+// Generate nodes from bracket data
 function generateNodes(): Node[] {
 	const nodes: Node[] = [];
 
-	// West Side - Round 1 (8 players)
-	westPlayers.forEach((player, index) => {
+	// Split each round into left/right halves
+	const round1 = splitForDisplay(bracket.round1);
+	const quarters = splitForDisplay(bracket.quarters);
+	const semis = splitForDisplay(bracket.semis);
+
+	// ===========================================================================
+	// LEFT SIDE (first half of each round)
+	// ===========================================================================
+
+	// Round 1 - Left side (games 0-3)
+	round1.left.forEach((game, gameIndex) => {
+		const baseY = gameIndex * 2 * MATCH_GAP;
+
+		// Player 1
 		nodes.push({
-			id: `west-r1-${index}`,
-			type: 'playerNode',
-			position: { x: 0, y: index * (NODE_HEIGHT + VERTICAL_GAP) },
-			data: player,
-			sourcePosition: Position.Right,
-			targetPosition: Position.Left,
+			id: `${game.id}-p1`,
+			type: "playerNode",
+			position: { x: 0, y: baseY },
+			data: playerToNodeData(game.player1, game, LEFT_RING_COLOR),
+		});
+
+		// Player 2
+		if (game.player2) {
+			nodes.push({
+				id: `${game.id}-p2`,
+				type: "playerNode",
+				position: { x: 0, y: baseY + MATCH_GAP },
+				data: playerToNodeData(game.player2, game, LEFT_RING_COLOR),
+			});
+		}
+	});
+
+	// Quarterfinals - Left side (games 0-1)
+	quarters.left.forEach((game, gameIndex) => {
+		const baseY = gameIndex * 4 * MATCH_GAP + MATCH_GAP / 2;
+
+		// Player 1
+		nodes.push({
+			id: `${game.id}-p1`,
+			type: "playerNode",
+			position: { x: ROUND_GAP, y: baseY },
+			data: playerToNodeData(game.player1, game, LEFT_RING_COLOR),
+		});
+
+		// Player 2
+		if (game.player2) {
+			nodes.push({
+				id: `${game.id}-p2`,
+				type: "playerNode",
+				position: { x: ROUND_GAP, y: baseY + 2 * MATCH_GAP },
+				data: playerToNodeData(game.player2, game, LEFT_RING_COLOR),
+			});
+		}
+	});
+
+	// Semifinals - Left side (game 0)
+	semis.left.forEach((game) => {
+		const baseY = 1.5 * MATCH_GAP;
+
+		// Player 1
+		nodes.push({
+			id: `${game.id}-p1`,
+			type: game.player1 ? "playerNode" : "emptySlot",
+			position: { x: ROUND_GAP * 2, y: baseY },
+			data: game.player1
+				? playerToNodeData(game.player1, game, LEFT_RING_COLOR)
+				: {},
+		});
+
+		// Player 2
+		nodes.push({
+			id: `${game.id}-p2`,
+			type: game.player2 ? "playerNode" : "emptySlot",
+			position: { x: ROUND_GAP * 2, y: baseY + 4 * MATCH_GAP },
+			data: game.player2
+				? playerToNodeData(game.player2, game, LEFT_RING_COLOR)
+				: {},
 		});
 	});
 
-	// West Side - Quarterfinals (4 winners)
-	const westQFWinners = westPlayers.filter((p) => p.isWinner);
-	westQFWinners.forEach((player, index) => {
-		const yPos =
-			index * 2 * (NODE_HEIGHT + VERTICAL_GAP) +
-			(NODE_HEIGHT + VERTICAL_GAP) / 2;
-		nodes.push({
-			id: `west-qf-${index}`,
-			type: 'playerNode',
-			position: { x: ROUND_GAP, y: yPos },
-			data: { ...player, isWinner: index < 2, isEliminated: index >= 2 },
-			sourcePosition: Position.Right,
-			targetPosition: Position.Left,
-		});
-	});
-
-	// West Side - Semifinals (2 empty slots)
-	for (let i = 0; i < 2; i++) {
-		const yPos =
-			i * 4 * (NODE_HEIGHT + VERTICAL_GAP) + 1.5 * (NODE_HEIGHT + VERTICAL_GAP);
-		nodes.push({
-			id: `west-sf-${i}`,
-			type: 'emptySlot',
-			position: { x: ROUND_GAP * 2, y: yPos },
-			data: {},
-			sourcePosition: Position.Right,
-			targetPosition: Position.Left,
-		});
-	}
-
-	// West Side - Finals (1 empty slot)
+	// Left finalist slot
 	nodes.push({
-		id: 'west-final',
-		type: 'emptySlot',
-		position: {
-			x: ROUND_GAP * 3,
-			y: 3 * (NODE_HEIGHT + VERTICAL_GAP),
-		},
+		id: `left-finalist`,
+		type: "emptySlot",
+		position: { x: ROUND_GAP * 3, y: 3.5 * MATCH_GAP },
 		data: {},
-		sourcePosition: Position.Right,
-		targetPosition: Position.Left,
 	});
 
-	// East Side - positioned on the right, mirrored
-	const eastStartX = ROUND_GAP * 6;
+	// ===========================================================================
+	// RIGHT SIDE (second half of each round)
+	// ===========================================================================
+	const rightStartX = ROUND_GAP * 6;
 
-	// East Side - Round 1 (8 players)
-	eastPlayers.forEach((player, index) => {
+	// Round 1 - Right side (games 4-7)
+	round1.right.forEach((game, gameIndex) => {
+		const baseY = gameIndex * 2 * MATCH_GAP;
+
+		// Player 1
 		nodes.push({
-			id: `east-r1-${index}`,
-			type: 'playerNode',
-			position: { x: eastStartX, y: index * (NODE_HEIGHT + VERTICAL_GAP) },
-			data: player,
-			sourcePosition: Position.Left,
-			targetPosition: Position.Right,
+			id: `${game.id}-p1`,
+			type: "playerNode",
+			position: { x: rightStartX, y: baseY },
+			data: playerToNodeData(game.player1, game, RIGHT_RING_COLOR),
+		});
+
+		// Player 2
+		if (game.player2) {
+			nodes.push({
+				id: `${game.id}-p2`,
+				type: "playerNode",
+				position: { x: rightStartX, y: baseY + MATCH_GAP },
+				data: playerToNodeData(game.player2, game, RIGHT_RING_COLOR),
+			});
+		}
+	});
+
+	// Quarterfinals - Right side (games 2-3)
+	quarters.right.forEach((game, gameIndex) => {
+		const baseY = gameIndex * 4 * MATCH_GAP + MATCH_GAP / 2;
+
+		// Player 1
+		nodes.push({
+			id: `${game.id}-p1`,
+			type: "playerNode",
+			position: { x: rightStartX - ROUND_GAP, y: baseY },
+			data: playerToNodeData(game.player1, game, RIGHT_RING_COLOR),
+		});
+
+		// Player 2
+		if (game.player2) {
+			nodes.push({
+				id: `${game.id}-p2`,
+				type: "playerNode",
+				position: { x: rightStartX - ROUND_GAP, y: baseY + 2 * MATCH_GAP },
+				data: playerToNodeData(game.player2, game, RIGHT_RING_COLOR),
+			});
+		}
+	});
+
+	// Semifinals - Right side (game 1)
+	semis.right.forEach((game) => {
+		const baseY = 1.5 * MATCH_GAP;
+
+		// Player 1
+		nodes.push({
+			id: `${game.id}-p1`,
+			type: game.player1 ? "playerNode" : "emptySlot",
+			position: { x: rightStartX - ROUND_GAP * 2, y: baseY },
+			data: game.player1
+				? playerToNodeData(game.player1, game, RIGHT_RING_COLOR)
+				: {},
+		});
+
+		// Player 2
+		nodes.push({
+			id: `${game.id}-p2`,
+			type: game.player2 ? "playerNode" : "emptySlot",
+			position: { x: rightStartX - ROUND_GAP * 2, y: baseY + 4 * MATCH_GAP },
+			data: game.player2
+				? playerToNodeData(game.player2, game, RIGHT_RING_COLOR)
+				: {},
 		});
 	});
 
-	// East Side - Quarterfinals (4 winners)
-	const eastQFWinners = eastPlayers.filter((p) => p.isWinner);
-	eastQFWinners.forEach((player, index) => {
-		const yPos =
-			index * 2 * (NODE_HEIGHT + VERTICAL_GAP) +
-			(NODE_HEIGHT + VERTICAL_GAP) / 2;
-		nodes.push({
-			id: `east-qf-${index}`,
-			type: 'playerNode',
-			position: { x: eastStartX - ROUND_GAP, y: yPos },
-			data: { ...player, isWinner: index < 2, isEliminated: index >= 2 },
-			sourcePosition: Position.Left,
-			targetPosition: Position.Right,
-		});
-	});
-
-	// East Side - Semifinals (2 empty slots)
-	for (let i = 0; i < 2; i++) {
-		const yPos =
-			i * 4 * (NODE_HEIGHT + VERTICAL_GAP) + 1.5 * (NODE_HEIGHT + VERTICAL_GAP);
-		nodes.push({
-			id: `east-sf-${i}`,
-			type: 'emptySlot',
-			position: { x: eastStartX - ROUND_GAP * 2, y: yPos },
-			data: {},
-			sourcePosition: Position.Left,
-			targetPosition: Position.Right,
-		});
-	}
-
-	// East Side - Finals (1 empty slot)
+	// Right finalist slot
 	nodes.push({
-		id: 'east-final',
-		type: 'emptySlot',
-		position: {
-			x: eastStartX - ROUND_GAP * 3,
-			y: 3 * (NODE_HEIGHT + VERTICAL_GAP),
-		},
+		id: `right-finalist`,
+		type: "emptySlot",
+		position: { x: rightStartX - ROUND_GAP * 3, y: 3.5 * MATCH_GAP },
 		data: {},
-		sourcePosition: Position.Left,
-		targetPosition: Position.Right,
 	});
 
-	// Championship (center)
+	// ===========================================================================
+	// CHAMPIONSHIP (center)
+	// ===========================================================================
+	const finalGame = bracket.finals[0];
 	nodes.push({
-		id: 'championship',
-		type: 'emptySlot',
+		id: "championship",
+		type: finalGame?.winner ? "playerNode" : "emptySlot",
 		position: {
-			x: ROUND_GAP * 4.5 - 190,
-			y: 3 * (NODE_HEIGHT + VERTICAL_GAP),
+			x: ROUND_GAP * 4.5 - 125,
+			y: 3.5 * MATCH_GAP,
 		},
-		data: {},
-		sourcePosition: Position.Right,
-		targetPosition: Position.Left,
+		data: finalGame?.winner
+			? playerToNodeData(finalGame.winner, finalGame, "#FFD700")
+			: {},
 	});
 
 	return nodes;
 }
 
-// Edge style for bracket lines
+// Edge style
 const edgeStyle: React.CSSProperties = {
-	stroke: '#000000',
+	stroke: "#000000",
 	strokeWidth: 3,
 };
 
-// Generate edges for bracket connections
+// Generate edges connecting the bracket
 function generateEdges(): Edge[] {
 	const edges: Edge[] = [];
 
-	// West Side - Round 1 to Quarterfinals
-	for (let i = 0; i < 4; i++) {
-		edges.push({
-			id: `west-r1-${i * 2}-to-qf-${i}`,
-			source: `west-r1-${i * 2}`,
-			target: `west-qf-${i}`,
-			type: 'bracket',
-			style: edgeStyle,
-		});
-		edges.push({
-			id: `west-r1-${i * 2 + 1}-to-qf-${i}`,
-			source: `west-r1-${i * 2 + 1}`,
-			target: `west-qf-${i}`,
-			type: 'bracket',
-			style: edgeStyle,
-		});
-	}
+	// Split each round into left/right halves
+	const round1 = splitForDisplay(bracket.round1);
+	const quarters = splitForDisplay(bracket.quarters);
+	const semis = splitForDisplay(bracket.semis);
 
-	// West Side - Quarterfinals to Semifinals
-	for (let i = 0; i < 2; i++) {
-		edges.push({
-			id: `west-qf-${i * 2}-to-sf-${i}`,
-			source: `west-qf-${i * 2}`,
-			target: `west-sf-${i}`,
-			type: 'bracket',
-			style: edgeStyle,
-		});
-		edges.push({
-			id: `west-qf-${i * 2 + 1}-to-sf-${i}`,
-			source: `west-qf-${i * 2 + 1}`,
-			target: `west-sf-${i}`,
-			type: 'bracket',
-			style: edgeStyle,
-		});
-	}
+	// ===========================================================================
+	// LEFT SIDE EDGES
+	// ===========================================================================
 
-	// West Side - Semifinals to Finals
-	edges.push({
-		id: 'west-sf-0-to-final',
-		source: 'west-sf-0',
-		target: 'west-final',
-		type: 'bracket',
-		style: edgeStyle,
-	});
-	edges.push({
-		id: 'west-sf-1-to-final',
-		source: 'west-sf-1',
-		target: 'west-final',
-		type: 'bracket',
-		style: edgeStyle,
+	// Round 1 to Quarters (left)
+	round1.left.forEach((game, gameIndex) => {
+		const quarterGame = quarters.left[Math.floor(gameIndex / 2)];
+
+		// Player 1 to quarter game
+		edges.push({
+			id: `${game.id}-p1-to-${quarterGame.id}`,
+			source: `${game.id}-p1`,
+			target: `${quarterGame.id}-p${(gameIndex % 2) + 1}`,
+			type: "bracket",
+			style: edgeStyle,
+      sourceHandle: "out-right",
+		});
+
+		// Player 2 to quarter game
+		if (game.player2) {
+			edges.push({
+				id: `${game.id}-p2-to-${quarterGame.id}`,
+				source: `${game.id}-p2`,
+				target: `${quarterGame.id}-p${(gameIndex % 2) + 1}`,
+				type: "bracket",
+				style: edgeStyle,
+			});
+		}
 	});
 
-	// West Final to Championship
-	edges.push({
-		id: 'west-final-to-champ',
-		source: 'west-final',
-		target: 'championship',
-		type: 'bracket',
-		style: edgeStyle,
+	// Quarters to Semis (left)
+	quarters.left.forEach((game, gameIndex) => {
+		const semiGame = semis.left[0];
+
+		edges.push({
+			id: `${game.id}-p1-to-${semiGame.id}`,
+			source: `${game.id}-p1`,
+			target: `${semiGame.id}-p${gameIndex + 1}`,
+			type: "bracket",
+			style: edgeStyle,
+		});
+
+		if (game.player2) {
+			edges.push({
+				id: `${game.id}-p2-to-${semiGame.id}`,
+				source: `${game.id}-p2`,
+				target: `${semiGame.id}-p${gameIndex + 1}`,
+				type: "bracket",
+				style: edgeStyle,
+			});
+		}
 	});
 
-	// East Side - Round 1 to Quarterfinals
-	for (let i = 0; i < 4; i++) {
+	// Semis to Left Finalist
+	semis.left.forEach((game) => {
 		edges.push({
-			id: `east-r1-${i * 2}-to-qf-${i}`,
-			source: `east-r1-${i * 2}`,
-			target: `east-qf-${i}`,
-			type: 'bracket',
+			id: `${game.id}-p1-to-left-finalist`,
+			source: `${game.id}-p1`,
+			target: `left-finalist`,
+			type: "bracket",
 			style: edgeStyle,
 		});
-		edges.push({
-			id: `east-r1-${i * 2 + 1}-to-qf-${i}`,
-			source: `east-r1-${i * 2 + 1}`,
-			target: `east-qf-${i}`,
-			type: 'bracket',
-			style: edgeStyle,
-		});
-	}
 
-	// East Side - Quarterfinals to Semifinals
-	for (let i = 0; i < 2; i++) {
 		edges.push({
-			id: `east-qf-${i * 2}-to-sf-${i}`,
-			source: `east-qf-${i * 2}`,
-			target: `east-sf-${i}`,
-			type: 'bracket',
+			id: `${game.id}-p2-to-left-finalist`,
+			source: `${game.id}-p2`,
+			target: `left-finalist`,
+			type: "bracket",
 			style: edgeStyle,
 		});
-		edges.push({
-			id: `east-qf-${i * 2 + 1}-to-sf-${i}`,
-			source: `east-qf-${i * 2 + 1}`,
-			target: `east-sf-${i}`,
-			type: 'bracket',
-			style: edgeStyle,
-		});
-	}
-
-	// East Side - Semifinals to Finals
-	edges.push({
-		id: 'east-sf-0-to-final',
-		source: 'east-sf-0',
-		target: 'east-final',
-		type: 'bracket',
-		style: edgeStyle,
 	});
+
+	// Left finalist to Championship
 	edges.push({
-		id: 'east-sf-1-to-final',
-		source: 'east-sf-1',
-		target: 'east-final',
-		type: 'bracket',
+		id: "left-finalist-to-champ",
+		source: `left-finalist`,
+		target: "championship",
+		type: "bracket",
 		style: edgeStyle,
 	});
 
-	// East Final to Championship
+	// ===========================================================================
+	// RIGHT SIDE EDGES
+	// ===========================================================================
+
+	// Round 1 to Quarters (right)
+	round1.right.forEach((game, gameIndex) => {
+		const quarterGame = quarters.right[Math.floor(gameIndex / 2)];
+
+		edges.push({
+			id: `${game.id}-p1-to-${quarterGame.id}`,
+			source: `${game.id}-p1`,
+			target: `${quarterGame.id}-p${(gameIndex % 2) + 1}`,
+			type: "bracket",
+			style: edgeStyle,
+      sourceHandle: "out-left",
+		});
+
+		if (game.player2) {
+			edges.push({
+				id: `${game.id}-p2-to-${quarterGame.id}`,
+				source: `${game.id}-p2`,
+				target: `${quarterGame.id}-p${(gameIndex % 2) + 1}`,
+				type: "bracket",
+				style: edgeStyle,
+        sourceHandle: "out-left",
+			});
+		}
+	});
+
+	// Quarters to Semis (right)
+	quarters.right.forEach((game, gameIndex) => {
+		const semiGame = semis.right[0];
+
+		edges.push({
+			id: `${game.id}-p1-to-${semiGame.id}`,
+			source: `${game.id}-p1`,
+			target: `${semiGame.id}-p${gameIndex + 1}`,
+			type: "bracket",
+			style: edgeStyle,
+      sourceHandle: "out-left",
+		});
+
+		if (game.player2) {
+			edges.push({
+				id: `${game.id}-p2-to-${semiGame.id}`,
+				source: `${game.id}-p2`,
+				target: `${semiGame.id}-p${gameIndex + 1}`,
+				type: "bracket",
+				style: edgeStyle,
+        sourceHandle: "out-left",
+			});
+		}
+	});
+
+	// Semis to Right Finalist
+	semis.right.forEach((game) => {
+		edges.push({
+			id: `${game.id}-p1-to-right-finalist`,
+			source: `${game.id}-p1`,
+			target: `right-finalist`,
+			type: "bracket",
+			style: edgeStyle,
+      sourceHandle: "out-left",
+		});
+
+		edges.push({
+			id: `${game.id}-p2-to-right-finalist`,
+			source: `${game.id}-p2`,
+			target: `right-finalist`,
+			type: "bracket",
+			style: edgeStyle,
+      sourceHandle: "out-left",
+		});
+	});
+
+	// Right finalist to Championship
 	edges.push({
-		id: 'east-final-to-champ',
-		source: 'east-final',
-		target: 'championship',
-		type: 'bracket',
+		id: "right-finalist-to-champ",
+		source: `right-finalist`,
+		target: "championship",
+		type: "bracket",
 		style: edgeStyle,
+      sourceHandle: "out-left",
 	});
 
 	return edges;
@@ -449,7 +469,7 @@ const initialNodes = generateNodes();
 const initialEdges = generateEdges();
 
 const defaultEdgeOptions = {
-	type: 'bracket',
+	type: "bracket",
 	style: edgeStyle,
 };
 
