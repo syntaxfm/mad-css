@@ -1,47 +1,67 @@
+/* Wrapper applies shadow to the masked ticket shape */
+.ticket_wrapper {
+	max-width: 800px;
+	margin: 0 auto;
+	margin-top: -100px;
+	z-index: 1;
+	position: relative;
+	filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.8))
+		drop-shadow(0 0 20px rgba(0, 0, 0, 0.4));
+}
+
 .ticket {
 	--padding: 20px;
 	--notch-size: 15px;
 	--stub-width: 100px;
-	background: var(--beige);
+	--dash-width: 2px;
+	--dash-length: 6px;
+	--dash-gap: 6px;
+
 	display: grid;
 	grid-template-columns: 1fr auto auto;
 	color: var(--black);
-	max-width: 800px;
-	margin: 0 auto;
-	margin-top: -100px;
 	container-type: inline-size;
 	container-name: ticket;
-	border-radius: 10px;
-	box-shadow:
-		0 0 10px 0 rgba(0, 0, 0, 1),
-		0 0 20px 0 rgba(0, 0, 0, 0.5);
-	z-index: 1;
+	corner-shape: scoop;
+	overflow: hidden;
+	border-radius: 15px;
 	position: relative;
-	/* Mask for ticket cutouts - semicircle notches */
-	/* Top notch cutout */
+	/* Mask for ticket cutouts - using exclude to punch holes */
+	/* Top notch - solid circle to cut out */
 	mask-image:
 		radial-gradient(
 			circle var(--notch-size) at calc(100% - var(--stub-width)) 0,
-			transparent 100%,
-			black 100%
+			black 100%,
+			transparent 100%
 		),
-		/* Bottom notch cutout */
+		/* Bottom notch - solid circle to cut out */
 		radial-gradient(
 			circle var(--notch-size) at calc(100% - var(--stub-width)) 100%,
-			transparent 100%,
-			black 100%
-		);
-	mask-composite: intersect;
-	/* Dashed tear line - full height so it extends through the notches */
-	&::after {
-		content: "";
-		position: absolute;
-		right: var(--stub-width);
-		top: calc(-1 * var(--notch-size));
-		bottom: calc(-1 * var(--notch-size));
-		width: 0;
-		border-right: 2px dashed var(--black);
-	}
+			black 100%,
+			transparent 100%
+		),
+		/* Dashed tear line - opaque dashes get cut out */
+		repeating-linear-gradient(
+			to bottom,
+			black 0,
+			black var(--dash-length),
+			transparent var(--dash-length),
+			transparent calc(var(--dash-length) + var(--dash-gap))
+		),
+		/* Solid base layer */
+		linear-gradient(black, black);
+	mask-size:
+		100% 100%,
+		100% 100%,
+		var(--dash-width) calc(100% - var(--notch-size) * 2),
+		100% 100%;
+	mask-position:
+		0 0,
+		0 0,
+		calc(100% - var(--stub-width) + var(--dash-width)) var(--notch-size),
+		0 0;
+	mask-repeat: no-repeat;
+	mask-composite: exclude, exclude, exclude;
 }
 
 /* Text Selection color */
@@ -51,6 +71,7 @@
 }
 
 .ticket_body {
+	background: var(--beige);
 	display: grid;
 	grid-template-columns: auto auto auto;
 	align-items: center;
@@ -86,6 +107,8 @@
 	}
 	p {
 		font-weight: 900;
+		font-size: 10px;
+		text-transform: uppercase;
 	}
 	img {
 		height: 70px;
@@ -114,6 +137,7 @@
 }
 
 .ticket_stub {
+	background: var(--beige);
 	display: flex;
 	align-items: center;
 	justify-content: center;
