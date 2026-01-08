@@ -94,7 +94,7 @@ export const adamArgyle: Player = {
 
 export const stephanieEckles: Player = {
 	id: 'stephanie-eckles',
-	name: 'Stephanie Eckles',
+	name: 'Stephanie',
 	photo: '/cards/scott.jpg',
 	byline: 'ModernCSS.dev',
 };

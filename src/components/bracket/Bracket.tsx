@@ -59,9 +59,9 @@ const edgeTypes = {
 
 // Node dimensions for positioning
 const NODE_HEIGHT = 70;
-const VERTICAL_GAP = 15;
+const VERTICAL_GAP = 100;
 const MATCH_GAP = NODE_HEIGHT + VERTICAL_GAP;
-const ROUND_GAP = 400;
+const ROUND_GAP = 220;
 
 // Convert a Player to PlayerData for the node
 function playerToNodeData(
