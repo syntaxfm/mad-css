@@ -105,25 +105,25 @@ export function PlayerNodeFlow({ data }: { data: PlayerData }) {
 }
 
 // Empty slot for matches not yet played
-export function EmptySlot({ text }: { text: string }) {
+export function EmptySlot({ text }: { text?: string }) {
 	return (
 		<div className="empty-slot">
+			<div className="empty-slot-ring">
+				<div className="empty-slot-circle" />
+			</div>
 			<div className="empty-slot-info">
-				{text || "TBD"}
-				<span className="empty-slot-text"></span>
+				<h3 className="empty-slot-name">{text || "TBD"}</h3>
 			</div>
 		</div>
 	);
 }
 
 // React Flow wrapper for EmptySlot
-export function EmptySlotFlow({ data }: { data: { text: string } }) {
-  console.log(data);
-  const { text } = data;
+export function EmptySlotFlow({ data }: { data: { text?: string } }) {
 	return (
 		<div style={{ position: "relative" }}>
-      <EmptySlot text={text} />
-      <Handles />
+			<EmptySlot text={data?.text} />
+			<Handles />
 		</div>
 	);
 }

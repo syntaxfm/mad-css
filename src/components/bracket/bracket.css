@@ -103,35 +103,83 @@
 	border-color: #888;
 }
 
-/* Empty Slot Styles */
+/* Empty Slot Styles - mirrors player-node structure */
 .empty-slot {
 	display: flex;
+	width: 280px;
 	align-items: center;
 	gap: 0;
 	position: relative;
-	min-width: 250px;
-	height: 50px;
 }
 
 .empty-slot-ring {
-	display: none;
+	--ring-thickness: 4px;
+	--gold-ring-thickness: 3px;
+	--photo-size: 50px;
+
+	position: relative;
+	z-index: 2;
+	width: calc(
+		var(--photo-size) +
+		var(--ring-thickness) *
+		2 +
+		var(--gold-ring-thickness) *
+		2
+	);
+	height: calc(
+		var(--photo-size) +
+		var(--ring-thickness) *
+		2 +
+		var(--gold-ring-thickness) *
+		2
+	);
+	border-radius: 50%;
+	background: #888;
+	padding: var(--ring-thickness);
+	flex-shrink: 0;
 }
 
-.empty-slot-info {
-	background: #4a4a4a;
-	padding: 10px 20px;
+.empty-slot-ring::before {
+	content: "";
+	position: absolute;
+	inset: var(--ring-thickness);
+	border-radius: 50%;
+	background: #aaa;
+	padding: var(--gold-ring-thickness);
+}
+
+.empty-slot-circle {
 	position: relative;
 	z-index: 1;
 	width: 100%;
 	height: 100%;
-	border-top: 3px solid var(--black);
-	border-bottom: 3px solid var(--black);
-	display: flex;
-	align-items: center;
+	border-radius: 50%;
+	background: #666;
+	border: var(--gold-ring-thickness) solid #aaa;
 }
 
-.empty-slot-text {
-	display: none;
+.empty-slot-info {
+	background: var(--beige);
+	padding: 10px 20px 10px 24px;
+	margin-left: -16px;
+	position: relative;
+	z-index: 1;
+	flex: 1;
+	min-width: 180px;
+	border-top: 3px solid var(--black);
+	border-bottom: 3px solid var(--black);
+	border-right: 3px solid var(--black);
+}
+
+.empty-slot-name {
+	font-family: var(--font-block), "Impact", sans-serif;
+	font-size: 1.1rem;
+	font-weight: 700;
+	color: #888;
+	margin: 0;
+	line-height: 1.1;
+	text-transform: uppercase;
+	letter-spacing: 0.02em;
 }
 
 /* React Flow Container */

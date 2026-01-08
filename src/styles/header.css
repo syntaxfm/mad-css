@@ -8,6 +8,17 @@
 	background-size: cover;
 	text-align: center;
 	min-height: 600px;
+	mask-image:
+		url("./assets/paper/paper-stripe.png"), linear-gradient(black, black);
+	mask-size:
+		auto 200px,
+		100% 100%;
+	mask-position:
+		center calc(100% + 50px),
+		center;
+	mask-repeat: repeat-x, no-repeat;
+	mask-composite: exclude;
+	mask-mode: alpha;
 }
 
 .logo {

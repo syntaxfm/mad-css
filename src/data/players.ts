@@ -181,7 +181,7 @@ export const players: Player[] = [
 export type Game = {
 	id: string; // Unique identifier for the game
 	date: string; // Game date (YYYY-MM-DD format)
-	player1: Player; // First player (always required)
+	player1?: Player; // First player (optional - may not be determined yet)
 	player2?: Player; // Second player (optional - may not be determined yet)
 	winner?: Player; // Winner (optional - game may not be played yet)
 };
@@ -378,6 +378,36 @@ export const bracket: Bracket = {
 	],
 };
 
+export const emptyBracket: Bracket = {
+	// 8 games in round 1 (games 0-3 left, 4-7 right)
+	round1: [
+		{ id: 'r1-0', date: '' },
+		{ id: 'r1-1', date: '' },
+		{ id: 'r1-2', date: '' },
+		{ id: 'r1-3', date: '' },
+		{ id: 'r1-4', date: '' },
+		{ id: 'r1-5', date: '' },
+		{ id: 'r1-6', date: '' },
+		{ id: 'r1-7', date: '' },
+	],
+	// 4 games in quarters (games 0-1 left, 2-3 right)
+	quarters: [
+		{ id: 'qf-0', date: '' },
+		{ id: 'qf-1', date: '' },
+		{ id: 'qf-2', date: '' },
+		{ id: 'qf-3', date: '' },
+	],
+	// 2 games in semis (game 0 left, 1 right)
+	semis: [
+		{ id: 'sf-0', date: '' },
+		{ id: 'sf-1', date: '' },
+	],
+	// 1 championship game
+	finals: [
+		{ id: 'final', date: '' },
+	],
+};
+
 // =============================================================================
 // HELPER FUNCTIONS
 // =============================================================================
@@ -391,7 +421,7 @@ export function isWinner(game: Game, player: Player): boolean {
 export function isLoser(game: Game, player: Player): boolean {
 	if (!game.winner) return false;
 	const wasInGame =
-		game.player1.id === player.id || game.player2?.id === player.id;
+		game.player1?.id === player.id || game.player2?.id === player.id;
 	return wasInGame && game.winner.id !== player.id;
 }
 

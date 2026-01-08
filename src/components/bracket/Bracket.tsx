@@ -4,13 +4,13 @@ import {
 	type EdgeProps,
 	getSmoothStepPath,
 	type Node,
-	Position,
 	ReactFlow,
 } from "@xyflow/react";
 import { useEffect, useState } from "react";
 import "@xyflow/react/dist/style.css";
 import {
-	bracket,
+	// bracket,
+  emptyBracket as bracket,
 	type Game,
 	isLoser,
 	isWinner,
@@ -86,6 +86,31 @@ function playerToNodeData(
 	};
 }
 
+// Create a node for either a player or an empty slot
+function createNode(
+	id: string,
+	player: Player | undefined,
+	game: Game,
+	ringColor: string,
+	position: { x: number; y: number },
+	emptyText?: string,
+): Node {
+	if (player) {
+		return {
+			id,
+			type: "playerNode",
+			position,
+			data: playerToNodeData(player, game, ringColor),
+		};
+	}
+	return {
+		id,
+		type: "emptySlot",
+		position,
+		data: { text: emptyText },
+	};
+}
+
 // Generate nodes from bracket data
 function generateNodes(): Node[] {
 	const nodes: Node[] = [];
@@ -104,22 +129,26 @@ function generateNodes(): Node[] {
 		const baseY = gameIndex * 2 * MATCH_GAP;
 
 		// Player 1
-		nodes.push({
-			id: `${game.id}-p1`,
-			type: "playerNode",
-			position: { x: 0, y: baseY },
-			data: playerToNodeData(game.player1, game, LEFT_RING_COLOR),
-		});
+		nodes.push(
+			createNode(
+				`${game.id}-p1`,
+				game.player1,
+				game,
+				LEFT_RING_COLOR,
+				{ x: 0, y: baseY },
+			),
+		);
 
 		// Player 2
-		if (game.player2) {
-			nodes.push({
-				id: `${game.id}-p2`,
-				type: "playerNode",
-				position: { x: 0, y: baseY + MATCH_GAP },
-				data: playerToNodeData(game.player2, game, LEFT_RING_COLOR),
-			});
-		}
+		nodes.push(
+			createNode(
+				`${game.id}-p2`,
+				game.player2,
+				game,
+				LEFT_RING_COLOR,
+				{ x: 0, y: baseY + MATCH_GAP },
+			),
+		);
 	});
 
 	// Quarterfinals - Left side (games 0-1)
@@ -127,22 +156,26 @@ function generateNodes(): Node[] {
 		const baseY = gameIndex * 4 * MATCH_GAP + MATCH_GAP / 2;
 
 		// Player 1
-		nodes.push({
-			id: `${game.id}-p1`,
-			type: "playerNode",
-			position: { x: ROUND_GAP, y: baseY },
-			data: playerToNodeData(game.player1, game, LEFT_RING_COLOR),
-		});
+		nodes.push(
+			createNode(
+				`${game.id}-p1`,
+				game.player1,
+				game,
+				LEFT_RING_COLOR,
+				{ x: ROUND_GAP, y: baseY },
+			),
+		);
 
 		// Player 2
-		if (game.player2) {
-			nodes.push({
-				id: `${game.id}-p2`,
-				type: "playerNode",
-				position: { x: ROUND_GAP, y: baseY + 2 * MATCH_GAP },
-				data: playerToNodeData(game.player2, game, LEFT_RING_COLOR),
-			});
-		}
+		nodes.push(
+			createNode(
+				`${game.id}-p2`,
+				game.player2,
+				game,
+				LEFT_RING_COLOR,
+				{ x: ROUND_GAP, y: baseY + 2 * MATCH_GAP },
+			),
+		);
 	});
 
 	// Semifinals - Left side (game 0)
@@ -150,24 +183,26 @@ function generateNodes(): Node[] {
 		const baseY = 1.5 * MATCH_GAP;
 
 		// Player 1
-		nodes.push({
-			id: `${game.id}-p1`,
-			type: game.player1 ? "playerNode" : "emptySlot",
-			position: { x: ROUND_GAP * 2, y: baseY },
-			data: game.player1
-				? playerToNodeData(game.player1, game, LEFT_RING_COLOR)
-				: {},
-		});
+		nodes.push(
+			createNode(
+				`${game.id}-p1`,
+				game.player1,
+				game,
+				LEFT_RING_COLOR,
+				{ x: ROUND_GAP * 2, y: baseY },
+			),
+		);
 
 		// Player 2
-		nodes.push({
-			id: `${game.id}-p2`,
-			type: game.player2 ? "playerNode" : "emptySlot",
-			position: { x: ROUND_GAP * 2, y: baseY + 4 * MATCH_GAP },
-			data: game.player2
-				? playerToNodeData(game.player2, game, LEFT_RING_COLOR)
-				: {},
-		});
+		nodes.push(
+			createNode(
+				`${game.id}-p2`,
+				game.player2,
+				game,
+				LEFT_RING_COLOR,
+				{ x: ROUND_GAP * 2, y: baseY + 4 * MATCH_GAP },
+			),
+		);
 	});
 
 	// Left finalist slot
@@ -188,22 +223,26 @@ function generateNodes(): Node[] {
 		const baseY = gameIndex * 2 * MATCH_GAP;
 
 		// Player 1
-		nodes.push({
-			id: `${game.id}-p1`,
-			type: "playerNode",
-			position: { x: rightStartX, y: baseY },
-			data: playerToNodeData(game.player1, game, RIGHT_RING_COLOR),
-		});
+		nodes.push(
+			createNode(
+				`${game.id}-p1`,
+				game.player1,
+				game,
+				RIGHT_RING_COLOR,
+				{ x: rightStartX, y: baseY },
+			),
+		);
 
 		// Player 2
-		if (game.player2) {
-			nodes.push({
-				id: `${game.id}-p2`,
-				type: "playerNode",
-				position: { x: rightStartX, y: baseY + MATCH_GAP },
-				data: playerToNodeData(game.player2, game, RIGHT_RING_COLOR),
-			});
-		}
+		nodes.push(
+			createNode(
+				`${game.id}-p2`,
+				game.player2,
+				game,
+				RIGHT_RING_COLOR,
+				{ x: rightStartX, y: baseY + MATCH_GAP },
+			),
+		);
 	});
 
 	// Quarterfinals - Right side (games 2-3) ROUND 2
@@ -211,22 +250,26 @@ function generateNodes(): Node[] {
 		const baseY = gameIndex * 4 * MATCH_GAP + MATCH_GAP / 2;
 
 		// Player 1
-		nodes.push({
-			id: `${game.id}-p1`,
-			type: "playerNode",
-			position: { x: rightStartX - ROUND_GAP, y: baseY },
-			data: playerToNodeData(game.player1, game, RIGHT_RING_COLOR),
-		});
+		nodes.push(
+			createNode(
+				`${game.id}-p1`,
+				game.player1,
+				game,
+				RIGHT_RING_COLOR,
+				{ x: rightStartX - ROUND_GAP, y: baseY },
+			),
+		);
 
 		// Player 2
-		if (game.player2) {
-			nodes.push({
-				id: `${game.id}-p2`,
-				type: "playerNode",
-				position: { x: rightStartX - ROUND_GAP, y: baseY + 2 * MATCH_GAP },
-				data: playerToNodeData(game.player2, game, RIGHT_RING_COLOR),
-			});
-		}
+		nodes.push(
+			createNode(
+				`${game.id}-p2`,
+				game.player2,
+				game,
+				RIGHT_RING_COLOR,
+				{ x: rightStartX - ROUND_GAP, y: baseY + 2 * MATCH_GAP },
+			),
+		);
 	});
 
 	// Semifinals - Right side (game 1) ROUND 3
@@ -234,24 +277,26 @@ function generateNodes(): Node[] {
 		const baseY = 1.5 * MATCH_GAP;
 
 		// Player 1
-		nodes.push({
-			id: `${game.id}-p1`,
-			type: game.player1 ? "playerNode" : "emptySlot",
-			position: { x: rightStartX - ROUND_GAP * 2, y: baseY },
-			data: game.player1
-				? playerToNodeData(game.player1, game, RIGHT_RING_COLOR)
-				: { text: 'Player 1 Right Semi' },
-		});
+		nodes.push(
+			createNode(
+				`${game.id}-p1`,
+				game.player1,
+				game,
+				RIGHT_RING_COLOR,
+				{ x: rightStartX - ROUND_GAP * 2, y: baseY },
+			),
+		);
 
 		// Player 2
-		nodes.push({
-			id: `${game.id}-p2`,
-			type: game.player2 ? "playerNode" : "emptySlot",
-			position: { x: rightStartX - ROUND_GAP * 2, y: baseY + 4 * MATCH_GAP },
-			data: game.player2
-				? playerToNodeData(game.player2, game, RIGHT_RING_COLOR)
-				: { text: 'Player 2 Right Semi' },
-		});
+		nodes.push(
+			createNode(
+				`${game.id}-p2`,
+				game.player2,
+				game,
+				RIGHT_RING_COLOR,
+				{ x: rightStartX - ROUND_GAP * 2, y: baseY + 4 * MATCH_GAP },
+			),
+		);
 	});
 
 	// Right finalist slot
@@ -319,7 +364,6 @@ function generateEdges(): Edge[] {
 		});
 
 		// Player 2 to quarter game
-		if (game.player2) {
       edges.push({
         id: `${game.id}-p2-to-${quarterGame.id}`,
 				source: `${game.id}-p2`,
@@ -328,7 +372,6 @@ function generateEdges(): Edge[] {
 				style: edgeStyle,
         targetHandle: "in-bottom",
 			});
-		}
 	});
 
 	// Quarters to Semis (left)
@@ -345,7 +388,6 @@ function generateEdges(): Edge[] {
       targetHandle: "in-top",
 		});
 
-		if (game.player2) {
 			edges.push({
 				id: `${game.id}-p2-to-${semiGame.id}`,
 				source: `${game.id}-p2`,
@@ -355,7 +397,6 @@ function generateEdges(): Edge[] {
         sourceHandle: "out-right",
         targetHandle: "in-bottom",
 			});
-		}
 	});
 
 	// Semis to Left Finalist
@@ -410,7 +451,6 @@ function generateEdges(): Edge[] {
       targetHandle: "in-top",
 		});
 
-		if (game.player2) {
 			edges.push({
 				id: `${game.id}-p2-to-${quarterGame.id}`,
 				source: `${game.id}-p2`,
@@ -420,7 +460,6 @@ function generateEdges(): Edge[] {
         sourceHandle: "out-left",
         targetHandle: "in-bottom",
 			});
-		}
 	});
 
 	// Quarters to Semis (right)
@@ -437,7 +476,6 @@ function generateEdges(): Edge[] {
       targetHandle: "in-top",
 		});
 
-		if (game.player2) {
 			edges.push({
 				id: `${game.id}-p2-to-${semiGame.id}`,
 				source: `${game.id}-p2`,
@@ -447,7 +485,6 @@ function generateEdges(): Edge[] {
         sourceHandle: "out-left",
         targetHandle: "in-bottom",
 			});
-		}
 	});
 
 	// Semis to Right Finalist
