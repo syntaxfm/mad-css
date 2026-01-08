@@ -175,13 +175,13 @@ function generateNodes(): Node[] {
 		id: `left-finalist`,
 		type: "emptySlot",
 		position: { x: ROUND_GAP * 3, y: 3.5 * MATCH_GAP },
-		data: {},
+		data: { text: 'Winner of Left Semi' },
 	});
 
 	// ===========================================================================
 	// RIGHT SIDE (second half of each round)
 	// ===========================================================================
-	const rightStartX = ROUND_GAP * 6;
+	const rightStartX = ROUND_GAP * 7;
 
 	// Round 1 - Right side (games 4-7)
 	round1.right.forEach((game, gameIndex) => {
@@ -206,7 +206,7 @@ function generateNodes(): Node[] {
 		}
 	});
 
-	// Quarterfinals - Right side (games 2-3)
+	// Quarterfinals - Right side (games 2-3) ROUND 2
 	quarters.right.forEach((game, gameIndex) => {
 		const baseY = gameIndex * 4 * MATCH_GAP + MATCH_GAP / 2;
 
@@ -229,7 +229,7 @@ function generateNodes(): Node[] {
 		}
 	});
 
-	// Semifinals - Right side (game 1)
+	// Semifinals - Right side (game 1) ROUND 3
 	semis.right.forEach((game) => {
 		const baseY = 1.5 * MATCH_GAP;
 
@@ -240,7 +240,7 @@ function generateNodes(): Node[] {
 			position: { x: rightStartX - ROUND_GAP * 2, y: baseY },
 			data: game.player1
 				? playerToNodeData(game.player1, game, RIGHT_RING_COLOR)
-				: {},
+				: { text: 'Player 1 Right Semi' },
 		});
 
 		// Player 2
@@ -250,7 +250,7 @@ function generateNodes(): Node[] {
 			position: { x: rightStartX - ROUND_GAP * 2, y: baseY + 4 * MATCH_GAP },
 			data: game.player2
 				? playerToNodeData(game.player2, game, RIGHT_RING_COLOR)
-				: {},
+				: { text: 'Player 2 Right Semi' },
 		});
 	});
 
@@ -259,7 +259,10 @@ function generateNodes(): Node[] {
 		id: `right-finalist`,
 		type: "emptySlot",
 		position: { x: rightStartX - ROUND_GAP * 3, y: 3.5 * MATCH_GAP },
-		data: {},
+		// position: { x: ROUND_GAP * 3, y: 3.5 * MATCH_GAP },
+		data: {
+			text: "Winner of Right Semi",
+		},
 	});
 
 	// ===========================================================================
@@ -270,12 +273,12 @@ function generateNodes(): Node[] {
 		id: "championship",
 		type: finalGame?.winner ? "playerNode" : "emptySlot",
 		position: {
-			x: ROUND_GAP * 4.5 - 125,
-			y: 3.5 * MATCH_GAP,
+			x: ROUND_GAP * 3.5 ,
+			y: 0,
 		},
 		data: finalGame?.winner
 			? playerToNodeData(finalGame.winner, finalGame, "#FFD700")
-			: {},
+			: { text: 'Winner of Championship' },
 	});
 
 	return nodes;
@@ -312,16 +315,18 @@ function generateEdges(): Edge[] {
 			type: "bracket",
 			style: edgeStyle,
       sourceHandle: "out-right",
+      targetHandle: "in-top",
 		});
 
 		// Player 2 to quarter game
 		if (game.player2) {
-			edges.push({
-				id: `${game.id}-p2-to-${quarterGame.id}`,
+      edges.push({
+        id: `${game.id}-p2-to-${quarterGame.id}`,
 				source: `${game.id}-p2`,
 				target: `${quarterGame.id}-p${(gameIndex % 2) + 1}`,
 				type: "bracket",
 				style: edgeStyle,
+        targetHandle: "in-bottom",
 			});
 		}
 	});
@@ -336,6 +341,8 @@ function generateEdges(): Edge[] {
 			target: `${semiGame.id}-p${gameIndex + 1}`,
 			type: "bracket",
 			style: edgeStyle,
+      sourceHandle: "out-right",
+      targetHandle: "in-top",
 		});
 
 		if (game.player2) {
@@ -345,6 +352,8 @@ function generateEdges(): Edge[] {
 				target: `${semiGame.id}-p${gameIndex + 1}`,
 				type: "bracket",
 				style: edgeStyle,
+        sourceHandle: "out-right",
+        targetHandle: "in-bottom",
 			});
 		}
 	});
@@ -357,6 +366,8 @@ function generateEdges(): Edge[] {
 			target: `left-finalist`,
 			type: "bracket",
 			style: edgeStyle,
+      sourceHandle: "out-right",
+      targetHandle: "in-top",
 		});
 
 		edges.push({
@@ -365,6 +376,8 @@ function generateEdges(): Edge[] {
 			target: `left-finalist`,
 			type: "bracket",
 			style: edgeStyle,
+      sourceHandle: "out-right",
+      targetHandle: "in-bottom",
 		});
 	});
 
@@ -375,6 +388,8 @@ function generateEdges(): Edge[] {
 		target: "championship",
 		type: "bracket",
 		style: edgeStyle,
+      sourceHandle: "out-right",
+      targetHandle: "in-top",
 	});
 
 	// ===========================================================================
@@ -392,6 +407,7 @@ function generateEdges(): Edge[] {
 			type: "bracket",
 			style: edgeStyle,
       sourceHandle: "out-left",
+      targetHandle: "in-top",
 		});
 
 		if (game.player2) {
@@ -402,6 +418,7 @@ function generateEdges(): Edge[] {
 				type: "bracket",
 				style: edgeStyle,
         sourceHandle: "out-left",
+        targetHandle: "in-bottom",
 			});
 		}
 	});
@@ -417,6 +434,7 @@ function generateEdges(): Edge[] {
 			type: "bracket",
 			style: edgeStyle,
       sourceHandle: "out-left",
+      targetHandle: "in-top",
 		});
 
 		if (game.player2) {
@@ -427,6 +445,7 @@ function generateEdges(): Edge[] {
 				type: "bracket",
 				style: edgeStyle,
         sourceHandle: "out-left",
+        targetHandle: "in-bottom",
 			});
 		}
 	});
@@ -440,6 +459,7 @@ function generateEdges(): Edge[] {
 			type: "bracket",
 			style: edgeStyle,
       sourceHandle: "out-left",
+      targetHandle: "in-top",
 		});
 
 		edges.push({
@@ -449,6 +469,7 @@ function generateEdges(): Edge[] {
 			type: "bracket",
 			style: edgeStyle,
       sourceHandle: "out-left",
+      targetHandle: "in-bottom",
 		});
 	});
 
@@ -460,6 +481,7 @@ function generateEdges(): Edge[] {
 		type: "bracket",
 		style: edgeStyle,
       sourceHandle: "out-left",
+      targetHandle: "in-top",
 	});
 
 	return edges;

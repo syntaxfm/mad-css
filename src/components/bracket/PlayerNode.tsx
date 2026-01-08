@@ -52,78 +52,78 @@ export function PlayerNode({
 	);
 }
 
+function Handles() {
+  return (
+			<>
+				<Handle
+					type="target"
+					position={Position.Top}
+					className="bracket-handle"
+					style={{ top: 15 }}
+          id="in-top"
+				/>
+				<Handle
+					type="target"
+					position={Position.Bottom}
+					className="bracket-handle"
+					style={{ bottom: 15 }}
+          id="in-bottom"
+				/>
+				<Handle
+					type="source"
+					position={Position.Right}
+					className="bracket-handle"
+					style={{ right: -5 }}
+					id="out-right"
+				/>
+				<Handle
+					type="source"
+					position={Position.Left}
+					className="bracket-handle"
+					style={{ right: -5 }}
+					id="out-left"
+				/>
+			</>
+		);
+}
+
 // React Flow wrapper for PlayerNode
 export function PlayerNodeFlow({ data }: { data: PlayerData }) {
 	return (
 		<div style={{ position: 'relative' }}>
-			<Handle
-				type="target"
-				position={Position.Left}
-				className="bracket-handle"
-				style={{ left: '320px' }}
-			/>
-			<PlayerNode
-				photo={data.photo}
-				name={data.name}
-				byline={data.byline}
-				ringColor={data.ringColor}
-				isWinner={data.isWinner}
-				isEliminated={data.isEliminated}
-			/>
-			<Handle
-				type="source"
-				position={Position.Right}
-				className="bracket-handle"
-				style={{ right: -5 }}
-        id="out-right"
-			/>
-			<Handle
-				type="source"
-				position={Position.Left}
-				className="bracket-handle"
-				style={{ right: -5 }}
-        id="out-left"
-			/>
+      <PlayerNode
+        photo={data.photo}
+        name={data.name}
+        byline={data.byline}
+        ringColor={data.ringColor}
+        isWinner={data.isWinner}
+        isEliminated={data.isEliminated}
+      />
+      <Handles />
 		</div>
 	);
 }
 
 // Empty slot for matches not yet played
-export function EmptySlot() {
+export function EmptySlot({ text }: { text: string }) {
 	return (
 		<div className="empty-slot">
 			<div className="empty-slot-info">
-				<span className="empty-slot-text">TBD</span>
+				{text || "TBD"}
+				<span className="empty-slot-text"></span>
 			</div>
 		</div>
 	);
 }
 
 // React Flow wrapper for EmptySlot
-export function EmptySlotFlow() {
+export function EmptySlotFlow({ data }: { data: { text: string } }) {
+  console.log(data);
+  const { text } = data;
 	return (
 		<div style={{ position: "relative" }}>
-			<Handle
-				type="target"
-				position={Position.Left}
-				className="bracket-handle"
-				style={{ left: -5 }}
-			/>
-			<EmptySlot />
-			<Handle
-				type="source"
-				position={Position.Right}
-				className="bracket-handle"
-				style={{ right: -5 }}
-				id="out-right"
-			/>
-			<Handle
-				type="source"
-				position={Position.Left}
-				className="bracket-handle"
-				style={{ right: -5 }}
-				id="out-left"
-			/>
+      <EmptySlot text={text} />
+      <Handles />
 		</div>
 	);
 }
