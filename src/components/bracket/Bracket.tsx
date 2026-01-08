@@ -2,15 +2,17 @@ import {
 	Controls,
 	type Edge,
 	type EdgeProps,
+	getNodesBounds,
 	getSmoothStepPath,
 	type Node,
 	ReactFlow,
+	type ReactFlowInstance,
 } from "@xyflow/react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import "@xyflow/react/dist/style.css";
 import {
-	// bracket,
-  emptyBracket as bracket,
+	bracket,
+  // emptyBracket as bracket,
 	type Game,
 	isLoser,
 	isWinner,
@@ -59,7 +61,7 @@ const edgeTypes = {
 
 // Node dimensions for positioning
 const NODE_HEIGHT = 70;
-const VERTICAL_GAP = 100;
+const VERTICAL_GAP = 50;
 const MATCH_GAP = NODE_HEIGHT + VERTICAL_GAP;
 const ROUND_GAP = 220;
 
@@ -532,9 +534,75 @@ const defaultEdgeOptions = {
 	style: edgeStyle,
 };
 
+// Padding used for fitView
+const FIT_VIEW_PADDING = 0.05;
+
 function BracketContent() {
+	const containerRef = useRef<HTMLDivElement>(null);
+	const [containerHeight, setContainerHeight] = useState<number | null>(null);
+	const rfInstanceRef = useRef<ReactFlowInstance | null>(null);
+	const boundsRef = useRef<{ width: number; height: number } | null>(null);
+
+	const calculateHeight = useCallback(() => {
+		if (!containerRef.current || !boundsRef.current) return;
+
+		const containerWidth = containerRef.current.clientWidth;
+		if (containerWidth === 0) return;
+
+		const { width: contentWidth, height: contentHeight } = boundsRef.current;
+
+		// Calculate the aspect ratio of the bracket content
+		const aspectRatio = contentHeight / contentWidth;
+
+		// Account for fitView padding
+		const paddingMultiplier = 1 + FIT_VIEW_PADDING * 2;
+
+		// Calculate height based on width and aspect ratio
+		const scaledHeight = containerWidth * aspectRatio * paddingMultiplier;
+
+		setContainerHeight(scaledHeight);
+	}, []);
+
+	const handleInit = (instance: ReactFlowInstance) => {
+		rfInstanceRef.current = instance;
+
+		// Get the bounds of all nodes (includes node dimensions)
+		const nodes = instance.getNodes();
+		const bounds = getNodesBounds(nodes);
+
+		// Store bounds for recalculation on resize
+		boundsRef.current = { width: bounds.width, height: bounds.height };
+
+		calculateHeight();
+	};
+
+	// Re-fit view when height changes
+	useEffect(() => {
+		if (containerHeight && rfInstanceRef.current) {
+			// Small delay to let the DOM update with new height
+			const timer = setTimeout(() => {
+				rfInstanceRef.current?.fitView({ padding: FIT_VIEW_PADDING });
+			}, 10);
+			return () => clearTimeout(timer);
+		}
+	}, [containerHeight]);
+
+	// Recalculate height on window resize
+	useEffect(() => {
+		const handleResize = () => {
+			calculateHeight();
+		};
+
+		window.addEventListener("resize", handleResize);
+		return () => window.removeEventListener("resize", handleResize);
+	}, [calculateHeight]);
+
 	return (
-		<div className="bracket-container">
+		<div
+			ref={containerRef}
+			className="bracket-container"
+			style={containerHeight ? { height: containerHeight } : undefined}
+		>
 			<ReactFlow
 				nodes={initialNodes}
 				edges={initialEdges}
@@ -542,16 +610,16 @@ function BracketContent() {
 				edgeTypes={edgeTypes}
 				defaultEdgeOptions={defaultEdgeOptions}
 				fitView
-				fitViewOptions={{ padding: 0.1 }}
+				fitViewOptions={{ padding: FIT_VIEW_PADDING }}
 				minZoom={0.1}
 				maxZoom={1.5}
 				nodesDraggable={false}
 				nodesConnectable={false}
 				elementsSelectable={false}
-				panOnScroll
 				zoomOnScroll
+				onInit={handleInit}
 			>
-				<Controls showInteractive={false} />
+				<Controls orientation="horizontal" showInteractive={false} style={{ position: "absolute", top: 0, bottom: 'auto', right: 0, left: 'auto' }} />
 			</ReactFlow>
 		</div>
 	);

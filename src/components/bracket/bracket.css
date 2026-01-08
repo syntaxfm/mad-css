@@ -185,8 +185,8 @@
 /* React Flow Container */
 .bracket-container {
 	width: 100%;
-	height: 100vh;
-	background: #efefef;
+	min-height: 400px; /* Fallback minimum before JS calculates actual height */
+	height: 1200px; /* Default that gets overridden by JS */
 }
 
 .bracket-container .react-flow__node {

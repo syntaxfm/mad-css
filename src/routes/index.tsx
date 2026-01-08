@@ -15,6 +15,10 @@ function App() {
           <Roster />
         </div>
       </div>
+      <div className="section">
+          <h2>The Bracket</h2>
+          <Bracket />
+      </div>
       <section className="section rules">
         <div className="section-content">
 
