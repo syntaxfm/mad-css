@@ -1,7 +1,7 @@
 .header {
 	background-image:
 		linear-gradient(to bottom, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0)),
-		url("/celebration.jpg");
+		url("../../public/madcss-wide.jpg");
 
 	background-repeat: no-repeat;
 	background-position: center;
@@ -9,7 +9,7 @@
 	text-align: center;
 	min-height: 600px;
 	mask-image:
-		url("./assets/paper/paper-stripe.png"), linear-gradient(black, black);
+		url("./assets/paper/paper-stripe-bottom.png"), linear-gradient(black, black);
 	mask-size:
 		auto 200px,
 		100% 100%;
@@ -25,6 +25,7 @@
 	margin: 0 auto;
 	display: inline-block;
 	img {
-		max-width: 350px;
+		max-width: 100%;
+		width: 400px;
 	}
 }
