@@ -81,14 +81,15 @@ p {
 	background-position: center, center;
 	background-repeat: no-repeat, no-repeat;
 	mask-image:
-		url("./assets/paper/paper2.png"), url("./assets/paper/paper2.png"),
+		url("./assets/paper/repeating-paper-top.png"),
+		url("./assets/paper/repeating-paper-bottom.png"),
 		linear-gradient(black, black);
 	mask-size:
-		auto 100px,
+		auto 33px,
 		auto 50px,
 		100% 100%;
 	mask-position:
-		center -50px,
+		center 0px,
 		center calc(100% + 25px),
 		center;
 	mask-repeat: repeat-x, repeat-x, no-repeat;

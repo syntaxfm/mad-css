@@ -9,7 +9,7 @@
 	text-align: center;
 	min-height: 600px;
 	mask-image:
-		url("./assets/paper/paper-stripe.png"), linear-gradient(black, black);
+		url("./assets/paper/paper-stripe-bottom.png"), linear-gradient(black, black);
 	mask-size:
 		auto 200px,
 		100% 100%;
