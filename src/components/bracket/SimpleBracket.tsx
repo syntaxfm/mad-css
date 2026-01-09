@@ -8,7 +8,6 @@ import {
 import { useCallback, useState } from "react";
 import "@xyflow/react/dist/style.css";
 
-
 const handles = [
 	{
 		type: "source",
@@ -23,9 +22,11 @@ const handles = [
 ];
 const initialNodes = [
 	{
-    id: "n1", position: { x: 0, y: 0 }, data: { label: "Node 1" },
-    handles
-  },
+		id: "n1",
+		position: { x: 0, y: 0 },
+		data: { label: "Node 1" },
+		handles,
+	},
 
 	{ id: "n2", position: { x: 0, y: 100 }, data: { label: "Node 2" }, handles },
 

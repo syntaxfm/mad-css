@@ -1,5 +1,5 @@
-import { Handle, Position } from '@xyflow/react';
-import './bracket.css';
+import { Handle, Position } from "@xyflow/react";
+import "./bracket.css";
 
 export interface PlayerData {
 	photo: string;
@@ -24,23 +24,23 @@ export function PlayerNode({
 	photo,
 	name,
 	byline,
-	ringColor = 'var(--orange)',
+	ringColor = "var(--orange)",
 	isWinner = false,
 	isEliminated = false,
 }: PlayerNodeProps) {
 	const classNames = [
-		'player-node',
-		isWinner && 'player-node--winner',
-		isEliminated && 'player-node--eliminated',
+		"player-node",
+		isWinner && "player-node--winner",
+		isEliminated && "player-node--eliminated",
 	]
 		.filter(Boolean)
-		.join(' ');
+		.join(" ");
 
 	return (
 		<div className={classNames}>
 			<div
 				className="player-photo-ring"
-				style={{ '--ring-color': ringColor } as React.CSSProperties}
+				style={{ "--ring-color": ringColor } as React.CSSProperties}
 			>
 				<img src={photo} alt={name} className="player-photo" />
 			</div>
@@ -53,53 +53,53 @@ export function PlayerNode({
 }
 
 function Handles() {
-  return (
-			<>
-				<Handle
-					type="target"
-					position={Position.Top}
-					className="bracket-handle"
-					style={{ top: 15 }}
-          id="in-top"
-				/>
-				<Handle
-					type="target"
-					position={Position.Bottom}
-					className="bracket-handle"
-					style={{ bottom: 15 }}
-          id="in-bottom"
-				/>
-				<Handle
-					type="source"
-					position={Position.Right}
-					className="bracket-handle"
-					style={{ right: -5 }}
-					id="out-right"
-				/>
-				<Handle
-					type="source"
-					position={Position.Left}
-					className="bracket-handle"
-					style={{ right: -5 }}
-					id="out-left"
-				/>
-			</>
-		);
+	return (
+		<>
+			<Handle
+				type="target"
+				position={Position.Top}
+				className="bracket-handle"
+				style={{ top: 15 }}
+				id="in-top"
+			/>
+			<Handle
+				type="target"
+				position={Position.Bottom}
+				className="bracket-handle"
+				style={{ bottom: 15 }}
+				id="in-bottom"
+			/>
+			<Handle
+				type="source"
+				position={Position.Right}
+				className="bracket-handle"
+				style={{ right: -5 }}
+				id="out-right"
+			/>
+			<Handle
+				type="source"
+				position={Position.Left}
+				className="bracket-handle"
+				style={{ right: -5 }}
+				id="out-left"
+			/>
+		</>
+	);
 }
 
 // React Flow wrapper for PlayerNode
 export function PlayerNodeFlow({ data }: { data: PlayerData }) {
 	return (
-		<div style={{ position: 'relative' }}>
-      <PlayerNode
-        photo={data.photo}
-        name={data.name}
-        byline={data.byline}
-        ringColor={data.ringColor}
-        isWinner={data.isWinner}
-        isEliminated={data.isEliminated}
-      />
-      <Handles />
+		<div style={{ position: "relative" }}>
+			<PlayerNode
+				photo={data.photo}
+				name={data.name}
+				byline={data.byline}
+				ringColor={data.ringColor}
+				isWinner={data.isWinner}
+				isEliminated={data.isEliminated}
+			/>
+			<Handles />
 		</div>
 	);
 }

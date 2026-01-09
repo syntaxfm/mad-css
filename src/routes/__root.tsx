@@ -32,8 +32,36 @@ export const Route = createRootRoute({
     ],
   }),
 
-  shellComponent: RootDocument,
-})
+function RootLayout() {
+	return (
+		<>
+			<Header />
+			<Outlet />
+			<ClientOnly fallback={null}>
+				<TanStackDevtools
+					config={{
+						position: "bottom-right",
+					}}
+					plugins={[
+						{
+							name: "Tanstack Router",
+							render: <TanStackRouterDevtoolsPanel />,
+						},
+					]}
+				/>
+			</ClientOnly>
+		</>
+	);
+}
+
+function NotFound() {
+	return (
+		<div style={{ padding: "2rem", textAlign: "center" }}>
+			<h1>404 - Page Not Found</h1>
+			<p>The page you're looking for doesn't exist.</p>
+		</div>
+	);
+}
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (

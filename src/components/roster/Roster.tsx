@@ -1,4 +1,11 @@
 import "./roster.css";
+
+// Deterministic pseudo-random based on seed (same result for same index)
+function seededRandom(seed: number): number {
+	const x = Math.sin(seed * 9999) * 10000;
+	return x - Math.floor(x);
+}
+
 export function Roster() {
   const players = [
 			{

@@ -1,7 +1,20 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "tanstack-start-app",
-  "compatibility_date": "2025-09-02",
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "mad-css",
+  // account_id is set via CLOUDFLARE_ACCOUNT_ID env var
+  "compatibility_date": "2026-01-07",
   "compatibility_flags": ["nodejs_compat"],
-  "main": "@tanstack/react-start/server-entry"
+  "main": "@tanstack/react-start/server-entry",
+  "observability": {
+    "enabled": true
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "mad-css-db",
+      // Create your own D1 database: npx wrangler d1 create mad-css-db
+      "database_id": "ca6dc8cf-f3e5-411b-909e-87bdd327347f",
+      "migrations_dir": "drizzle"
+    }
+  ]
 }

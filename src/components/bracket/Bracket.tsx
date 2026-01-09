@@ -12,7 +12,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import "@xyflow/react/dist/style.css";
 import {
 	bracket,
-  // emptyBracket as bracket,
+	// emptyBracket as bracket,
 	type Game,
 	isLoser,
 	isWinner,
@@ -132,24 +132,18 @@ function generateNodes(): Node[] {
 
 		// Player 1
 		nodes.push(
-			createNode(
-				`${game.id}-p1`,
-				game.player1,
-				game,
-				LEFT_RING_COLOR,
-				{ x: 0, y: baseY },
-			),
+			createNode(`${game.id}-p1`, game.player1, game, LEFT_RING_COLOR, {
+				x: 0,
+				y: baseY,
+			}),
 		);
 
 		// Player 2
 		nodes.push(
-			createNode(
-				`${game.id}-p2`,
-				game.player2,
-				game,
-				LEFT_RING_COLOR,
-				{ x: 0, y: baseY + MATCH_GAP },
-			),
+			createNode(`${game.id}-p2`, game.player2, game, LEFT_RING_COLOR, {
+				x: 0,
+				y: baseY + MATCH_GAP,
+			}),
 		);
 	});
 
@@ -159,24 +153,18 @@ function generateNodes(): Node[] {
 
 		// Player 1
 		nodes.push(
-			createNode(
-				`${game.id}-p1`,
-				game.player1,
-				game,
-				LEFT_RING_COLOR,
-				{ x: ROUND_GAP, y: baseY },
-			),
+			createNode(`${game.id}-p1`, game.player1, game, LEFT_RING_COLOR, {
+				x: ROUND_GAP,
+				y: baseY,
+			}),
 		);
 
 		// Player 2
 		nodes.push(
-			createNode(
-				`${game.id}-p2`,
-				game.player2,
-				game,
-				LEFT_RING_COLOR,
-				{ x: ROUND_GAP, y: baseY + 2 * MATCH_GAP },
-			),
+			createNode(`${game.id}-p2`, game.player2, game, LEFT_RING_COLOR, {
+				x: ROUND_GAP,
+				y: baseY + 2 * MATCH_GAP,
+			}),
 		);
 	});
 
@@ -186,24 +174,18 @@ function generateNodes(): Node[] {
 
 		// Player 1
 		nodes.push(
-			createNode(
-				`${game.id}-p1`,
-				game.player1,
-				game,
-				LEFT_RING_COLOR,
-				{ x: ROUND_GAP * 2, y: baseY },
-			),
+			createNode(`${game.id}-p1`, game.player1, game, LEFT_RING_COLOR, {
+				x: ROUND_GAP * 2,
+				y: baseY,
+			}),
 		);
 
 		// Player 2
 		nodes.push(
-			createNode(
-				`${game.id}-p2`,
-				game.player2,
-				game,
-				LEFT_RING_COLOR,
-				{ x: ROUND_GAP * 2, y: baseY + 4 * MATCH_GAP },
-			),
+			createNode(`${game.id}-p2`, game.player2, game, LEFT_RING_COLOR, {
+				x: ROUND_GAP * 2,
+				y: baseY + 4 * MATCH_GAP,
+			}),
 		);
 	});
 
@@ -212,7 +194,7 @@ function generateNodes(): Node[] {
 		id: `left-finalist`,
 		type: "emptySlot",
 		position: { x: ROUND_GAP * 3, y: 3.5 * MATCH_GAP },
-		data: { text: 'Winner of Left Semi' },
+		data: { text: "Winner of Left Semi" },
 	});
 
 	// ===========================================================================
@@ -226,24 +208,18 @@ function generateNodes(): Node[] {
 
 		// Player 1
 		nodes.push(
-			createNode(
-				`${game.id}-p1`,
-				game.player1,
-				game,
-				RIGHT_RING_COLOR,
-				{ x: rightStartX, y: baseY },
-			),
+			createNode(`${game.id}-p1`, game.player1, game, RIGHT_RING_COLOR, {
+				x: rightStartX,
+				y: baseY,
+			}),
 		);
 
 		// Player 2
 		nodes.push(
-			createNode(
-				`${game.id}-p2`,
-				game.player2,
-				game,
-				RIGHT_RING_COLOR,
-				{ x: rightStartX, y: baseY + MATCH_GAP },
-			),
+			createNode(`${game.id}-p2`, game.player2, game, RIGHT_RING_COLOR, {
+				x: rightStartX,
+				y: baseY + MATCH_GAP,
+			}),
 		);
 	});
 
@@ -253,24 +229,18 @@ function generateNodes(): Node[] {
 
 		// Player 1
 		nodes.push(
-			createNode(
-				`${game.id}-p1`,
-				game.player1,
-				game,
-				RIGHT_RING_COLOR,
-				{ x: rightStartX - ROUND_GAP, y: baseY },
-			),
+			createNode(`${game.id}-p1`, game.player1, game, RIGHT_RING_COLOR, {
+				x: rightStartX - ROUND_GAP,
+				y: baseY,
+			}),
 		);
 
 		// Player 2
 		nodes.push(
-			createNode(
-				`${game.id}-p2`,
-				game.player2,
-				game,
-				RIGHT_RING_COLOR,
-				{ x: rightStartX - ROUND_GAP, y: baseY + 2 * MATCH_GAP },
-			),
+			createNode(`${game.id}-p2`, game.player2, game, RIGHT_RING_COLOR, {
+				x: rightStartX - ROUND_GAP,
+				y: baseY + 2 * MATCH_GAP,
+			}),
 		);
 	});
 
@@ -280,24 +250,18 @@ function generateNodes(): Node[] {
 
 		// Player 1
 		nodes.push(
-			createNode(
-				`${game.id}-p1`,
-				game.player1,
-				game,
-				RIGHT_RING_COLOR,
-				{ x: rightStartX - ROUND_GAP * 2, y: baseY },
-			),
+			createNode(`${game.id}-p1`, game.player1, game, RIGHT_RING_COLOR, {
+				x: rightStartX - ROUND_GAP * 2,
+				y: baseY,
+			}),
 		);
 
 		// Player 2
 		nodes.push(
-			createNode(
-				`${game.id}-p2`,
-				game.player2,
-				game,
-				RIGHT_RING_COLOR,
-				{ x: rightStartX - ROUND_GAP * 2, y: baseY + 4 * MATCH_GAP },
-			),
+			createNode(`${game.id}-p2`, game.player2, game, RIGHT_RING_COLOR, {
+				x: rightStartX - ROUND_GAP * 2,
+				y: baseY + 4 * MATCH_GAP,
+			}),
 		);
 	});
 
@@ -320,12 +284,12 @@ function generateNodes(): Node[] {
 		id: "championship",
 		type: finalGame?.winner ? "playerNode" : "emptySlot",
 		position: {
-			x: ROUND_GAP * 3.5 ,
+			x: ROUND_GAP * 3.5,
 			y: 0,
 		},
 		data: finalGame?.winner
 			? playerToNodeData(finalGame.winner, finalGame, "#FFD700")
-			: { text: 'Winner of Championship' },
+			: { text: "Winner of Championship" },
 	});
 
 	return nodes;
@@ -361,19 +325,19 @@ function generateEdges(): Edge[] {
 			target: `${quarterGame.id}-p${(gameIndex % 2) + 1}`,
 			type: "bracket",
 			style: edgeStyle,
-      sourceHandle: "out-right",
-      targetHandle: "in-top",
+			sourceHandle: "out-right",
+			targetHandle: "in-top",
 		});
 
 		// Player 2 to quarter game
-      edges.push({
-        id: `${game.id}-p2-to-${quarterGame.id}`,
-				source: `${game.id}-p2`,
-				target: `${quarterGame.id}-p${(gameIndex % 2) + 1}`,
-				type: "bracket",
-				style: edgeStyle,
-        targetHandle: "in-bottom",
-			});
+		edges.push({
+			id: `${game.id}-p2-to-${quarterGame.id}`,
+			source: `${game.id}-p2`,
+			target: `${quarterGame.id}-p${(gameIndex % 2) + 1}`,
+			type: "bracket",
+			style: edgeStyle,
+			targetHandle: "in-bottom",
+		});
 	});
 
 	// Quarters to Semis (left)
@@ -386,19 +350,19 @@ function generateEdges(): Edge[] {
 			target: `${semiGame.id}-p${gameIndex + 1}`,
 			type: "bracket",
 			style: edgeStyle,
-      sourceHandle: "out-right",
-      targetHandle: "in-top",
+			sourceHandle: "out-right",
+			targetHandle: "in-top",
 		});
 
-			edges.push({
-				id: `${game.id}-p2-to-${semiGame.id}`,
-				source: `${game.id}-p2`,
-				target: `${semiGame.id}-p${gameIndex + 1}`,
-				type: "bracket",
-				style: edgeStyle,
-        sourceHandle: "out-right",
-        targetHandle: "in-bottom",
-			});
+		edges.push({
+			id: `${game.id}-p2-to-${semiGame.id}`,
+			source: `${game.id}-p2`,
+			target: `${semiGame.id}-p${gameIndex + 1}`,
+			type: "bracket",
+			style: edgeStyle,
+			sourceHandle: "out-right",
+			targetHandle: "in-bottom",
+		});
 	});
 
 	// Semis to Left Finalist
@@ -409,8 +373,8 @@ function generateEdges(): Edge[] {
 			target: `left-finalist`,
 			type: "bracket",
 			style: edgeStyle,
-      sourceHandle: "out-right",
-      targetHandle: "in-top",
+			sourceHandle: "out-right",
+			targetHandle: "in-top",
 		});
 
 		edges.push({
@@ -419,8 +383,8 @@ function generateEdges(): Edge[] {
 			target: `left-finalist`,
 			type: "bracket",
 			style: edgeStyle,
-      sourceHandle: "out-right",
-      targetHandle: "in-bottom",
+			sourceHandle: "out-right",
+			targetHandle: "in-bottom",
 		});
 	});
 
@@ -431,8 +395,8 @@ function generateEdges(): Edge[] {
 		target: "championship",
 		type: "bracket",
 		style: edgeStyle,
-      sourceHandle: "out-right",
-      targetHandle: "in-top",
+		sourceHandle: "out-right",
+		targetHandle: "in-top",
 	});
 
 	// ===========================================================================
@@ -449,19 +413,19 @@ function generateEdges(): Edge[] {
 			target: `${quarterGame.id}-p${(gameIndex % 2) + 1}`,
 			type: "bracket",
 			style: edgeStyle,
-      sourceHandle: "out-left",
-      targetHandle: "in-top",
+			sourceHandle: "out-left",
+			targetHandle: "in-top",
 		});
 
-			edges.push({
-				id: `${game.id}-p2-to-${quarterGame.id}`,
-				source: `${game.id}-p2`,
-				target: `${quarterGame.id}-p${(gameIndex % 2) + 1}`,
-				type: "bracket",
-				style: edgeStyle,
-        sourceHandle: "out-left",
-        targetHandle: "in-bottom",
-			});
+		edges.push({
+			id: `${game.id}-p2-to-${quarterGame.id}`,
+			source: `${game.id}-p2`,
+			target: `${quarterGame.id}-p${(gameIndex % 2) + 1}`,
+			type: "bracket",
+			style: edgeStyle,
+			sourceHandle: "out-left",
+			targetHandle: "in-bottom",
+		});
 	});
 
 	// Quarters to Semis (right)
@@ -474,19 +438,19 @@ function generateEdges(): Edge[] {
 			target: `${semiGame.id}-p${gameIndex + 1}`,
 			type: "bracket",
 			style: edgeStyle,
-      sourceHandle: "out-left",
-      targetHandle: "in-top",
+			sourceHandle: "out-left",
+			targetHandle: "in-top",
 		});
 
-			edges.push({
-				id: `${game.id}-p2-to-${semiGame.id}`,
-				source: `${game.id}-p2`,
-				target: `${semiGame.id}-p${gameIndex + 1}`,
-				type: "bracket",
-				style: edgeStyle,
-        sourceHandle: "out-left",
-        targetHandle: "in-bottom",
-			});
+		edges.push({
+			id: `${game.id}-p2-to-${semiGame.id}`,
+			source: `${game.id}-p2`,
+			target: `${semiGame.id}-p${gameIndex + 1}`,
+			type: "bracket",
+			style: edgeStyle,
+			sourceHandle: "out-left",
+			targetHandle: "in-bottom",
+		});
 	});
 
 	// Semis to Right Finalist
@@ -497,8 +461,8 @@ function generateEdges(): Edge[] {
 			target: `right-finalist`,
 			type: "bracket",
 			style: edgeStyle,
-      sourceHandle: "out-left",
-      targetHandle: "in-top",
+			sourceHandle: "out-left",
+			targetHandle: "in-top",
 		});
 
 		edges.push({
@@ -507,8 +471,8 @@ function generateEdges(): Edge[] {
 			target: `right-finalist`,
 			type: "bracket",
 			style: edgeStyle,
-      sourceHandle: "out-left",
-      targetHandle: "in-bottom",
+			sourceHandle: "out-left",
+			targetHandle: "in-bottom",
 		});
 	});
 
@@ -519,8 +483,8 @@ function generateEdges(): Edge[] {
 		target: "championship",
 		type: "bracket",
 		style: edgeStyle,
-      sourceHandle: "out-left",
-      targetHandle: "in-top",
+		sourceHandle: "out-left",
+		targetHandle: "in-top",
 	});
 
 	return edges;
@@ -619,7 +583,17 @@ function BracketContent() {
 				zoomOnScroll
 				onInit={handleInit}
 			>
-				<Controls orientation="horizontal" showInteractive={false} style={{ position: "absolute", top: 0, bottom: 'auto', right: 0, left: 'auto' }} />
+				<Controls
+					orientation="horizontal"
+					showInteractive={false}
+					style={{
+						position: "absolute",
+						top: 0,
+						bottom: "auto",
+						right: 0,
+						left: "auto",
+					}}
+				/>
 			</ReactFlow>
 		</div>
 	);
