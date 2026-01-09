@@ -1,0 +1,93 @@
+.bracket-cta {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 20px;
+	padding: 20px 30px;
+	margin: 0 auto 20px;
+	max-width: 700px;
+	background: rgba(0, 0, 0, 0.4);
+	border: 2px solid var(--yellow);
+	border-radius: 8px;
+}
+
+.bracket-cta.logged-in {
+	background: rgba(0, 0, 0, 0.3);
+	border-color: rgba(255, 255, 255, 0.2);
+}
+
+.login-loading {
+	opacity: 0.5;
+}
+
+.cta-text {
+	flex: 1;
+}
+
+.cta-headline {
+	font-size: 1.4rem;
+	text-transform: uppercase;
+	color: var(--yellow);
+	margin-bottom: 4px;
+}
+
+.cta-sub {
+	font-size: 0.9rem;
+	opacity: 0.9;
+	line-height: 1.4;
+}
+
+.cta-welcome {
+	font-size: 1rem;
+	margin-bottom: 2px;
+}
+
+.btn-github {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 12px 20px;
+	background: var(--yellow);
+	color: var(--black);
+	font-family: var(--font-block);
+	font-size: 0.9rem;
+	text-transform: uppercase;
+	border: none;
+	border-radius: 5px;
+	cursor: pointer;
+	transition:
+		transform 0.15s ease,
+		background 0.15s ease;
+	white-space: nowrap;
+}
+
+.btn-github:hover {
+	background: #ffbe2e;
+	transform: translateY(-1px);
+}
+
+.github-icon {
+	width: 20px;
+	height: 20px;
+}
+
+.btn-link {
+	background: none;
+	border: none;
+	color: var(--white);
+	text-decoration: underline;
+	cursor: pointer;
+	font-size: 0.85rem;
+	opacity: 0.7;
+}
+
+.btn-link:hover {
+	opacity: 1;
+}
+
+.user-avatar {
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	border: 2px solid var(--yellow);
+}

@@ -1,4 +1,4 @@
-import '@/styles/ticket.css';
+import "@/styles/ticket.css";
 export function Ticket() {
 	return (
 		<div className="ticket_wrapper">
@@ -7,20 +7,20 @@ export function Ticket() {
 					<h2>The Ultimate CSS Tournament</h2>
 					<p className="font_block battle">16 Devs Battle for Glory</p>
 					<div className="presented">
-						<a href="https://syntax.fm" target="_blank">
+						<a href="https://syntax.fm" target="_blank" rel="noopener">
 							<img src="/syntax.svg" alt="Syntax" />
 						</a>
 						<p>Presented by</p>
 					</div>
 					<div className="presented">
 						{/* TODO Setup UTM tracking */}
-						<a href="https://sentry.io" target="_blank">
+						<a href="https://sentry.io" target="_blank" rel="noopener">
 							<img src="/sentry.svg" alt="Sentry" />
 						</a>
 						<p>Technology Partner</p>
 					</div>
 					<div className="presented">
-						<a href="https://youtube.com" target="_blank">
+						<a href="https://youtube.com" target="_blank" rel="noopener">
 							<img src="/youtube.png" alt="YouTube" />
 						</a>
 						<p>Unofficial Internet Broadcast Partner</p>
