@@ -20,8 +20,8 @@ body {
 	min-height: 100vh;
 	background: var(--orange);
 	background-image: url("./assets/textures/dots005.svg");
-	background-size: cover;
-	background-repeat: no-repeat;
+	background-size: contain;
+	background-repeat: repeat;
 	color: var(--white);
 	font-family: var(--font-sans);
 }
