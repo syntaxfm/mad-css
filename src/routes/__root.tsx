@@ -1,5 +1,5 @@
 import { TanStackDevtools } from '@tanstack/react-devtools'
-import { createRootRoute, HeadContent, Scripts } from '@tanstack/react-router'
+import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { Footer } from '@/components/footer/Footer'
 import { Header } from '@/components/Header'
@@ -31,39 +31,20 @@ export const Route = createRootRoute({
       },
     ],
   }),
-
-function RootLayout() {
-	return (
-		<>
-			<Header />
-			<Outlet />
-			<ClientOnly fallback={null}>
-				<TanStackDevtools
-					config={{
-						position: "bottom-right",
-					}}
-					plugins={[
-						{
-							name: "Tanstack Router",
-							render: <TanStackRouterDevtoolsPanel />,
-						},
-					]}
-				/>
-			</ClientOnly>
-		</>
-	);
-}
+  component: RootDocument,
+  notFoundComponent: NotFound,
+})
 
 function NotFound() {
-	return (
-		<div style={{ padding: "2rem", textAlign: "center" }}>
-			<h1>404 - Page Not Found</h1>
-			<p>The page you're looking for doesn't exist.</p>
-		</div>
-	);
+  return (
+    <div style={{ padding: '2rem', textAlign: 'center' }}>
+      <h1>404 - Page Not Found</h1>
+      <p>The page you're looking for doesn't exist.</p>
+    </div>
+  )
 }
 
-function RootDocument({ children }: { children: React.ReactNode }) {
+function RootDocument() {
   return (
     <html lang="en">
       <head>
@@ -71,8 +52,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <Header />
-        {children}
-
+        <Outlet />
         <Footer />
         <TanStackDevtools
           config={{

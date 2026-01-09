@@ -18,20 +18,13 @@ function App() {
 			</div>
 			<div className="section">
 				<h2>The Bracket</h2>
-				<ClientOnly fallback={null}>
+				{/* <ClientOnly fallback={null}>
 					<LoginSection />
-				</ClientOnly>
+				</ClientOnly> */}
 				<Bracket />
 			</div>
 			<section className="section rules">
 				<div className="section-content">
-					<h2>The Rules</h2>
-
-					<p>
-						Welcome to Mad CSS — the ultimate showdown of styling supremacy. Two
-						competitors enter, one champion emerges. This ain't your grandma's
-						CSS tutorial. This is war.
-					</p>
 
         <h2>The Rules</h2>
         <p className="center">
