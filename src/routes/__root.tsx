@@ -1,9 +1,9 @@
-import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
-import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
-
-import appCss from '../styles/styles.css?url'
+import { createRootRoute, HeadContent, Scripts } from '@tanstack/react-router'
+import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
+import { Footer } from '@/components/footer/Footer'
 import { Header } from '@/components/Header'
+import appCss from '../styles/styles.css?url'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -44,6 +44,8 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <body>
         <Header />
         {children}
+
+        <Footer />
         <TanStackDevtools
           config={{
             position: 'bottom-right',

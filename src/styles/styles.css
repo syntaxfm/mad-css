@@ -14,7 +14,6 @@
 
 html {
 	color-scheme: dark;
-	scrollbar-color: var(--black) transparent;
 }
 body {
 	min-height: 100vh;
@@ -46,6 +45,9 @@ h3 {
 }
 p {
 	font-family: var(--font-sans);
+	font-size: 16px;
+	line-height: 1.5;
+	font-weight: 800;
 }
 
 .font_block {
@@ -75,8 +77,8 @@ p {
 	padding: 20px;
 	background: black;
 	background-image:
-		linear-gradient(to bottom, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.6)),
-		url("../../public/celebration.jpg");
+		linear-gradient(to bottom, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.3)),
+		url("../../public/madcss-wide.jpg");
 	background-size: cover, cover;
 	background-position: center, center;
 	background-repeat: no-repeat, no-repeat;
@@ -110,10 +112,10 @@ p {
 	-webkit-background-clip: text;
 	color: rgba(255, 255, 255, 0.3);
 	background-blend-mode: difference;
-	position: relative;
 	width: fit-content;
 	line-height: 1;
-	margin: 50px auto;
+	margin: 20px auto;
+	filter: drop-shadow(0 0 7px rgba(0, 0, 0, 1));
 	&:after {
 		content: "";
 		position: absolute;

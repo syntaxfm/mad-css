@@ -1,6 +1,7 @@
 .cards {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+	margin-block: 20px;
 }
 
 .card {
@@ -8,10 +9,8 @@
 	box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
 	transform: rotate(var(--rotate, 0deg));
 	transition: transform 0.2s ease;
-	/* border: 1px solid white; */
-	margin-top: -20px;
+	margin-bottom: -20px;
 	img {
-		/* box-shadow: 0 0 1px 5px rgba(0, 0, 0, 0.6); */
 		filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.6));
 	}
 	&:hover {

@@ -1,0 +1,39 @@
+.footer {
+	width: 100%;
+	background: black;
+	background-image: url("/wes-screaming.jpg");
+	background-position: top center;
+	aspect-ratio: 1.4 / 1;
+	background-size: cover;
+	mask-image:
+		url("../../styles/assets/paper/repeating-paper-top.png"),
+		linear-gradient(black, black);
+	mask-size:
+		auto 33px,
+		100% 100%;
+	mask-position:
+		center 0px,
+		center;
+	mask-repeat: repeat-x, repeat-x, no-repeat;
+	mask-composite: exclude;
+	mask-mode: alpha;
+	position: relative;
+	container-type: size;
+	container-name: footer;
+}
+
+.copy {
+	font-size: 1.5cqi;
+	font-weight: 100;
+	color: var(--orange);
+	background: black;
+	position: absolute;
+	color: var(--white);
+	font-weight: 500;
+	padding: 5px 10px;
+	top: 33.4cqh;
+	left: 46%;
+	transform: translateX(-50%);
+	display: inline-block;
+	rotate: -4deg;
+}

@@ -10,8 +10,12 @@ export function Roster() {
 				image: "/cards/scott.png",
 			},
 			{
-				name: "Kevin Powell",
-				image: "/cards/kevin.png",
+				name: "Wes Bos",
+				image: "/cards/wes.png",
+			},
+			{
+				name: "Scott Tolinski",
+				image: "/cards/scott.png",
 			},
 			{
 				name: "Wes Bos",
@@ -22,53 +26,18 @@ export function Roster() {
 				image: "/cards/scott.png",
 			},
 			{
-				name: "Kevin Powell",
-				image: "/cards/kevin.png",
-			},
-			{
 				name: "Wes Bos",
 				image: "/cards/wes.png",
 			},
 			{
 				name: "Scott Tolinski",
 				image: "/cards/scott.png",
-			},
-			{
-				name: "Kevin Powell",
-				image: "/cards/kevin.png",
-			},
-			{
-				name: "Wes Bos",
-				image: "/cards/wes.png",
-			},
-			{
-				name: "Scott Tolinski",
-				image: "/cards/scott.png",
-			},
-			{
-				name: "Kevin Powell",
-				image: "/cards/kevin.png",
-			},
-			{
-				name: "Wes Bos",
-				image: "/cards/wes.png",
-			},
-			{
-				name: "Scott Tolinski",
-				image: "/cards/scott.png",
-			},
-			{
-				name: "Kevin Powell",
-				image: "/cards/kevin.png",
-			},
-			{
-				name: "Kevin Powell",
-				image: "/cards/kevin.png",
 			},
 		];
   return (
     <div className="roster">
       <h2 className="center font_block uppercase">The Roster</h2>
+      <p className="center">16 player lineup to be posted soon. For Now enjoy Wes and Scott a few times.</p>
       <div className="cards">
         {players.map((player, index) => (
           <div
