@@ -7,7 +7,7 @@ export function Header() {
     <header className="header">
 			<Link to="/" className="logo">
 				{/* TODO this should be a vector image */}
-				<img src="/mad-css-logo.png" alt="Mad CSS Logo" />
+				<img src="/mad-css-logo.svg" alt="Mad CSS Logo" />
 			</Link>
 		</header>
 	);
