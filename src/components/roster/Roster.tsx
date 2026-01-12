@@ -50,7 +50,7 @@ export function Roster() {
           <div
             className="card"
             key={`${player.name}-${index}`}
-            style={{ "--rotate": `${(index % 2 === 0 ? 1 : -1) * Math.random() * 5}deg` } as React.CSSProperties}
+            style={{ "--rotate": `${(index % 2 === 0 ? 1 : -1) * seededRandom(index) * 5}deg` } as React.CSSProperties}
           >
             <img src={player.image} alt={player.name} />
           </div>
