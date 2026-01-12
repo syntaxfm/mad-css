@@ -507,6 +507,42 @@ function BracketContent() {
 	const rfInstanceRef = useRef<ReactFlowInstance | null>(null);
 	const boundsRef = useRef<{ width: number; height: number } | null>(null);
 
+	// Scroll zoom lock state - prevents scroll trap
+	const [scrollZoomLocked, setScrollZoomLocked] = useState(true);
+	const unlockTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+	const clearUnlockTimer = useCallback(() => {
+		if (unlockTimerRef.current) {
+			clearTimeout(unlockTimerRef.current);
+			unlockTimerRef.current = null;
+		}
+	}, []);
+
+	const handleMouseEnter = useCallback(() => {
+		// Start 1.5s timer to unlock scroll zoom
+		clearUnlockTimer();
+		unlockTimerRef.current = setTimeout(() => {
+			setScrollZoomLocked(false);
+		}, 1500);
+	}, [clearUnlockTimer]);
+
+	const handleMouseLeave = useCallback(() => {
+		// Lock scroll zoom and cancel any pending unlock
+		clearUnlockTimer();
+		setScrollZoomLocked(true);
+	}, [clearUnlockTimer]);
+
+	const handleClick = useCallback(() => {
+		// Instantly unlock on click
+		clearUnlockTimer();
+		setScrollZoomLocked(false);
+	}, [clearUnlockTimer]);
+
+	// Cleanup timer on unmount
+	useEffect(() => {
+		return () => clearUnlockTimer();
+	}, [clearUnlockTimer]);
+
 	const calculateHeight = useCallback(() => {
 		if (!containerRef.current || !boundsRef.current) return;
 
@@ -566,7 +602,28 @@ function BracketContent() {
 			ref={containerRef}
 			className="bracket-container"
 			style={containerHeight ? { height: containerHeight } : undefined}
+			onMouseEnter={handleMouseEnter}
+			onMouseLeave={handleMouseLeave}
+			onClick={handleClick}
 		>
+			{/* Debug indicator for scroll zoom lock state */}
+			{/* <div
+				style={{
+					position: "relative",
+					zIndex: 10,
+					top: 10,
+					left: 10,
+					zIndex: 10,
+					padding: "4px 8px",
+					background: scrollZoomLocked ? "#ff4444" : "#44ff44",
+					color: scrollZoomLocked ? "#fff" : "#000",
+					fontFamily: "monospace",
+					fontSize: 12,
+					borderRadius: 4,
+				}}
+			>
+				Scroll Zoom: {scrollZoomLocked ? "LOCKED" : "UNLOCKED"}
+			</div> */}
 			<ReactFlow
 				nodes={initialNodes}
 				edges={initialEdges}
@@ -580,7 +637,8 @@ function BracketContent() {
 				nodesDraggable={false}
 				nodesConnectable={false}
 				elementsSelectable={false}
-				zoomOnScroll
+				zoomOnScroll={!scrollZoomLocked}
+				preventScrolling={!scrollZoomLocked}
 				onInit={handleInit}
 			>
 				<Controls
