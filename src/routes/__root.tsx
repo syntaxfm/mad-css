@@ -39,8 +39,8 @@ export const Route = createRootRoute({
       },
       {
         rel: 'icon',
-        type: 'image/svg+xml',
-        href: '/mad-css-logo.svg',
+        type: 'image/png',
+        href: '/favicon.png',
       },
     ],
   }),
