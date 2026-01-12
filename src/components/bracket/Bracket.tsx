@@ -45,7 +45,7 @@ function BracketEdge({
 		borderRadius: 0,
 	});
 
-	return <path d={edgePath} fill="none" stroke="#000000" strokeWidth={3} />;
+	return <path d={edgePath} fill="none" stroke="#FFFFFF" strokeWidth={3} />;
 }
 
 // Register custom node types
@@ -297,8 +297,9 @@ function generateNodes(): Node[] {
 
 // Edge style
 const edgeStyle: React.CSSProperties = {
-	stroke: "#000000",
+	stroke: "#ffffff",
 	strokeWidth: 3,
+	filter: "drop-shadow(0px 0px 7px black)",
 };
 
 // Generate edges connecting the bracket

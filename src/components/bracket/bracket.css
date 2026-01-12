@@ -71,11 +71,11 @@
 }
 
 .player-name {
-	font-family: var(--font-block), "Impact", sans-serif;
+	font-family: var(--font-sans), "Impact", sans-serif;
 	font-size: 1.1rem;
-	font-weight: 700;
 	color: var(--black);
 	margin: 0;
+	font-weight: 800;
 	line-height: 1.1;
 	text-transform: uppercase;
 	letter-spacing: 0.02em;
@@ -197,67 +197,23 @@
 
 /* Edge/Connector Styles - Force visibility */
 .bracket-container .react-flow__edges {
-	z-index: 5 !important;
+	z-index: 5;
 	pointer-events: none;
 }
 
 .bracket-container .react-flow__nodes {
-	z-index: 10 !important;
+	z-index: 10;
 }
 
-.bracket-container .react-flow__edge path,
-.bracket-container .react-flow__edge-path,
-.bracket-container svg path {
-	stroke: #000000 !important;
-	stroke-width: 3px !important;
-	fill: none !important;
-	opacity: 1 !important;
-	visibility: visible !important;
+.bracket-container path {
+	filter: drop-shadow(0px 0px 7px black);
 }
 
-.bracket-container svg.react-flow__edges {
-	overflow: visible !important;
-}
-
-/* Debug - make edges very visible */
-.react-flow__edge {
-	stroke: #000 !important;
-}
-
-.react-flow__edge-path {
-	stroke: #000 !important;
-	stroke-width: 3px !important;
-}
-
-/* Hide default React Flow UI elements for cleaner look */
-.bracket-container .react-flow__attribution {
-	display: none;
-}
-
-.bracket-container .react-flow__controls {
-	background: var(--beige);
-	border: 2px solid var(--black);
-	border-radius: 8px;
-}
-
-.bracket-container .react-flow__controls-button {
-	background: var(--beige);
-	border-bottom: 1px solid var(--black);
-}
-
-.bracket-container .react-flow__controls-button:hover {
-	background: var(--yellow);
-}
-
-.bracket-container .react-flow__controls-button svg {
-	fill: var(--black);
-}
-
-/* Handles */
 .bracket-handle {
-	width: 10px !important;
-	height: 10px !important;
-	background: red !important;
-	border: 2px solid black !important;
-	border-radius: 50% !important;
+	opacity: 0; /* Handles. Hidden, only used for debugging. */
+	width: 10px;
+	height: 10px;
+	background: red;
+	border: 2px solid black;
+	border-radius: 50%;
 }

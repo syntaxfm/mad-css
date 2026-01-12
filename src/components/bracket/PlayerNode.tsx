@@ -73,14 +73,14 @@ function Handles() {
 				type="source"
 				position={Position.Right}
 				className="bracket-handle"
-				style={{ right: -5 }}
+				style={{ right: 10 }}
 				id="out-right"
 			/>
 			<Handle
 				type="source"
 				position={Position.Left}
 				className="bracket-handle"
-				style={{ right: -5 }}
+				style={{ left: 10 }}
 				id="out-left"
 			/>
 		</>
