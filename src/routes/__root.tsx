@@ -23,6 +23,32 @@ export const Route = createRootRoute({
 			{
 				title: "March Mad CSS",
 			},
+			// Open Graph
+			{
+				property: "og:title",
+				content: "March Mad CSS",
+			},
+			{
+				property: "og:image",
+				content: "/og.jpg",
+			},
+			{
+				property: "og:type",
+				content: "website",
+			},
+			// Twitter
+			{
+				name: "twitter:card",
+				content: "summary_large_image",
+			},
+			{
+				name: "twitter:image",
+				content: "/og.jpg",
+			},
+			{
+				name: "twitter:title",
+				content: "March Mad CSS",
+			},
 		],
 		links: [
 			{
