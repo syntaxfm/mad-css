@@ -16,8 +16,13 @@
 
 @media (max-width: 600px) {
 	.ticket_wrapper {
-		margin-top: -50px;
 		margin-inline: 15px;
+	}
+}
+@media (max-width: 500px) {
+	.ticket_wrapper {
+		margin-inline: 15px;
+		margin-block: -100px;
 	}
 }
 

@@ -10,15 +10,25 @@
 	min-height: 600px;
 	mask-image:
 		url("./assets/paper/paper-stripe-bottom.png"), linear-gradient(black, black);
+	--mask-size: 200px;
+	--mask-position: calc(100% + 50px);
 	mask-size:
-		auto 200px,
+		auto var(--mask-size),
 		100% 100%;
 	mask-position:
-		center calc(100% + 50px),
+		center var(--mask-position),
 		center;
 	mask-repeat: repeat-x, no-repeat;
 	mask-composite: exclude;
 	mask-mode: alpha;
+	padding-inline: 50px;
+	@media (max-width: 500px) {
+		height: auto;
+		padding-bottom: 100px;
+		min-height: 0;
+		--mask-size: 100px;
+		--mask-position: calc(100% + 25px);
+	}
 }
 
 .logo {

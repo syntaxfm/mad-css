@@ -39,6 +39,9 @@ h6,
 
 h2 {
 	font-size: 6rem;
+	@media (max-width: 700px) {
+		font-size: 4rem;
+	}
 }
 h3 {
 	font-size: 3rem;
