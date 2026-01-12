@@ -10,35 +10,35 @@ export function Roster() {
   const players = [
 			{
 				name: "Wes Bos",
-				image: "/cards/wes.png",
+				image: "/cards/wes.jpg",
 			},
 			{
 				name: "Scott Tolinski",
-				image: "/cards/scott.png",
+				image: "/cards/scott.jpg",
 			},
 			{
 				name: "Wes Bos",
-				image: "/cards/wes.png",
+				image: "/cards/wes.jpg",
 			},
 			{
 				name: "Scott Tolinski",
-				image: "/cards/scott.png",
+				image: "/cards/scott.jpg",
 			},
 			{
 				name: "Wes Bos",
-				image: "/cards/wes.png",
+				image: "/cards/wes.jpg",
 			},
 			{
 				name: "Scott Tolinski",
-				image: "/cards/scott.png",
+				image: "/cards/scott.jpg",
 			},
 			{
 				name: "Wes Bos",
-				image: "/cards/wes.png",
+				image: "/cards/wes.jpg",
 			},
 			{
 				name: "Scott Tolinski",
-				image: "/cards/scott.png",
+				image: "/cards/scott.jpg",
 			},
 		];
   return (
