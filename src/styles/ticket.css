@@ -42,8 +42,6 @@
 	overflow: hidden;
 	border-radius: 15px;
 	position: relative;
-	/* Mask for ticket cutouts - using exclude to punch holes */
-	/* Top notch - solid circle to cut out */
 	mask-image:
 		radial-gradient(
 			circle var(--notch-size) at calc(100% - var(--stub-width)) 0,

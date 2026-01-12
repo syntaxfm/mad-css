@@ -3,6 +3,7 @@ import { Bracket } from "@/components/bracket/Bracket";
 import { SimpleBracket } from "@/components/bracket/SimpleBracket";
 import { LoginSection } from "@/components/LoginSection";
 import { Roster } from "@/components/roster/Roster";
+import { Rules } from "@/components/rules/Rules";
 import { Ticket } from "@/components/Ticket";
 
 export const Route = createFileRoute("/")({ component: App });
@@ -23,18 +24,9 @@ function App() {
 				</ClientOnly> */}
 				<Bracket />
 			</div>
-			<section className="section rules">
-				<div className="section-content">
-
-        <h2>The Rules</h2>
-        <p className="center">
-          The rules are coming
-        </p>
-        </div>
-      </section>
-      {/* <Bracket /> */}
-      {/* <SimpleBracket /> */}
-
-    </div>
-  )
+			<Rules />
+			{/* <Bracket /> */}
+			{/* <SimpleBracket /> */}
+		</div>
+	);
 }
