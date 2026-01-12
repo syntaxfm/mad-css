@@ -1,85 +1,92 @@
-import { TanStackDevtools } from '@tanstack/react-devtools'
-import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router'
-import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
-import { Footer } from '@/components/footer/Footer'
-import { Header } from '@/components/Header'
-import appCss from '../styles/styles.css?url'
+import { TanStackDevtools } from "@tanstack/react-devtools";
+import {
+	createRootRoute,
+	HeadContent,
+	Outlet,
+	Scripts,
+} from "@tanstack/react-router";
+import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
+import { Footer } from "@/components/footer/Footer";
+import { Header } from "@/components/Header";
+import appCss from "../styles/styles.css?url";
 
 export const Route = createRootRoute({
-  head: () => ({
-    meta: [
-      {
-        charSet: 'utf-8',
-      },
-      {
-        name: 'viewport',
-        content: 'width=device-width, initial-scale=1',
-      },
-      {
-        title: 'March Mad CSS',
-      },
-    ],
-    links: [
-      {
-        rel: 'preconnect',
-        href: 'https://fonts.googleapis.com',
-      },
-      {
-        rel: 'preconnect',
-        href: 'https://fonts.gstatic.com',
-        crossOrigin: 'anonymous',
-      },
-      {
-        rel: 'stylesheet',
-        href: 'https://fonts.googleapis.com/css2?family=Alfa+Slab+One&display=swap',
-      },
-      {
-        rel: 'stylesheet',
-        href: appCss,
-      },
-      {
-        rel: 'icon',
-        type: 'image/png',
-        href: '/favicon.png',
-      },
-    ],
-  }),
-  component: RootDocument,
-  notFoundComponent: NotFound,
-})
+	head: () => ({
+		meta: [
+			{
+				charSet: "utf-8",
+			},
+			{
+				name: "viewport",
+				content: "width=device-width, initial-scale=1",
+			},
+			{
+				title: "March Mad CSS",
+			},
+		],
+		links: [
+			{
+				rel: "preconnect",
+				href: "https://fonts.googleapis.com",
+			},
+			{
+				rel: "preconnect",
+				href: "https://fonts.gstatic.com",
+				crossOrigin: "anonymous",
+			},
+			{
+				rel: "stylesheet",
+				href: "https://fonts.googleapis.com/css2?family=Alfa+Slab+One&display=swap",
+			},
+			{
+				rel: "stylesheet",
+				href: appCss,
+			},
+			{
+				rel: "icon",
+				type: "image/png",
+				href: "/favicon.png",
+			},
+		],
+	}),
+	component: RootDocument,
+	notFoundComponent: NotFound,
+});
 
 function NotFound() {
-  return (
-    <div style={{ padding: '2rem', textAlign: 'center' }}>
-      <h1>404 - Page Not Found</h1>
-      <p>The page you're looking for doesn't exist.</p>
-    </div>
-  )
+	return (
+		<div style={{ padding: "2rem", textAlign: "center" }}>
+			<h1>404 - Page Not Found</h1>
+			<p>The page you're looking for doesn't exist.</p>
+		</div>
+	);
 }
 
 function RootDocument() {
-  return (
-    <html lang="en">
-      <head>
-        <HeadContent />
-      </head>
-      <body>
-        <Header />
-        <Outlet />
-        <Footer />
-        <TanStackDevtools
-          config={{
-            position: 'bottom-right',
-          }}
-          plugins={[
-            {
-              name: 'Tanstack Router',
-              render: <TanStackRouterDevtoolsPanel />,
-            },
-          ]}
-        />
-        <Scripts />
-      </body>
-    </html>
-  )
+	return (
+		<html lang="en">
+			<head>
+				<HeadContent />
+			</head>
+			<body>
+				<Header />
+				<Outlet />
+				<Footer />
+				{process.env.NODE_ENV === "development" && (
+					<TanStackDevtools
+						config={{
+							position: "bottom-right",
+						}}
+						plugins={[
+							{
+								name: "Tanstack Router",
+								render: <TanStackRouterDevtoolsPanel />,
+							},
+						]}
+					/>
+				)}
+				<Scripts />
+			</body>
+		</html>
+	);
 }
