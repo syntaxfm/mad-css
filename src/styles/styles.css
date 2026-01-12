@@ -7,9 +7,10 @@
 	--white: #fff;
 	--beige: #f5eeda;
 	/* TODO: Add web fonts */
-	--font-serif: "Kaltjer", serif;
-	--font-block: "CollegiateBlackFLF", sans-serif;
-	--font-sans: "Inter", sans-serif;
+	--font-serif: "serif", serif;
+	--font-block: "Alfa Slab One", "CollegiateBlackFLF", sans-serif;
+	--font-sans:
+		"Inter", "Inter Tight", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 
 html {
@@ -23,6 +24,14 @@ body {
 	background-repeat: repeat;
 	color: var(--white);
 	font-family: var(--font-sans);
+}
+
+@font-face {
+	font-family: "serif";
+	src: url("../../public/fonts/serif.woff2") format("woff2");
+	font-weight: normal;
+	font-style: normal;
+	font-display: swap;
 }
 
 h1,
@@ -50,7 +59,7 @@ p {
 	font-family: var(--font-sans);
 	font-size: 16px;
 	line-height: 1.5;
-	font-weight: 800;
+	font-weight: 500;
 }
 
 .font_block {

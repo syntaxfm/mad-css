@@ -138,6 +138,9 @@
 		margin: 0 auto;
 		@container ticket (max-width: 700px) {
 			height: 40px;
+			.youtube & {
+				height: 30px;
+			}
 		}
 	}
 }
