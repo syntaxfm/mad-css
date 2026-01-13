@@ -61,7 +61,7 @@ const edgeTypes = {
 
 // Node dimensions for positioning
 const NODE_HEIGHT = 70;
-const VERTICAL_GAP = 50;
+const VERTICAL_GAP = 76;
 const MATCH_GAP = NODE_HEIGHT + VERTICAL_GAP;
 const ROUND_GAP = 220;
 
@@ -194,7 +194,7 @@ function generateNodes(): Node[] {
 		id: `left-finalist`,
 		type: "emptySlot",
 		position: { x: ROUND_GAP * 3, y: 3.5 * MATCH_GAP },
-		data: { text: "Winner of Left Semi" },
+		data: { text: "Left Finalist" },
 	});
 
 	// ===========================================================================
@@ -269,10 +269,10 @@ function generateNodes(): Node[] {
 	nodes.push({
 		id: `right-finalist`,
 		type: "emptySlot",
-		position: { x: rightStartX - ROUND_GAP * 3, y: 3.5 * MATCH_GAP },
+		position: { x: rightStartX - ROUND_GAP * 2.5, y: 3.5 * MATCH_GAP },
 		// position: { x: ROUND_GAP * 3, y: 3.5 * MATCH_GAP },
 		data: {
-			text: "Winner of Right Semi",
+			text: "Right Finalist",
 		},
 	});
 
@@ -289,7 +289,7 @@ function generateNodes(): Node[] {
 		},
 		data: finalGame?.winner
 			? playerToNodeData(finalGame.winner, finalGame, "#FFD700")
-			: { text: "Winner of Championship" },
+			: { text: "CHAMPION" },
 	});
 
 	return nodes;
@@ -397,7 +397,7 @@ function generateEdges(): Edge[] {
 		type: "bracket",
 		style: edgeStyle,
 		sourceHandle: "out-right",
-		targetHandle: "in-top",
+		targetHandle: "in-bottom",
 	});
 
 	// ===========================================================================
@@ -485,7 +485,7 @@ function generateEdges(): Edge[] {
 		type: "bracket",
 		style: edgeStyle,
 		sourceHandle: "out-left",
-		targetHandle: "in-top",
+		targetHandle: "in-bottom",
 	});
 
 	return edges;

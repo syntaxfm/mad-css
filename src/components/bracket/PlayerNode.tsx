@@ -107,12 +107,12 @@ export function PlayerNodeFlow({ data }: { data: PlayerData }) {
 // Empty slot for matches not yet played
 export function EmptySlot({ text }: { text?: string }) {
 	return (
-		<div className="empty-slot">
-			<div className="empty-slot-ring">
-				<div className="empty-slot-circle" />
+		<div className="player-node player-node--empty">
+			<div className="player-photo-ring">
+				<div className="player-photo-placeholder" />
 			</div>
-			<div className="empty-slot-info">
-				<h3 className="empty-slot-name">{text || "TBD"}</h3>
+			<div className="player-info">
+				<h3 className="player-name">{text || "TBD"}</h3>
 			</div>
 		</div>
 	);
