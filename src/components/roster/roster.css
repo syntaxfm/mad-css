@@ -1,24 +1,31 @@
 .cards {
 	display: grid;
-	--card-size: 200px;
+	--card-size: 300px;
 	grid-template-columns: repeat(auto-fill, minmax(var(--card-size), 1fr));
 	@media (max-width: 500px) {
-		--card-size: 120px;
+		--card-size: 150px;
 	}
 	margin-block: 20px;
 }
 
 .card {
 	align-content: center;
-	box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
 	transform: rotate(var(--rotate, 0deg));
-	transition: transform 0.2s ease;
+	transition:
+		transform 0.2s ease,
+		filter 0.2s ease;
 	margin-bottom: -20px;
+	/* drop-shadow on parent respects the masked shape inside */
+	filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.7));
 	img {
-		filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.6));
+		mask-image: url("/card-mask.png");
+		mask-size: contain;
+		mask-repeat: no-repeat;
+		mask-position: center;
 	}
 	&:hover {
 		transform: rotate(0deg) scale(1.05);
+		filter: drop-shadow(5px 8px 8px rgba(0, 0, 0, 0.6));
 		z-index: 1;
 	}
 }
