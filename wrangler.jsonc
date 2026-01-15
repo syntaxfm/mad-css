@@ -7,6 +7,7 @@
 		{ "pattern": "madcss.com/*", "zone_name": "madcss.com" },
 		{ "pattern": "www.madcss.com/*", "zone_name": "madcss.com" }
 	],
+  "preview_urls": true,
 	"compatibility_flags": [
 		"nodejs_compat"
 	],
