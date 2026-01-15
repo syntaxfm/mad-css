@@ -1,6 +1,3 @@
-// Cloudflare Image Resizing URL helper (only works in production behind Cloudflare)
-// Docs: https://developers.cloudflare.com/images/transform-images/transform-via-url/
-
 type CfImageOptions = {
 	width?: number;
 	height?: number;
