@@ -1,7 +1,6 @@
-import { ClientOnly, createFileRoute } from "@tanstack/react-router";
+import { ClientOnly, createFileRoute} from "@tanstack/react-router";
 import { Bracket } from "@/components/bracket/Bracket";
-import { SimpleBracket } from "@/components/bracket/SimpleBracket";
-import { LoginSection } from "@/components/LoginSection";
+// import { LoginSection } from "@/components/LoginSection";
 import { Roster } from "@/components/roster/Roster";
 import { Rules } from "@/components/rules/Rules";
 import { Ticket } from "@/components/Ticket";
@@ -9,6 +8,7 @@ import { Ticket } from "@/components/Ticket";
 export const Route = createFileRoute("/")({ component: App });
 
 function App() {
+
 	return (
 		<div>
 			<Ticket />
