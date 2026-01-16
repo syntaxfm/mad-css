@@ -12,6 +12,6 @@ export function cfImage(src: string, options: CfImageOptions = {}) {
 	if (import.meta.env.DEV) return `${origin}${src}`;
 
 	const params = [`width=${width}`, `quality=${quality}`, `fit=${fit}`, "format=auto"].join(",");
-	return `https://madcss.com/cdn-cgi/image/${params}${origin}${src}`;
+	return `https://madcss.com/cdn-cgi/image/${params}${origin ? `/${origin}` : ''}${src}`;
 }
 
