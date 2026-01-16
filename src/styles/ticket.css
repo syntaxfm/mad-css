@@ -38,6 +38,7 @@
 	display: grid;
 	grid-template-columns: 1fr auto auto;
 	color: var(--black);
+	/* biome-ignore lint/correctness/noUnknownProperty: Progressive enhancement. Not yet added to biome https://github.com/biomejs/biome/issues/7625 */
 	corner-shape: scoop;
 	overflow: hidden;
 	border-radius: 15px;
