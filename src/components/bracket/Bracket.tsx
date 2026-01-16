@@ -11,8 +11,8 @@ import {
 import { useCallback, useEffect, useRef, useState } from "react";
 import "@xyflow/react/dist/style.css";
 import {
-	bracket,
-	// emptyBracket as bracket,
+	// bracket,
+	emptyBracket as bracket,
 	type Game,
 	isLoser,
 	isWinner,
