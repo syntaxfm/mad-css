@@ -1,19 +1,17 @@
 type CfImageOptions = {
 	width?: number;
 	height?: number;
-	quality?: number;
+	quality?: number | 'auto';
 	fit?: "scale-down" | "contain" | "cover" | "crop" | "pad";
+  origin?: string;
 };
 
 export function cfImage(src: string, options: CfImageOptions = {}) {
+	const { width = 400, quality = 'auto', fit = "cover", origin = '' } = options;
 	// Skip Cloudflare transform in development
-	if (import.meta.env.DEV) return src;
+	if (import.meta.env.DEV) return `${origin}${src}`;
 
-	// Only enable on production domain - set VITE_CF_IMAGES=1 in your production environment
-	if (!import.meta.env.VITE_CF_IMAGES) return src;
-
-	const { width = 400, quality = 80, fit = "cover" } = options;
 	const params = [`width=${width}`, `quality=${quality}`, `fit=${fit}`, "format=auto"].join(",");
-	return `/cdn-cgi/image/${params}${src}`;
+	return `https://madcss.com/cdn-cgi/image/${params}${origin ? `/${origin}` : ''}${src}`;
 }
 

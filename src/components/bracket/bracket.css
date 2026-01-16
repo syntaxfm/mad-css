@@ -88,7 +88,7 @@
 		border-radius: 0 0 120% 120%;
 		position: absolute;
 		inset: 0 0 -7px 0;
-		background: url("/avatars/placeholders.png");
+		background: var(--placeholder-url);
 		background-size: 500%;
 		background-position: var(--x) var(--y);
 		background-repeat: no-repeat;

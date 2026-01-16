@@ -1,5 +1,9 @@
 import { Handle, Position } from "@xyflow/react";
 import "./bracket.css";
+import { useLocation } from "@tanstack/react-router";
+import { cfImage } from "@/lib/cfImage";
+import placeholder from "/avatars/placeholders.png";
+
 
 export interface PlayerData {
 	photo: string;
@@ -106,6 +110,8 @@ export function PlayerNodeFlow({ data }: { data: PlayerData }) {
 
 // Empty slot for matches not yet played
 export function EmptySlot({ text }: { text?: string }) {
+	const location = useLocation();
+  const placeholderUrl = cfImage(placeholder, { width: 600, origin: location.url.origin });
 	const xPositions = [0, 25, 50, 75, 100];
 	const yPositions = [0, 50, 100];
 	const randomX = xPositions[Math.floor(Math.random() * xPositions.length)];
@@ -116,7 +122,13 @@ export function EmptySlot({ text }: { text?: string }) {
 			<div className="player-photo-ring">
 				<div
 					className="player-photo-placeholder"
-					style={{ "--x": `${randomX}%`, "--y": `${randomY}%` } as React.CSSProperties}
+					style={
+						{
+              "--placeholder-url": `url(${placeholderUrl})`,
+							"--x": `${randomX}%`,
+							"--y": `${randomY}%`,
+						} as React.CSSProperties
+					}
 				/>
 			</div>
 			<div className="player-info">
