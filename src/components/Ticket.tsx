@@ -13,8 +13,7 @@ export function Ticket() {
 						<p>Presented by</p>
 					</div>
 					<div className="presented">
-						{/* TODO Setup UTM tracking */}
-						<a href="https://sentry.io" target="_blank" rel="noopener">
+						<a href="https://sentry.io/welcome" target="_blank" rel="noopener">
 							<img src="/sentry.svg" alt="Sentry" />
 						</a>
 						<p>Technology Partner</p>
