@@ -20,7 +20,11 @@ export function Ticket() {
 						<p>Technology Partner</p>
 					</div>
 					<div className="presented youtube">
-						<a href="https://youtube.com" target="_blank" rel="noopener">
+						<a
+							href="https://www.youtube.com/@syntaxfm"
+							target="_blank"
+							rel="noopener"
+						>
 							<img src="/youtube.png" alt="YouTube" />
 						</a>
 						<p>Unofficial Internet Broadcast Partner</p>
