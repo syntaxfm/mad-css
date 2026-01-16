@@ -15,8 +15,8 @@ export function createAuth(d1: D1Database) {
 		}),
 		socialProviders: {
 			github: {
-				clientId: process.env.GITHUB_CLIENT_ID || '',
-				clientSecret: process.env.GITHUB_CLIENT_SECRET || '',
+				clientId: process.env.GITHUB_CLIENT_ID || "",
+				clientSecret: process.env.GITHUB_CLIENT_SECRET || "",
 			},
 		},
 		plugins: [tanstackStartCookies()],

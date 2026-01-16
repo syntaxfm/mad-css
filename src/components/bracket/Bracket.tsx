@@ -600,8 +600,8 @@ function BracketContent() {
 
 	return (
 		// biome-ignore lint/a11y/useKeyWithClickEvents: this is a enhancement for mouse users. Feature still fully accessible.
-    // biome-ignore lint/a11y/noStaticElementInteractions: see above
-<div
+		// biome-ignore lint/a11y/noStaticElementInteractions: see above
+		<div
 			ref={containerRef}
 			className="bracket-container"
 			style={containerHeight ? { height: containerHeight } : undefined}

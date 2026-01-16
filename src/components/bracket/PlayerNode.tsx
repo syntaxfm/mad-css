@@ -4,7 +4,6 @@ import { useLocation } from "@tanstack/react-router";
 import { cfImage } from "@/lib/cfImage";
 import placeholder from "/avatars/placeholders.png";
 
-
 export interface PlayerData {
 	photo: string;
 	name: string;
@@ -111,7 +110,10 @@ export function PlayerNodeFlow({ data }: { data: PlayerData }) {
 // Empty slot for matches not yet played
 export function EmptySlot({ text }: { text?: string }) {
 	const location = useLocation();
-  const placeholderUrl = cfImage(placeholder, { width: 600, origin: location.url.origin });
+	const placeholderUrl = cfImage(placeholder, {
+		width: 600,
+		origin: location.url.origin,
+	});
 	const xPositions = [0, 25, 50, 75, 100];
 	const yPositions = [0, 50, 100];
 	const randomX = xPositions[Math.floor(Math.random() * xPositions.length)];
@@ -124,7 +126,7 @@ export function EmptySlot({ text }: { text?: string }) {
 					className="player-photo-placeholder"
 					style={
 						{
-              "--placeholder-url": `url(${placeholderUrl})`,
+							"--placeholder-url": `url(${placeholderUrl})`,
 							"--x": `${randomX}%`,
 							"--y": `${randomY}%`,
 						} as React.CSSProperties
