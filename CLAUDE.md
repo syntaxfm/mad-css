@@ -35,10 +35,12 @@ npm run db:setup         # Generate + migrate local (full setup)
 ## Database Setup
 
 ### Prerequisites
+
 - Cloudflare account with D1 access
 - `CLOUDFLARE_ACCOUNT_ID` environment variable set
 
 ### Local Development
+
 1. Create D1 database (first time only):
    ```bash
    npx wrangler d1 create mad-css-db
@@ -54,7 +56,9 @@ npm run db:setup         # Generate + migrate local (full setup)
    ```
 
 ### Environment Variables
+
 Create `.dev.vars` file (not committed):
+
 ```
 GITHUB_CLIENT_ID=your_github_client_id
 GITHUB_CLIENT_SECRET=your_github_client_secret
@@ -63,6 +67,7 @@ BETTER_AUTH_URL=http://localhost:3000
 ```
 
 ### Production Deployment
+
 1. Set secrets in Cloudflare dashboard (Workers > Settings > Variables):
    - `GITHUB_CLIENT_ID`
    - `GITHUB_CLIENT_SECRET`
@@ -80,6 +85,7 @@ BETTER_AUTH_URL=http://localhost:3000
 **File-based routing:** Routes live in `src/routes/`. TanStack Router auto-generates `src/routeTree.gen.ts` - don't edit this file manually.
 
 **Key directories:**
+
 - `src/routes/` - Page components and API routes
 - `src/routes/__root.tsx` - Root layout, includes Header and devtools
 - `src/components/` - Reusable components (Header, Ticket, Roster)
@@ -94,4 +100,3 @@ BETTER_AUTH_URL=http://localhost:3000
 
 - Biome for linting/formatting (tabs, double quotes)
 - TypeScript strict mode
-- Files in `src/routes/demo/` are TanStack Start examples - can be deleted
