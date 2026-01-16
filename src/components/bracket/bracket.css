@@ -27,7 +27,7 @@
 .player-photo-ring {
 	--ring-color: var(--orange);
 	--inner-ring-color: var(--yellow);
-	--ring-thickness: 4px;
+	--ring-thickness: 2px;
 	--gold-ring-thickness: 3px;
 	--photo-size: 70px;
 	position: relative;
@@ -80,7 +80,19 @@
 	width: 100%;
 	height: 100%;
 	border-radius: 50%;
-	background: #666;
+	background: var(--orange);
+	&:after {
+		content: "";
+		transform: translateY(-7px);
+		/* scale: 1.2; */
+		border-radius: 0 0 120% 120%;
+		position: absolute;
+		inset: 0 0 -7px 0;
+		background: url("/avatars/placeholders.png");
+		background-size: 500%;
+		background-position: var(--x) var(--y);
+		background-repeat: no-repeat;
+	}
 }
 
 .player-info {
@@ -91,9 +103,7 @@
 	z-index: 1;
 	flex: 1;
 	min-width: 180px;
-	border-top: 3px solid var(--black);
-	border-bottom: 3px solid var(--black);
-	border-right: 3px solid var(--black);
+	border: 2px solid var(--black);
 }
 
 .player-name {
@@ -131,7 +141,7 @@
 
 /* Empty Slot State - grey version of player node */
 .player-node--empty .player-photo-ring {
-	--ring-color: #888;
+	--ring-color: var(--yellow);
 	--inner-ring-color: #aaa;
 	--photo-size: 50px;
 }

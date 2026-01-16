@@ -106,10 +106,18 @@ export function PlayerNodeFlow({ data }: { data: PlayerData }) {
 
 // Empty slot for matches not yet played
 export function EmptySlot({ text }: { text?: string }) {
+	const xPositions = [0, 25, 50, 75, 100];
+	const yPositions = [0, 50, 100];
+	const randomX = xPositions[Math.floor(Math.random() * xPositions.length)];
+	const randomY = yPositions[Math.floor(Math.random() * yPositions.length)];
+
 	return (
 		<div className="player-node player-node--empty">
 			<div className="player-photo-ring">
-				<div className="player-photo-placeholder" />
+				<div
+					className="player-photo-placeholder"
+					style={{ "--x": `${randomX}%`, "--y": `${randomY}%` } as React.CSSProperties}
+				/>
 			</div>
 			<div className="player-info">
 				<h3 className="player-name">{text || "TBD"}</h3>
