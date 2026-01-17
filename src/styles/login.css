@@ -1,93 +1,549 @@
-.bracket-cta {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	gap: 20px;
-	padding: 20px 30px;
-	margin: 0 auto 20px;
-	max-width: 700px;
-	background: rgba(0, 0, 0, 0.4);
-	border: 2px solid var(--yellow);
-	border-radius: 8px;
-}
+/* ============================================
+   BRACKET CTA - Tournament Control Panel
+   ============================================ */
 
-.bracket-cta.logged-in {
-	background: rgba(0, 0, 0, 0.3);
-	border-color: rgba(255, 255, 255, 0.2);
+.bracket-cta {
+	max-width: 600px;
+	margin: 0 auto 24px;
+	padding: 40px 30px 50px;
+	background: linear-gradient(
+		135deg,
+		rgba(0, 0, 0, 0.85) 0%,
+		rgba(20, 20, 20, 0.9) 100%
+	);
+	border: 3px solid var(--yellow);
+	border-radius: 4px;
+	box-shadow:
+		0 0 0 1px rgba(0, 0, 0, 0.5),
+		0 8px 32px rgba(0, 0, 0, 0.4),
+		inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 .login-loading {
-	opacity: 0.5;
+	text-align: center;
+	opacity: 0.6;
+	padding: 20px;
 }
 
-.cta-text {
-	flex: 1;
+/* ============================================
+   Logged Out State - Sign In CTA (Rules card style)
+   ============================================ */
+
+.bracket-cta:not(.logged-in) {
+	text-align: center;
+	background: var(--beige);
+	border: none;
+	border-radius: 15px;
+	box-shadow: none;
+	mask-image:
+		url("./assets/paper/repeating-paper-top.png"),
+		url("./assets/paper/repeating-paper-bottom.png"),
+		linear-gradient(black, black);
+	mask-size:
+		auto 23px,
+		auto 40px,
+		100% 100%;
+	mask-position:
+		center 0px,
+		center calc(100% + 15px),
+		center;
+	mask-repeat: repeat-x, repeat-x, no-repeat;
+	mask-composite: exclude;
+	mask-mode: alpha;
 }
 
 .cta-headline {
-	font-size: 1.4rem;
-	text-transform: uppercase;
-	color: var(--yellow);
-	margin-bottom: 4px;
+	font-family: var(--font-serif);
+	font-size: 2rem;
+	text-transform: none;
+	color: var(--orange);
+	margin-bottom: 8px;
+	letter-spacing: 0;
+	font-style: italic;
 }
 
 .cta-sub {
-	font-size: 0.9rem;
-	opacity: 0.9;
-	line-height: 1.4;
+	font-size: 0.95rem;
+	line-height: 1.5;
+	color: var(--black);
+	margin-bottom: 20px;
 }
 
-.cta-welcome {
-	font-size: 1rem;
-	margin-bottom: 2px;
+.cta-sub strong {
+	color: var(--orange);
+}
+
+/* Countdown in logged-out state - centered */
+.bracket-cta:not(.logged-in) .countdown {
+	align-items: center;
+	margin-bottom: 20px;
 }
 
 .btn-github {
 	display: inline-flex;
 	align-items: center;
-	gap: 8px;
-	padding: 12px 20px;
-	background: var(--yellow);
-	color: var(--black);
+	justify-content: center;
+	gap: 10px;
+	padding: 14px 28px;
+	background: var(--orange);
+	color: var(--white);
 	font-family: var(--font-block);
-	font-size: 0.9rem;
+	font-size: 1rem;
 	text-transform: uppercase;
-	border: none;
-	border-radius: 5px;
+	letter-spacing: 0.03em;
+	border: 3px solid var(--black);
+	border-radius: 0;
 	cursor: pointer;
-	transition:
-		transform 0.15s ease,
-		background 0.15s ease;
-	white-space: nowrap;
+	transition: transform 0.1s ease;
+	box-shadow: 4px 4px 0 var(--black);
 }
 
 .btn-github:hover {
-	background: #ffbe2e;
-	transform: translateY(-1px);
+	transform: translate(2px, 2px);
+	box-shadow: 2px 2px 0 var(--black);
+}
+
+.btn-github:active {
+	transform: translate(4px, 4px);
+	box-shadow: none;
 }
 
 .github-icon {
-	width: 20px;
-	height: 20px;
+	width: 22px;
+	height: 22px;
 }
 
-.btn-link {
-	background: none;
+/* ============================================
+   Logged In State - Control Panel (Same card style)
+   ============================================ */
+
+.bracket-cta.logged-in {
+	background: var(--beige);
 	border: none;
-	color: var(--white);
-	text-decoration: underline;
-	cursor: pointer;
-	font-size: 0.85rem;
-	opacity: 0.7;
+	border-radius: 15px;
+	box-shadow: none;
+	mask-image:
+		url("./assets/paper/repeating-paper-top.png"),
+		url("./assets/paper/repeating-paper-bottom.png"),
+		linear-gradient(black, black);
+	mask-size:
+		auto 23px,
+		auto 40px,
+		100% 100%;
+	mask-position:
+		center 0px,
+		center calc(100% + 15px),
+		center;
+	mask-repeat: repeat-x, repeat-x, no-repeat;
+	mask-composite: exclude;
+	mask-mode: alpha;
 }
 
-.btn-link:hover {
-	opacity: 1;
+/* Header row: avatar + name + sign out */
+.cta-header {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin-bottom: 20px;
+	padding-bottom: 16px;
+	border-bottom: 2px solid var(--black);
 }
 
 .user-avatar {
-	width: 40px;
-	height: 40px;
+	width: 44px;
+	height: 44px;
 	border-radius: 50%;
-	border: 2px solid var(--yellow);
+	border: 3px solid var(--orange);
+	flex-shrink: 0;
+}
+
+.cta-welcome {
+	flex: 1;
+	font-size: 1.1rem;
+	font-weight: 500;
+	margin: 0;
+	color: var(--black);
+}
+
+.cta-welcome strong {
+	color: var(--orange);
+}
+
+.btn-signout {
+	background: none;
+	border: none;
+	color: var(--black);
+	opacity: 0.5;
+	font-size: 0.8rem;
+	font-family: var(--font-block);
+	text-transform: uppercase;
+	cursor: pointer;
+	padding: 4px 8px;
+}
+
+.btn-signout:hover {
+	opacity: 1;
+}
+
+/* Progress section */
+.cta-progress {
+	background: rgba(0, 0, 0, 0.08);
+	border-radius: 0;
+	padding: 16px;
+	margin-bottom: 16px;
+	border: 2px solid var(--black);
+}
+
+.progress-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.progress-count {
+	font-family: var(--font-block);
+	font-size: 1.3rem;
+	color: var(--orange);
+	letter-spacing: 0.05em;
+}
+
+.progress-count span {
+	color: var(--black);
+	opacity: 0.6;
+	font-size: 0.9rem;
+}
+
+.countdown {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: 2px;
+}
+
+.countdown-label {
+	font-size: 0.7rem;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	color: var(--black);
+	opacity: 0.6;
+}
+
+.countdown-timer {
+	display: flex;
+	gap: 2px;
+	font-family: var(--font-block);
+}
+
+.countdown-unit {
+	display: flex;
+	align-items: baseline;
+}
+
+.countdown-value {
+	font-size: 1.1rem;
+	color: var(--orange);
+	font-variant-numeric: tabular-nums;
+	font-feature-settings: "tnum";
+	min-width: 2ch;
+	display: inline-block;
+	text-align: right;
+}
+
+.countdown-suffix {
+	font-size: 0.7rem;
+	color: var(--black);
+	opacity: 0.5;
+	margin-right: 4px;
+}
+
+.countdown--urgent .countdown-value {
+	color: #f87171;
+	animation: pulse-urgent 1s ease-in-out infinite;
+}
+
+.countdown--urgent .countdown-label {
+	color: #f87171;
+}
+
+@keyframes pulse-urgent {
+	0%,
+	100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.6;
+	}
+}
+
+.progress-bar {
+	height: 8px;
+	background: rgba(255, 255, 255, 0.1);
+	border-radius: 4px;
+	overflow: hidden;
+}
+
+.progress-bar-fill {
+	height: 100%;
+	background: linear-gradient(90deg, var(--orange) 0%, var(--yellow) 100%);
+	border-radius: 4px;
+	transition: width 0.4s ease;
+}
+
+/* Status badges */
+.cta-status {
+	text-align: center;
+	padding: 12px;
+	border-radius: 0;
+	margin-bottom: 16px;
+	font-family: var(--font-block);
+	font-size: 0.9rem;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+
+.cta-status.locked {
+	background: var(--black);
+	border: 3px solid var(--black);
+	color: var(--yellow);
+}
+
+.cta-status.deadline-passed {
+	background: var(--orange);
+	border: 3px solid var(--black);
+	color: var(--white);
+}
+
+/* Instructions */
+.cta-instructions {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 12px 14px;
+	background: rgba(0, 0, 0, 0.05);
+	border: 2px solid var(--black);
+	border-radius: 0;
+	margin-bottom: 20px;
+	font-size: 0.85rem;
+	color: var(--black);
+}
+
+.cta-instructions svg {
+	flex-shrink: 0;
+	color: var(--orange);
+}
+
+/* Actions row */
+.cta-actions {
+	display: flex;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
+/* Button base styles - retro graphic style */
+.btn-save,
+.btn-lock,
+.btn-reset {
+	flex: 1;
+	min-width: 100px;
+	padding: 12px 16px;
+	font-family: var(--font-block);
+	font-size: 0.8rem;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	border-radius: 0;
+	cursor: pointer;
+	text-align: center;
+	transition: transform 0.1s ease;
+}
+
+.btn-save {
+	background: var(--beige);
+	color: var(--black);
+	border: 3px solid var(--black);
+	box-shadow: 4px 4px 0 var(--black);
+}
+
+.btn-save:hover:not(:disabled) {
+	transform: translate(2px, 2px);
+	box-shadow: 2px 2px 0 var(--black);
+}
+
+.btn-save:active:not(:disabled) {
+	transform: translate(4px, 4px);
+	box-shadow: none;
+}
+
+.btn-save:disabled {
+	background: var(--beige);
+	color: rgba(0, 0, 0, 0.3);
+	border-color: rgba(0, 0, 0, 0.2);
+	box-shadow: none;
+	cursor: not-allowed;
+}
+
+.btn-lock {
+	background: var(--orange);
+	color: var(--white);
+	border: 3px solid var(--black);
+	box-shadow: 4px 4px 0 var(--black);
+}
+
+.btn-lock:hover:not(:disabled) {
+	transform: translate(2px, 2px);
+	box-shadow: 2px 2px 0 var(--black);
+}
+
+.btn-lock:active:not(:disabled) {
+	transform: translate(4px, 4px);
+	box-shadow: none;
+}
+
+.btn-lock:disabled {
+	background: rgba(0, 0, 0, 0.1);
+	color: rgba(0, 0, 0, 0.3);
+	border-color: rgba(0, 0, 0, 0.2);
+	box-shadow: none;
+	cursor: not-allowed;
+}
+
+.btn-reset {
+	background: var(--beige);
+	color: var(--orange);
+	border: 3px solid var(--orange);
+	box-shadow: 4px 4px 0 var(--orange);
+	flex: 0 0 auto;
+	min-width: 80px;
+}
+
+.btn-reset:hover:not(:disabled) {
+	transform: translate(2px, 2px);
+	box-shadow: 2px 2px 0 var(--orange);
+}
+
+.btn-reset:active:not(:disabled) {
+	transform: translate(4px, 4px);
+	box-shadow: none;
+}
+
+.btn-reset:disabled {
+	background: var(--beige);
+	color: rgba(0, 0, 0, 0.3);
+	border-color: rgba(0, 0, 0, 0.2);
+	box-shadow: none;
+	cursor: not-allowed;
+}
+
+/* Lock confirmation overlay */
+.lock-confirm {
+	background: var(--black);
+	padding: 16px;
+	border-radius: 0;
+	border: 3px solid var(--black);
+	text-align: center;
+	flex: 1 1 100%;
+}
+
+.lock-confirm p {
+	font-size: 0.9rem;
+	margin-bottom: 14px;
+	color: var(--yellow);
+}
+
+.lock-confirm-buttons {
+	display: flex;
+	gap: 10px;
+	justify-content: center;
+}
+
+.btn-lock-confirm {
+	padding: 10px 20px;
+	background: var(--yellow);
+	color: var(--black);
+	font-family: var(--font-block);
+	font-size: 0.8rem;
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+	border: 3px solid var(--yellow);
+	border-radius: 0;
+	cursor: pointer;
+	transition: transform 0.1s ease;
+	box-shadow: 4px 4px 0 var(--yellow);
+}
+
+.btn-lock-confirm:hover:not(:disabled) {
+	transform: translate(2px, 2px);
+	box-shadow: 2px 2px 0 var(--yellow);
+}
+
+.btn-lock-confirm:active:not(:disabled) {
+	transform: translate(4px, 4px);
+	box-shadow: none;
+}
+
+.btn-lock-confirm:disabled {
+	opacity: 0.4;
+	cursor: not-allowed;
+	box-shadow: none;
+}
+
+.btn-cancel {
+	padding: 10px 20px;
+	background: transparent;
+	color: var(--white);
+	font-family: var(--font-block);
+	font-size: 0.8rem;
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+	border: 3px solid var(--white);
+	border-radius: 0;
+	cursor: pointer;
+	transition: transform 0.1s ease;
+	box-shadow: 4px 4px 0 var(--white);
+}
+
+.btn-cancel:hover {
+	transform: translate(2px, 2px);
+	box-shadow: 2px 2px 0 var(--white);
+}
+
+.btn-cancel:active {
+	transform: translate(4px, 4px);
+	box-shadow: none;
+}
+
+/* Error message */
+.cta-error {
+	margin-top: 12px;
+	padding: 10px 14px;
+	background: var(--orange);
+	border: 3px solid var(--black);
+	border-radius: 0;
+	color: var(--white);
+	font-size: 0.85rem;
+	text-align: center;
+	font-family: var(--font-block);
+	text-transform: uppercase;
+}
+
+/* ============================================
+   Responsive
+   ============================================ */
+
+@media (max-width: 480px) {
+	.bracket-cta {
+		margin-left: 12px;
+		margin-right: 12px;
+		padding: 18px;
+	}
+
+	.cta-actions {
+		flex-direction: column;
+	}
+
+	.btn-save,
+	.btn-lock,
+	.btn-reset {
+		flex: none;
+		width: 100%;
+	}
 }

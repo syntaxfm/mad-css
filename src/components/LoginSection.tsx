@@ -1,51 +1,282 @@
+import { useEffect, useState } from "react";
+import { TOTAL_GAMES } from "@/data/players";
 import { authClient } from "@/lib/auth-client";
 import "@/styles/login.css";
 
-export function LoginSection() {
+export interface LoginSectionProps {
+	pickCount?: number;
+	isLocked?: boolean;
+	isSaving?: boolean;
+	hasChanges?: boolean;
+	error?: string | null;
+	deadline?: string;
+	isDeadlinePassed?: boolean;
+	onSave?: () => void;
+	onLock?: () => void;
+	onReset?: () => void;
+}
+
+type CountdownTime = {
+	days: number;
+	hours: number;
+	minutes: number;
+	seconds: number;
+	totalMs: number;
+};
+
+function getTimeRemaining(deadline: string): CountdownTime {
+	const total = new Date(deadline).getTime() - Date.now();
+	if (total <= 0) {
+		return { days: 0, hours: 0, minutes: 0, seconds: 0, totalMs: 0 };
+	}
+	return {
+		days: Math.floor(total / (1000 * 60 * 60 * 24)),
+		hours: Math.floor((total / (1000 * 60 * 60)) % 24),
+		minutes: Math.floor((total / (1000 * 60)) % 60),
+		seconds: Math.floor((total / 1000) % 60),
+		totalMs: total,
+	};
+}
+
+function useCountdown(deadline: string | undefined): CountdownTime {
+	const [time, setTime] = useState<CountdownTime>(() =>
+		deadline
+			? getTimeRemaining(deadline)
+			: { days: 0, hours: 0, minutes: 0, seconds: 0, totalMs: 0 },
+	);
+
+	useEffect(() => {
+		if (!deadline) return;
+		setTime(getTimeRemaining(deadline));
+		const interval = setInterval(() => {
+			setTime(getTimeRemaining(deadline));
+		}, 1000);
+		return () => clearInterval(interval);
+	}, [deadline]);
+
+	return time;
+}
+
+function CountdownUnit({
+	value,
+	suffix,
+	pad = true,
+}: {
+	value: number;
+	suffix: string;
+	pad?: boolean;
+}) {
+	const displayValue = pad ? String(value).padStart(2, "0") : String(value);
+	return (
+		<span className="countdown-unit">
+			<span className="countdown-value">{displayValue}</span>
+			<span className="countdown-suffix">{suffix}</span>
+		</span>
+	);
+}
+
+export function LoginSection({
+	pickCount = 0,
+	isLocked = false,
+	isSaving = false,
+	hasChanges = false,
+	error = null,
+	deadline,
+	isDeadlinePassed = false,
+	onSave,
+	onLock,
+	onReset,
+}: LoginSectionProps) {
 	const { data: session, isPending } = authClient.useSession();
+	const [showLockConfirm, setShowLockConfirm] = useState(false);
+	const countdown = useCountdown(deadline);
+	const isUrgent =
+		countdown.totalMs > 0 && countdown.totalMs < 24 * 60 * 60 * 1000;
 
 	if (isPending) {
 		return (
 			<div className="bracket-cta">
-				<span className="login-loading">...</span>
+				<span className="login-loading">Loading...</span>
 			</div>
 		);
 	}
 
 	if (session?.user) {
+		const canLock = pickCount === TOTAL_GAMES && !isLocked && !isDeadlinePassed;
+
 		return (
 			<div className="bracket-cta logged-in">
-				<img
-					src={session.user.image || "/default-avatar.png"}
-					alt={session.user.name}
-					className="user-avatar"
-				/>
-				<div className="cta-text">
+				{/* Header: Avatar + Name + Sign Out */}
+				<div className="cta-header">
+					<img
+						src={session.user.image || "/default-avatar.png"}
+						alt=""
+						className="user-avatar"
+					/>
 					<p className="cta-welcome">
-						You're in, <strong>{session.user.name}</strong>!
+						Welcome back, <strong>{session.user.name}</strong>
 					</p>
-					<p className="cta-sub">Lock in your picks below.</p>
+					<button
+						type="button"
+						className="btn-signout"
+						onClick={() => authClient.signOut()}
+					>
+						Sign out
+					</button>
 				</div>
-				<button
-					type="button"
-					className="btn-link"
-					onClick={() => authClient.signOut()}
-				>
-					Sign Out
-				</button>
+
+				{/* Status badges for locked/deadline states */}
+				{isLocked && (
+					<div className="cta-status locked">✓ Your bracket is locked in!</div>
+				)}
+
+				{isDeadlinePassed && !isLocked && (
+					<div className="cta-status deadline-passed">Deadline has passed</div>
+				)}
+
+				{/* Progress section - only show when not locked */}
+				{!isLocked && !isDeadlinePassed && (
+					<>
+						<div className="cta-progress">
+							<div className="progress-header">
+								<div className="progress-count">
+									{pickCount} <span>/ {TOTAL_GAMES} picks</span>
+								</div>
+								{deadline && countdown.totalMs > 0 && (
+									<div
+										className={`countdown ${isUrgent ? "countdown--urgent" : ""}`}
+									>
+										<span className="countdown-label">Lock in</span>
+										<div className="countdown-timer">
+											{countdown.days > 0 && (
+												<CountdownUnit
+													value={countdown.days}
+													suffix="d"
+													pad={false}
+												/>
+											)}
+											<CountdownUnit value={countdown.hours} suffix="h" />
+											<CountdownUnit value={countdown.minutes} suffix="m" />
+											<CountdownUnit value={countdown.seconds} suffix="s" />
+										</div>
+									</div>
+								)}
+							</div>
+						</div>
+
+						{/* Instructions */}
+						<div className="cta-instructions">
+							<svg
+								width="18"
+								height="18"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								strokeWidth="2"
+								strokeLinecap="round"
+								strokeLinejoin="round"
+								aria-hidden="true"
+							>
+								<circle cx="12" cy="12" r="10" />
+								<path d="m9 12 2 2 4-4" />
+							</svg>
+							<span>
+								Click any player to pick them as the winner of that match
+							</span>
+						</div>
+
+						{/* Actions */}
+						<div className="cta-actions">
+							{showLockConfirm ? (
+								<div className="lock-confirm">
+									<p>Lock your bracket? This cannot be undone.</p>
+									<div className="lock-confirm-buttons">
+										<button
+											type="button"
+											className="btn-lock-confirm"
+											onClick={() => {
+												onLock?.();
+												setShowLockConfirm(false);
+											}}
+											disabled={!canLock || isSaving}
+										>
+											Yes, Lock It
+										</button>
+										<button
+											type="button"
+											className="btn-cancel"
+											onClick={() => setShowLockConfirm(false)}
+										>
+											Cancel
+										</button>
+									</div>
+								</div>
+							) : (
+								<>
+									<button
+										type="button"
+										className="btn-save"
+										onClick={onSave}
+										disabled={isSaving || !hasChanges}
+									>
+										{isSaving ? "Saving..." : "Save"}
+									</button>
+									<button
+										type="button"
+										className="btn-lock"
+										onClick={() => setShowLockConfirm(true)}
+										disabled={!canLock || isSaving}
+										title={
+											pickCount < TOTAL_GAMES
+												? `Need all ${TOTAL_GAMES} picks to lock`
+												: "Lock your bracket"
+										}
+									>
+										Lock Bracket
+									</button>
+									{pickCount > 0 && (
+										<button
+											type="button"
+											className="btn-reset"
+											onClick={onReset}
+											disabled={isSaving}
+											title="Reset all picks"
+										>
+											Reset
+										</button>
+									)}
+								</>
+							)}
+						</div>
+					</>
+				)}
+
+				{error && <p className="cta-error">{error}</p>}
 			</div>
 		);
 	}
 
+	// Logged out state
 	return (
 		<div className="bracket-cta">
-			<div className="cta-text">
-				<p className="cta-headline font_block">Think you can call it?</p>
-				<p className="cta-sub">
-					Lock in your predictions before <strong>Round 1</strong> and compete
-					for mass internet clout. Perfect bracket = mass internet clout.
-				</p>
-			</div>
+			<p className="cta-headline font_block">Think you can call it?</p>
+			<p className="cta-sub">
+				Lock in your predictions before <strong>Round 1</strong> and compete for
+				mass internet clout. Perfect bracket = mass internet clout.
+			</p>
+			{deadline && countdown.totalMs > 0 && (
+				<div className={`countdown ${isUrgent ? "countdown--urgent" : ""}`}>
+					<span className="countdown-label">Lock in</span>
+					<div className="countdown-timer">
+						{countdown.days > 0 && (
+							<CountdownUnit value={countdown.days} suffix="d" pad={false} />
+						)}
+						<CountdownUnit value={countdown.hours} suffix="h" />
+						<CountdownUnit value={countdown.minutes} suffix="m" />
+						<CountdownUnit value={countdown.seconds} suffix="s" />
+					</div>
+				</div>
+			)}
 			<button
 				type="button"
 				className="btn-github"
