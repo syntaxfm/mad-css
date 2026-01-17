@@ -1,4 +1,15 @@
 // =============================================================================
+// TOURNAMENT CONFIG
+// =============================================================================
+
+// Deadline for locking brackets (ISO 8601 format)
+// After this time, no new brackets can be created or locked
+export const BRACKET_DEADLINE = "2026-02-01T00:00:00Z";
+
+// Total number of games in the bracket (8 + 4 + 2 + 1 = 15)
+export const TOTAL_GAMES = 15;
+
+// =============================================================================
 // PLAYER DEFINITIONS
 // =============================================================================
 // Each player needs: id (slug), name, photo path, and byline
@@ -12,139 +23,146 @@ export type Player = {
 };
 
 // -----------------------------------------------------------------------------
-// ALL PLAYERS
+// REAL PLAYERS (6 with actual card artwork)
 // -----------------------------------------------------------------------------
 
 export const wesBos: Player = {
 	id: "wes-bos",
 	name: "Wes Bos",
-	photo: "/cards/wes.jpg",
+	photo: "/cards/wes bos card.jpg",
 	byline: "Syntax.fm",
-};
-
-export const michaelJordan: Player = {
-	id: "michael-jordan",
-	name: "Michael Jordan",
-	photo: "/cards/kevin.jpg",
-	byline: "Chicago Bulls",
 };
 
 export const scottTolinski: Player = {
 	id: "scott-tolinski",
 	name: "Scott Tolinski",
-	photo: "/cards/scott.jpg",
+	photo: "/cards/scott tolinski card.jpg",
 	byline: "Level Up Tuts",
 };
 
-export const scottiePippen: Player = {
-	id: "scottie-pippen",
-	name: "Scottie Pippen",
-	photo: "/cards/wes.jpg",
-	byline: "Chicago Bulls",
+export const kevinPowell: Player = {
+	id: "kevin-powell",
+	name: "Kevin Powell",
+	photo: "/cards/Kevin Powell Card.jpg",
+	byline: "CSS Evangelist",
 };
 
-export const dennisRodman: Player = {
-	id: "dennis-rodman",
-	name: "Dennis Rodman",
-	photo: "/cards/kevin.jpg",
-	byline: "Chicago Bulls",
+export const adamArgyle: Player = {
+	id: "adam-argyle",
+	name: "Adam Argyle",
+	photo: "/cards/adam argyle card.jpg",
+	byline: "Google Chrome",
 };
 
-export const shaquilleOneal: Player = {
-	id: "shaquille-oneal",
-	name: "Shaquille O'Neal",
-	photo: "/cards/scott.jpg",
-	byline: "Orlando Magic",
+export const adamWathan: Player = {
+	id: "adam-wathan",
+	name: "Adam Wathan",
+	photo: "/cards/Adam Wathan Card.jpg",
+	byline: "Tailwind CSS",
 };
 
-export const hakeemOlajuwon: Player = {
-	id: "hakeem-olajuwon",
-	name: "Hakeem Olajuwon",
-	photo: "/cards/wes.jpg",
-	byline: "Houston Rockets",
+export const aniaKubow: Player = {
+	id: "ania-kubow",
+	name: "Ania Kubow",
+	photo: "/cards/Ania Kubow card.jpg",
+	byline: "Code with Ania",
 };
 
-export const charlesBarkley: Player = {
-	id: "charles-barkley",
-	name: "Charles Barkley",
-	photo: "/cards/kevin.jpg",
-	byline: "Phoenix Suns",
+// -----------------------------------------------------------------------------
+// PLACEHOLDER PLAYERS (10 dummy CSS/web dev contestants)
+// These use existing card images as placeholders
+// -----------------------------------------------------------------------------
+
+export const sarasoueidan: Player = {
+	id: "sara-soueidan",
+	name: "Sara Soueidan",
+	photo: "/cards/Ania Kubow card.jpg",
+	byline: "SVG Specialist",
 };
 
-export const karlMalone: Player = {
-	id: "karl-malone",
-	name: "Karl Malone",
-	photo: "/cards/scott.jpg",
-	byline: "Utah Jazz",
+export const joshComeau: Player = {
+	id: "josh-comeau",
+	name: "Josh Comeau",
+	photo: "/cards/wes bos card.jpg",
+	byline: "CSS for JS Devs",
 };
 
-export const johnStockton: Player = {
-	id: "john-stockton",
-	name: "John Stockton",
-	photo: "/cards/wes.jpg",
-	byline: "Utah Jazz",
+export const unaMravos: Player = {
+	id: "una-kravets",
+	name: "Una Kravets",
+	photo: "/cards/Adam Wathan Card.jpg",
+	byline: "Google Chrome",
 };
 
-export const patrickEwing: Player = {
-	id: "patrick-ewing",
-	name: "Patrick Ewing",
-	photo: "/cards/kevin.jpg",
-	byline: "New York Knicks",
+export const jenSimmons: Player = {
+	id: "jen-simmons",
+	name: "Jen Simmons",
+	photo: "/cards/Kevin Powell Card.jpg",
+	byline: "Apple WebKit",
 };
 
-export const reggieMiller: Player = {
-	id: "reggie-miller",
-	name: "Reggie Miller",
-	photo: "/cards/scott.jpg",
-	byline: "Indiana Pacers",
+export const bramus: Player = {
+	id: "bramus",
+	name: "Bramus",
+	photo: "/cards/adam argyle card.jpg",
+	byline: "Chrome DevRel",
 };
 
-export const garyPayton: Player = {
-	id: "gary-payton",
-	name: "Gary Payton",
-	photo: "/cards/wes.jpg",
-	byline: "Seattle SuperSonics",
+export const rachelandrew: Player = {
+	id: "rachel-andrew",
+	name: "Rachel Andrew",
+	photo: "/cards/scott tolinski card.jpg",
+	byline: "CSS Grid Master",
 };
 
-export const clydeDrexler: Player = {
-	id: "clyde-drexler",
-	name: "Clyde Drexler",
-	photo: "/cards/kevin.jpg",
-	byline: "Portland Trail Blazers",
+export const stephaleruch: Player = {
+	id: "stephanie-eckles",
+	name: "Stephanie Eckles",
+	photo: "/cards/Ania Kubow card.jpg",
+	byline: "ModernCSS.dev",
 };
 
-export const davidRobinson: Player = {
-	id: "david-robinson",
-	name: "David Robinson",
-	photo: "/cards/scott.jpg",
-	byline: "San Antonio Spurs",
+export const cassiecodes: Player = {
+	id: "cassie-evans",
+	name: "Cassie Evans",
+	photo: "/cards/wes bos card.jpg",
+	byline: "GSAP & SVG",
 };
 
-export const pennyHardaway: Player = {
-	id: "penny-hardaway",
-	name: "Penny Hardaway",
-	photo: "/cards/wes.jpg",
-	byline: "Orlando Magic",
+export const mirisuzanne: Player = {
+	id: "miriam-suzanne",
+	name: "Miriam Suzanne",
+	photo: "/cards/Kevin Powell Card.jpg",
+	byline: "OddBird CSS",
 };
 
-// All players array
+export const cssninjatech: Player = {
+	id: "css-ninja",
+	name: "CSS Ninja",
+	photo: "/cards/adam argyle card.jpg",
+	byline: "Dark Arts of CSS",
+};
+
+// All players array (16 total for tournament bracket)
 export const players: Player[] = [
+	// Round 1 - Left side (Games 0-3)
 	wesBos,
-	michaelJordan,
 	scottTolinski,
-	scottiePippen,
-	dennisRodman,
-	shaquilleOneal,
-	hakeemOlajuwon,
-	charlesBarkley,
-	karlMalone,
-	johnStockton,
-	patrickEwing,
-	reggieMiller,
-	garyPayton,
-	clydeDrexler,
-	davidRobinson,
-	pennyHardaway,
+	kevinPowell,
+	adamArgyle,
+	adamWathan,
+	aniaKubow,
+	sarasoueidan,
+	joshComeau,
+	// Round 1 - Right side (Games 4-7)
+	unaMravos,
+	jenSimmons,
+	bramus,
+	rachelandrew,
+	stephaleruch,
+	cassiecodes,
+	mirisuzanne,
+	cssninjatech,
 ];
 
 // =============================================================================
@@ -217,72 +235,72 @@ export const bracket: Bracket = {
 	round1: [
 		// ----- LEFT SIDE (games 0-3) -----
 
-		// Game 0: Wes Bos vs Michael Jordan
+		// Game 0: Wes Bos vs Scott Tolinski
 		{
 			id: "r1-0",
 			date: "2026-02-01",
 			player1: wesBos,
-			player2: michaelJordan,
-			winner: wesBos, // ← Wes won!
+			player2: scottTolinski,
+			// winner: undefined    // ← GAME NOT PLAYED YET
 		},
-		// Game 1: Scott Tolinski vs Scottie Pippen
+		// Game 1: Kevin Powell vs Adam Argyle
 		{
 			id: "r1-1",
 			date: "2026-02-01",
-			player1: scottTolinski,
-			player2: scottiePippen,
-			winner: scottTolinski, // ← Scott won!
+			player1: kevinPowell,
+			player2: adamArgyle,
+			// winner: undefined    // ← GAME NOT PLAYED YET
 		},
-		// Game 2: Dennis Rodman vs Shaquille O'Neal
+		// Game 2: Adam Wathan vs Ania Kubow
 		{
 			id: "r1-2",
 			date: "2026-02-02",
-			player1: dennisRodman,
-			player2: shaquilleOneal,
-			winner: shaquilleOneal, // ← Shaq won!
+			player1: adamWathan,
+			player2: aniaKubow,
+			// winner: undefined    // ← GAME NOT PLAYED YET
 		},
-		// Game 3: Hakeem Olajuwon vs Charles Barkley
+		// Game 3: Sara Soueidan vs Josh Comeau
 		{
 			id: "r1-3",
 			date: "2026-02-02",
-			player1: hakeemOlajuwon,
-			player2: charlesBarkley,
-			winner: hakeemOlajuwon, // ← Hakeem won!
+			player1: sarasoueidan,
+			player2: joshComeau,
+			// winner: undefined    // ← GAME NOT PLAYED YET
 		},
 
 		// ----- RIGHT SIDE (games 4-7) -----
 
-		// Game 4: Karl Malone vs John Stockton
+		// Game 4: Una Kravets vs Jen Simmons
 		{
 			id: "r1-4",
 			date: "2026-02-01",
-			player1: karlMalone,
-			player2: johnStockton,
-			winner: karlMalone, // ← Karl won!
+			player1: unaMravos,
+			player2: jenSimmons,
+			// winner: undefined    // ← GAME NOT PLAYED YET
 		},
-		// Game 5: Patrick Ewing vs Reggie Miller
+		// Game 5: Bramus vs Rachel Andrew
 		{
 			id: "r1-5",
 			date: "2026-02-01",
-			player1: patrickEwing,
-			player2: reggieMiller,
-			winner: reggieMiller, // ← Reggie won!
+			player1: bramus,
+			player2: rachelandrew,
+			// winner: undefined    // ← GAME NOT PLAYED YET
 		},
-		// Game 6: Gary Payton vs Clyde Drexler
+		// Game 6: Stephanie Eckles vs Cassie Evans
 		{
 			id: "r1-6",
 			date: "2026-02-02",
-			player1: garyPayton,
-			player2: clydeDrexler,
-			winner: garyPayton, // ← Gary won!
+			player1: stephaleruch,
+			player2: cassiecodes,
+			// winner: undefined    // ← GAME NOT PLAYED YET
 		},
-		// Game 7: David Robinson vs Penny Hardaway
+		// Game 7: Miriam Suzanne vs CSS Ninja
 		{
 			id: "r1-7",
 			date: "2026-02-02",
-			player1: davidRobinson,
-			player2: pennyHardaway,
-			winner: pennyHardaway, // ← Penny won!
+			player1: mirisuzanne,
+			player2: cssninjatech,
+			// winner: undefined    // ← GAME NOT PLAYED YET
 		},
 	],
 
@@ -299,17 +317,17 @@ export const bracket: Bracket = {
 		{
 			id: "qf-0",
 			date: "2026-02-08",
-			player1: wesBos, // Winner of Game 0
-			player2: scottTolinski, // Winner of Game 1
-			winner: wesBos, // ← Wes won!
+			// player1: undefined   // ← TBD (R1-0 winner)
+			// player2: undefined   // ← TBD (R1-1 winner)
+			// winner: undefined    // ← GAME NOT PLAYED YET
 		},
 		// Game 1: Winner of R1-2 vs Winner of R1-3
 		{
 			id: "qf-1",
 			date: "2026-02-08",
-			player1: shaquilleOneal, // Winner of Game 2
-			player2: hakeemOlajuwon, // Winner of Game 3
-			winner: hakeemOlajuwon, // ← Hakeem won!
+			// player1: undefined   // ← TBD (R1-2 winner)
+			// player2: undefined   // ← TBD (R1-3 winner)
+			// winner: undefined    // ← GAME NOT PLAYED YET
 		},
 
 		// ----- RIGHT SIDE (games 2-3) -----
@@ -318,16 +336,16 @@ export const bracket: Bracket = {
 		{
 			id: "qf-2",
 			date: "2026-02-08",
-			player1: karlMalone, // Winner of Game 4
-			player2: reggieMiller, // Winner of Game 5
-			winner: karlMalone, // ← Karl won!
+			// player1: undefined   // ← TBD (R1-4 winner)
+			// player2: undefined   // ← TBD (R1-5 winner)
+			// winner: undefined    // ← GAME NOT PLAYED YET
 		},
 		// Game 3: Winner of R1-6 vs Winner of R1-7
 		{
 			id: "qf-3",
 			date: "2026-02-08",
-			player1: garyPayton, // Winner of Game 6
-			player2: pennyHardaway, // Winner of Game 7
+			// player1: undefined   // ← TBD (R1-6 winner)
+			// player2: undefined   // ← TBD (R1-7 winner)
 			// winner: undefined    // ← GAME NOT PLAYED YET
 		},
 	],
@@ -345,8 +363,8 @@ export const bracket: Bracket = {
 		{
 			id: "sf-0",
 			date: "2026-02-15",
-			player1: wesBos, // Winner of QF Game 0
-			player2: hakeemOlajuwon, // Winner of QF Game 1
+			// player1: undefined   // ← TBD (QF-0 winner)
+			// player2: undefined   // ← TBD (QF-1 winner)
 			// winner: undefined    // ← GAME NOT PLAYED YET
 		},
 
@@ -356,8 +374,8 @@ export const bracket: Bracket = {
 		{
 			id: "sf-1",
 			date: "2026-02-15",
-			player1: karlMalone, // Winner of QF Game 2
-			// player2: undefined   // ← TBD (waiting for QF-3 result)
+			// player1: undefined   // ← TBD (QF-2 winner)
+			// player2: undefined   // ← TBD (QF-3 winner)
 			// winner: undefined    // ← GAME NOT PLAYED YET
 		},
 	],
@@ -371,8 +389,8 @@ export const bracket: Bracket = {
 		{
 			id: "final",
 			date: "2026-02-22",
-			player1: wesBos, // Placeholder - will be SF-0 winner
-			// player2: undefined   // ← TBD (waiting for SF-1 result)
+			// player1: undefined   // ← TBD (SF-0 winner)
+			// player2: undefined   // ← TBD (SF-1 winner)
 			// winner: undefined    // ← CHAMPIONSHIP NOT PLAYED YET
 		},
 	],

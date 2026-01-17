@@ -87,9 +87,11 @@ export const verification = sqliteTable(
 	(table) => [index("verification_identifier_idx").on(table.identifier)],
 );
 
-export const userRelations = relations(user, ({ many }) => ({
+export const userRelations = relations(user, ({ many, one }) => ({
 	sessions: many(session),
 	accounts: many(account),
+	predictions: many(userPrediction),
+	bracketStatus: one(userBracketStatus),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -105,3 +107,66 @@ export const accountRelations = relations(account, ({ one }) => ({
 		references: [user.id],
 	}),
 }));
+
+// =============================================================================
+// USER PREDICTIONS
+// =============================================================================
+
+export const userPrediction = sqliteTable(
+	"user_prediction",
+	{
+		id: text("id").primaryKey(),
+		userId: text("user_id")
+			.notNull()
+			.references(() => user.id, { onDelete: "cascade" }),
+		gameId: text("game_id").notNull(), // e.g., "r1-0", "qf-1", "sf-0", "final"
+		predictedWinnerId: text("predicted_winner_id").notNull(), // player id
+		createdAt: integer("created_at", { mode: "timestamp_ms" })
+			.default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+			.notNull(),
+		updatedAt: integer("updated_at", { mode: "timestamp_ms" })
+			.default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+			.$onUpdate(() => new Date())
+			.notNull(),
+	},
+	(table) => [
+		index("user_prediction_userId_idx").on(table.userId),
+		index("user_prediction_userId_gameId_idx").on(table.userId, table.gameId),
+	],
+);
+
+export const userBracketStatus = sqliteTable(
+	"user_bracket_status",
+	{
+		id: text("id").primaryKey(),
+		userId: text("user_id")
+			.notNull()
+			.unique()
+			.references(() => user.id, { onDelete: "cascade" }),
+		isLocked: integer("is_locked", { mode: "boolean" })
+			.default(false)
+			.notNull(),
+		lockedAt: integer("locked_at", { mode: "timestamp_ms" }),
+		createdAt: integer("created_at", { mode: "timestamp_ms" })
+			.default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+			.notNull(),
+	},
+	(table) => [index("user_bracket_status_userId_idx").on(table.userId)],
+);
+
+export const userPredictionRelations = relations(userPrediction, ({ one }) => ({
+	user: one(user, {
+		fields: [userPrediction.userId],
+		references: [user.id],
+	}),
+}));
+
+export const userBracketStatusRelations = relations(
+	userBracketStatus,
+	({ one }) => ({
+		user: one(user, {
+			fields: [userBracketStatus.userId],
+			references: [user.id],
+		}),
+	}),
+);

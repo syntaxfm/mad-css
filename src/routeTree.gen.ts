@@ -9,12 +9,30 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TestRouteImport } from './routes/test'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiPredictionsIndexRouteImport } from './routes/api/predictions/index'
+import { Route as ApiPredictionsLockRouteImport } from './routes/api/predictions/lock'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
+const TestRoute = TestRouteImport.update({
+  id: '/test',
+  path: '/test',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPredictionsIndexRoute = ApiPredictionsIndexRouteImport.update({
+  id: '/api/predictions/',
+  path: '/api/predictions/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPredictionsLockRoute = ApiPredictionsLockRouteImport.update({
+  id: '/api/predictions/lock',
+  path: '/api/predictions/lock',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
@@ -25,37 +43,86 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/test': typeof TestRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/predictions/lock': typeof ApiPredictionsLockRoute
+  '/api/predictions': typeof ApiPredictionsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/test': typeof TestRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/predictions/lock': typeof ApiPredictionsLockRoute
+  '/api/predictions': typeof ApiPredictionsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/test': typeof TestRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/predictions/lock': typeof ApiPredictionsLockRoute
+  '/api/predictions/': typeof ApiPredictionsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/auth/$'
+  fullPaths:
+    | '/'
+    | '/test'
+    | '/api/auth/$'
+    | '/api/predictions/lock'
+    | '/api/predictions'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/auth/$'
-  id: '__root__' | '/' | '/api/auth/$'
+  to:
+    | '/'
+    | '/test'
+    | '/api/auth/$'
+    | '/api/predictions/lock'
+    | '/api/predictions'
+  id:
+    | '__root__'
+    | '/'
+    | '/test'
+    | '/api/auth/$'
+    | '/api/predictions/lock'
+    | '/api/predictions/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  TestRoute: typeof TestRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiPredictionsLockRoute: typeof ApiPredictionsLockRoute
+  ApiPredictionsIndexRoute: typeof ApiPredictionsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/test': {
+      id: '/test'
+      path: '/test'
+      fullPath: '/test'
+      preLoaderRoute: typeof TestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/predictions/': {
+      id: '/api/predictions/'
+      path: '/api/predictions'
+      fullPath: '/api/predictions'
+      preLoaderRoute: typeof ApiPredictionsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/predictions/lock': {
+      id: '/api/predictions/lock'
+      path: '/api/predictions/lock'
+      fullPath: '/api/predictions/lock'
+      preLoaderRoute: typeof ApiPredictionsLockRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/auth/$': {
@@ -70,7 +137,10 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  TestRoute: TestRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiPredictionsLockRoute: ApiPredictionsLockRoute,
+  ApiPredictionsIndexRoute: ApiPredictionsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
