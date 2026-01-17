@@ -64,6 +64,7 @@
 		linear-gradient(var(--ring-color), var(--ring-color)) border-box;
 	padding: var(--ring-thickness);
 	flex-shrink: 0;
+	transition: box-shadow 0.3s ease;
 }
 
 .player-photo-ring::before {
@@ -82,7 +83,9 @@
 	height: 100%;
 	border-radius: 50%;
 	object-fit: cover;
+	object-position: center top;
 	filter: grayscale(100%);
+	transition: filter 0.3s ease;
 }
 
 /* Grey circle placeholder for empty slots */
@@ -155,7 +158,78 @@
 .player-node--empty .player-photo-ring {
 	--ring-color: var(--yellow);
 	--inner-ring-color: #aaa;
-	--photo-size: 50px;
+	overflow: visible;
+}
+
+/* Pickable State - hoverable/clickable for making predictions */
+.player-node--pickable {
+	cursor: pointer;
+	transition:
+		transform 0.15s ease,
+		box-shadow 0.15s ease;
+}
+
+.player-node--pickable:hover {
+	transform: scale(1.02);
+}
+
+.player-node--pickable:hover .player-photo-ring {
+	box-shadow:
+		0 0 0 3px var(--yellow),
+		0 0 15px rgba(255, 215, 0, 0.4);
+}
+
+.player-node--pickable:focus {
+	outline: none;
+}
+
+.player-node--pickable:focus-visible .player-photo-ring {
+	box-shadow:
+		0 0 0 3px var(--yellow),
+		0 0 0 5px var(--black);
+}
+
+/* Selected State - user has picked this player (checkmark badge) */
+.player-node--selected .player-photo {
+	filter: grayscale(0%);
+}
+
+.player-node--selected .player-photo-ring {
+	box-shadow:
+		0 0 0 2px var(--yellow),
+		0 0 12px rgba(255, 174, 0, 0.4);
+}
+
+/* Checkmark entrance animation */
+@keyframes checkmark-pop {
+	0% {
+		transform: scale(0);
+		opacity: 0;
+	}
+	60% {
+		transform: scale(1.2);
+	}
+	100% {
+		transform: scale(1);
+		opacity: 1;
+	}
+}
+
+.player-node__checkmark {
+	position: absolute;
+	top: -2px;
+	right: -2px;
+	width: 22px;
+	height: 22px;
+	background: var(--yellow);
+	border: 2px solid var(--black);
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 10;
+	color: var(--black);
+	animation: checkmark-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 /* React Flow Container */

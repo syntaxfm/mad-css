@@ -1,35 +1,40 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code (claude.ai/code) when working with
+code in this repository.
 
 ## Project Overview
 
-Mad CSS is a TanStack Start application for "The Ultimate CSS Tournament" - an event website featuring 16 developers battling for CSS glory. Built with React 19, TanStack Router, and deploys to Cloudflare Workers.
+Mad CSS is a TanStack Start application for "The Ultimate CSS Tournament" - an
+event website featuring 16 developers battling for CSS glory. Built with React
+19, TanStack Router, and deploys to Cloudflare Workers.
 
 ## Commands
 
+**Package manager: pnpm** (not npm)
+
 ```bash
 # Development
-npm run dev          # Start dev server on port 3000
+pnpm dev          # Start dev server on port 3000
 
 # Build & Deploy
-npm run build        # Build for production
-npm run deploy       # Build and deploy to Cloudflare Workers
+pnpm build        # Build for production
+pnpm deploy       # Build and deploy to Cloudflare Workers
 
 # Code Quality
-npm run check        # Run Biome linter and formatter checks
-npm run lint         # Lint only
-npm run format       # Format only
+pnpm check        # Run Biome linter and formatter checks
+pnpm lint         # Lint only
+pnpm format       # Format only
 
 # Testing
-npm run test         # Run Vitest tests
+pnpm test         # Run Vitest tests
 
 # Database
-npm run db:generate      # Generate Drizzle migrations from schema
-npm run db:migrate:local # Apply migrations to local D1
-npm run db:migrate:prod  # Apply migrations to production D1
-npm run db:studio        # Open Drizzle Studio
-npm run db:setup         # Generate + migrate local (full setup)
+pnpm db:generate      # Generate Drizzle migrations from schema
+pnpm db:migrate:local # Apply migrations to local D1
+pnpm db:migrate:prod  # Apply migrations to production D1
+pnpm db:studio        # Open Drizzle Studio
+pnpm db:setup         # Generate + migrate local (full setup)
 ```
 
 ## Database Setup
@@ -82,21 +87,43 @@ BETTER_AUTH_URL=http://localhost:3000
 
 **Stack:** TanStack Start (SSR framework) + React 19 + Vite + Cloudflare Workers
 
-**File-based routing:** Routes live in `src/routes/`. TanStack Router auto-generates `src/routeTree.gen.ts` - don't edit this file manually.
+**File-based routing:** Routes live in `src/routes/`. TanStack Router
+auto-generates `src/routeTree.gen.ts` - don't edit this file manually.
 
 **Key directories:**
 
 - `src/routes/` - Page components and API routes
 - `src/routes/__root.tsx` - Root layout, includes Header and devtools
-- `src/components/` - Reusable components (Header, Ticket, Roster)
+- `src/components/` - Reusable components (Header, Ticket, LoginSection,
+  bracket/, roster/, footer/, rules/)
+- `src/lib/` - Auth setup (better-auth) and utilities (cfImage.ts for Cloudflare
+  Images)
+- `src/data/` - Player data (players.ts with 16 contestants)
 - `src/styles/` - CSS files imported directly into components
-- `public/` - Static assets (logos, images)
+- `public/` - Static assets (logos, images, card artwork)
 
 **Path alias:** `@/*` maps to `./src/*`
 
-**Styling:** Plain CSS with CSS custom properties defined in `src/styles/styles.css`. Uses custom fonts (Kaltjer, CollegiateBlackFLF, Inter) and texture backgrounds.
+**Styling:** Plain CSS with CSS custom properties defined in
+`src/styles/styles.css`. Uses custom fonts (Kaltjer, CollegiateBlackFLF, Inter)
+and texture backgrounds.
 
 ## Code Style
 
 - Biome for linting/formatting (tabs, double quotes)
 - TypeScript strict mode
+- XY Flow library for tournament bracket visualization
+
+## Comment Policy
+
+### Unacceptable Comments
+
+- Comments that repeat what code does
+- Commented-out code (delete it)
+- Obvious comments ("increment counter")
+- Comments instead of good naming
+
+### Principle
+
+Code should be self-documenting. If you need a comment to explain WHAT the code
+does, consider refactoring to make it clearer.
