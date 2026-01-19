@@ -119,7 +119,10 @@ export function LoginSection({
 					<button
 						type="button"
 						className="btn-signout"
-						onClick={() => authClient.signOut()}
+						onClick={() => {
+							sessionStorage.removeItem("bracket-scrolled");
+							authClient.signOut();
+						}}
 					>
 						Sign out
 					</button>
@@ -280,7 +283,12 @@ export function LoginSection({
 			<button
 				type="button"
 				className="btn-github"
-				onClick={() => authClient.signIn.social({ provider: "github" })}
+				onClick={() =>
+					authClient.signIn.social({
+						provider: "github",
+						callbackURL: "/test",
+					})
+				}
 			>
 				<svg viewBox="0 0 24 24" aria-hidden="true" className="github-icon">
 					<path
