@@ -11,7 +11,7 @@ event website featuring 16 developers battling for CSS glory. Built with React
 
 ## Commands
 
-**Package manager: pnpm** (not npm)
+**Package manager: pnpm**
 
 ```bash
 # Development
@@ -77,7 +77,8 @@ BETTER_AUTH_URL=http://localhost:3000
 2. Fill in:
    - **Application name:** Mad CSS (Local) or similar
    - **Homepage URL:** `http://localhost:3000/test`
-   - **Authorization callback URL:** `http://localhost:3000/api/auth/callback/github`
+   - **Authorization callback URL:**
+     `http://localhost:3000/api/auth/callback/github`
 3. Click "Register application"
 4. Copy the **Client ID** to `GITHUB_CLIENT_ID` in `.dev.vars`
 5. Generate a new **Client Secret** and copy to `GITHUB_CLIENT_SECRET`
