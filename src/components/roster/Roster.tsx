@@ -33,6 +33,18 @@ export function Roster() {
 			name: "Ania Kubow",
 			image: "/cards/Ania Kubow card.jpg",
 		},
+		{
+			name: "Cassidy Williams",
+			image: "/cards/cassidy williams card.jpg",
+		},
+		{
+			name: "Josh Comeau",
+			image: "/cards/josh comeau card.jpg",
+		},
+		{
+			name: "Kyle Cook",
+			image: "/cards/kyle cook card.jpg",
+		},
 	];
 	return (
 		<div className="roster">
