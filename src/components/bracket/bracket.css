@@ -30,9 +30,6 @@
 		.player-photo-ring {
 			--photo-size: 100px;
 		}
-		.player-photo {
-			filter: grayscale(0%);
-		}
 	}
 }
 
@@ -84,7 +81,6 @@
 	border-radius: 50%;
 	object-fit: cover;
 	object-position: center top;
-	filter: grayscale(100%);
 	transition: filter 0.3s ease;
 }
 
@@ -95,11 +91,10 @@
 	width: 100%;
 	height: 100%;
 	border-radius: 50%;
-	background: var(--orange);
-	&:after {
+	background: #888;
+	&::after {
 		content: "";
 		transform: translateY(-7px);
-		/* scale: 1.2; */
 		border-radius: 0 0 120% 120%;
 		position: absolute;
 		inset: 0 0 -7px 0;
@@ -107,6 +102,7 @@
 		background-size: 500%;
 		background-position: var(--x) var(--y);
 		background-repeat: no-repeat;
+		filter: grayscale(100%);
 	}
 }
 
@@ -140,9 +136,6 @@
 }
 
 /* Winner State */
-.player-node--winner .player-photo {
-	filter: grayscale(0%);
-}
 
 /* Eliminated State */
 .player-node--eliminated .player-photo-ring {
@@ -152,12 +145,13 @@
 
 .player-node--eliminated .player-photo {
 	border-color: #888;
+	filter: grayscale(100%);
 }
 
 /* Empty Slot State - grey version of player node */
 .player-node--empty .player-photo-ring {
-	--ring-color: var(--yellow);
-	--inner-ring-color: #aaa;
+	--ring-color: #666;
+	--inner-ring-color: #888;
 	overflow: visible;
 }
 
@@ -190,10 +184,6 @@
 }
 
 /* Selected State - user has picked this player (checkmark badge) */
-.player-node--selected .player-photo {
-	filter: grayscale(0%);
-}
-
 .player-node--selected .player-photo-ring {
 	box-shadow:
 		0 0 0 2px var(--yellow),
