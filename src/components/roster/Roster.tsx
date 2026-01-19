@@ -45,6 +45,10 @@ export function Roster() {
 			name: "Kyle Cook",
 			image: "/cards/kyle cook card.jpg",
 		},
+		{
+			name: "Julia Miocene",
+			image: "/cards/julia miocene card.png",
+		},
 	];
 	return (
 		<div className="roster">
