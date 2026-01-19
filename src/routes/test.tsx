@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { Bracket } from "@/components/bracket/Bracket";
 import { LoginSection } from "@/components/LoginSection";
+import { Leaderboard } from "@/components/leaderboard/Leaderboard";
 import { Roster } from "@/components/roster/Roster";
 import { Rules } from "@/components/rules/Rules";
 import { Ticket } from "@/components/Ticket";
@@ -73,6 +74,7 @@ function TestPage() {
 					isAuthenticated={isAuthenticated}
 				/>
 			</div>
+			<Leaderboard />
 			<Rules />
 		</div>
 	);

@@ -12,7 +12,9 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TestRouteImport } from './routes/test'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiPredictionsIndexRouteImport } from './routes/api/predictions/index'
+import { Route as ApiLeaderboardIndexRouteImport } from './routes/api/leaderboard/index'
 import { Route as ApiPredictionsLockRouteImport } from './routes/api/predictions/lock'
+import { Route as ApiLeaderboardCalculateRouteImport } from './routes/api/leaderboard/calculate'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const TestRoute = TestRouteImport.update({
@@ -30,9 +32,19 @@ const ApiPredictionsIndexRoute = ApiPredictionsIndexRouteImport.update({
   path: '/api/predictions/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiLeaderboardIndexRoute = ApiLeaderboardIndexRouteImport.update({
+  id: '/api/leaderboard/',
+  path: '/api/leaderboard/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPredictionsLockRoute = ApiPredictionsLockRouteImport.update({
   id: '/api/predictions/lock',
   path: '/api/predictions/lock',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiLeaderboardCalculateRoute = ApiLeaderboardCalculateRouteImport.update({
+  id: '/api/leaderboard/calculate',
+  path: '/api/leaderboard/calculate',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
@@ -45,14 +57,18 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/test': typeof TestRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/leaderboard/calculate': typeof ApiLeaderboardCalculateRoute
   '/api/predictions/lock': typeof ApiPredictionsLockRoute
+  '/api/leaderboard': typeof ApiLeaderboardIndexRoute
   '/api/predictions': typeof ApiPredictionsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/test': typeof TestRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/leaderboard/calculate': typeof ApiLeaderboardCalculateRoute
   '/api/predictions/lock': typeof ApiPredictionsLockRoute
+  '/api/leaderboard': typeof ApiLeaderboardIndexRoute
   '/api/predictions': typeof ApiPredictionsIndexRoute
 }
 export interface FileRoutesById {
@@ -60,7 +76,9 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/test': typeof TestRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/leaderboard/calculate': typeof ApiLeaderboardCalculateRoute
   '/api/predictions/lock': typeof ApiPredictionsLockRoute
+  '/api/leaderboard/': typeof ApiLeaderboardIndexRoute
   '/api/predictions/': typeof ApiPredictionsIndexRoute
 }
 export interface FileRouteTypes {
@@ -69,21 +87,27 @@ export interface FileRouteTypes {
     | '/'
     | '/test'
     | '/api/auth/$'
+    | '/api/leaderboard/calculate'
     | '/api/predictions/lock'
+    | '/api/leaderboard'
     | '/api/predictions'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/test'
     | '/api/auth/$'
+    | '/api/leaderboard/calculate'
     | '/api/predictions/lock'
+    | '/api/leaderboard'
     | '/api/predictions'
   id:
     | '__root__'
     | '/'
     | '/test'
     | '/api/auth/$'
+    | '/api/leaderboard/calculate'
     | '/api/predictions/lock'
+    | '/api/leaderboard/'
     | '/api/predictions/'
   fileRoutesById: FileRoutesById
 }
@@ -91,7 +115,9 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   TestRoute: typeof TestRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiLeaderboardCalculateRoute: typeof ApiLeaderboardCalculateRoute
   ApiPredictionsLockRoute: typeof ApiPredictionsLockRoute
+  ApiLeaderboardIndexRoute: typeof ApiLeaderboardIndexRoute
   ApiPredictionsIndexRoute: typeof ApiPredictionsIndexRoute
 }
 
@@ -118,11 +144,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPredictionsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/leaderboard/': {
+      id: '/api/leaderboard/'
+      path: '/api/leaderboard'
+      fullPath: '/api/leaderboard'
+      preLoaderRoute: typeof ApiLeaderboardIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/predictions/lock': {
       id: '/api/predictions/lock'
       path: '/api/predictions/lock'
       fullPath: '/api/predictions/lock'
       preLoaderRoute: typeof ApiPredictionsLockRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/leaderboard/calculate': {
+      id: '/api/leaderboard/calculate'
+      path: '/api/leaderboard/calculate'
+      fullPath: '/api/leaderboard/calculate'
+      preLoaderRoute: typeof ApiLeaderboardCalculateRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/auth/$': {
@@ -139,7 +179,9 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   TestRoute: TestRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiLeaderboardCalculateRoute: ApiLeaderboardCalculateRoute,
   ApiPredictionsLockRoute: ApiPredictionsLockRoute,
+  ApiLeaderboardIndexRoute: ApiLeaderboardIndexRoute,
   ApiPredictionsIndexRoute: ApiPredictionsIndexRoute,
 }
 export const routeTree = rootRouteImport

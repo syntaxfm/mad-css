@@ -92,6 +92,7 @@ export const userRelations = relations(user, ({ many, one }) => ({
 	accounts: many(account),
 	predictions: many(userPrediction),
 	bracketStatus: one(userBracketStatus),
+	score: one(userScore),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -170,3 +171,62 @@ export const userBracketStatusRelations = relations(
 		}),
 	}),
 );
+
+// =============================================================================
+// TOURNAMENT RESULTS
+// =============================================================================
+
+export const tournamentResult = sqliteTable(
+	"tournament_result",
+	{
+		id: text("id").primaryKey(),
+		gameId: text("game_id").notNull().unique(), // e.g., "r1-0", "qf-1", "sf-0", "final"
+		winnerId: text("winner_id").notNull(), // player id who won
+		createdAt: integer("created_at", { mode: "timestamp_ms" })
+			.default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+			.notNull(),
+		updatedAt: integer("updated_at", { mode: "timestamp_ms" })
+			.default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+			.$onUpdate(() => new Date())
+			.notNull(),
+	},
+	(table) => [index("tournament_result_gameId_idx").on(table.gameId)],
+);
+
+// =============================================================================
+// USER SCORES (LEADERBOARD)
+// =============================================================================
+
+export const userScore = sqliteTable(
+	"user_score",
+	{
+		id: text("id").primaryKey(),
+		userId: text("user_id")
+			.notNull()
+			.unique()
+			.references(() => user.id, { onDelete: "cascade" }),
+		round1Score: integer("round1_score").default(0).notNull(),
+		round2Score: integer("round2_score").default(0).notNull(),
+		round3Score: integer("round3_score").default(0).notNull(),
+		round4Score: integer("round4_score").default(0).notNull(),
+		totalScore: integer("total_score").default(0).notNull(),
+		createdAt: integer("created_at", { mode: "timestamp_ms" })
+			.default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+			.notNull(),
+		updatedAt: integer("updated_at", { mode: "timestamp_ms" })
+			.default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+			.$onUpdate(() => new Date())
+			.notNull(),
+	},
+	(table) => [
+		index("user_score_userId_idx").on(table.userId),
+		index("user_score_totalScore_idx").on(table.totalScore),
+	],
+);
+
+export const userScoreRelations = relations(userScore, ({ one }) => ({
+	user: one(user, {
+		fields: [userScore.userId],
+		references: [user.id],
+	}),
+}));
