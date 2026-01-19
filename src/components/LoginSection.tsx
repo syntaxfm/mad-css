@@ -1,6 +1,8 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { TOTAL_GAMES } from "@/data/players";
+import { useCountdown } from "@/hooks/useCountdown";
 import { authClient } from "@/lib/auth-client";
+import { Scoreboard } from "./scoreboard/Scoreboard";
 import "@/styles/login.css";
 
 export interface LoginSectionProps {
@@ -14,98 +16,6 @@ export interface LoginSectionProps {
 	onSave?: () => void;
 	onLock?: () => void;
 	onReset?: () => void;
-}
-
-type CountdownTime = {
-	days: number;
-	hours: number;
-	minutes: number;
-	seconds: number;
-	totalMs: number;
-};
-
-function getTimeRemaining(deadline: string): CountdownTime {
-	const total = new Date(deadline).getTime() - Date.now();
-	if (total <= 0) {
-		return { days: 0, hours: 0, minutes: 0, seconds: 0, totalMs: 0 };
-	}
-	return {
-		days: Math.floor(total / (1000 * 60 * 60 * 24)),
-		hours: Math.floor((total / (1000 * 60 * 60)) % 24),
-		minutes: Math.floor((total / (1000 * 60)) % 60),
-		seconds: Math.floor((total / 1000) % 60),
-		totalMs: total,
-	};
-}
-
-function useCountdown(deadline: string | undefined): CountdownTime {
-	const [time, setTime] = useState<CountdownTime>(() =>
-		deadline
-			? getTimeRemaining(deadline)
-			: { days: 0, hours: 0, minutes: 0, seconds: 0, totalMs: 0 },
-	);
-
-	useEffect(() => {
-		if (!deadline) return;
-		setTime(getTimeRemaining(deadline));
-		const interval = setInterval(() => {
-			setTime(getTimeRemaining(deadline));
-		}, 1000);
-		return () => clearInterval(interval);
-	}, [deadline]);
-
-	return time;
-}
-
-function ScoreboardUnit({ value, label }: { value: number; label: string }) {
-	const digits = String(value).padStart(2, "0");
-	return (
-		<div className="scoreboard-unit">
-			<div className="scoreboard-digits">
-				<span className="scoreboard-digit">{digits[0]}</span>
-				<span className="scoreboard-digit">{digits[1]}</span>
-			</div>
-			<span className="scoreboard-label">{label}</span>
-		</div>
-	);
-}
-
-function ScoreboardSeparator() {
-	return (
-		<div className="scoreboard-separator">
-			<span className="separator-dot" />
-			<span className="separator-dot" />
-		</div>
-	);
-}
-
-function Scoreboard({
-	countdown,
-	isUrgent,
-}: {
-	countdown: CountdownTime;
-	isUrgent: boolean;
-}) {
-	return (
-		<div className={`scoreboard ${isUrgent ? "scoreboard--urgent" : ""}`}>
-			<div className="scoreboard-frame">
-				<div className="scoreboard-rivet scoreboard-rivet--tl" />
-				<div className="scoreboard-rivet scoreboard-rivet--tr" />
-				<div className="scoreboard-rivet scoreboard-rivet--bl" />
-				<div className="scoreboard-rivet scoreboard-rivet--br" />
-				<div className="scoreboard-display">
-					<ScoreboardUnit value={countdown.days} label="DAYS" />
-					<ScoreboardSeparator />
-					<ScoreboardUnit value={countdown.hours} label="HRS" />
-					<ScoreboardSeparator />
-					<ScoreboardUnit value={countdown.minutes} label="MIN" />
-					<ScoreboardSeparator />
-					<ScoreboardUnit value={countdown.seconds} label="SEC" />
-				</div>
-				<div className="scoreboard-scanlines" />
-			</div>
-		</div>
-	);
 }
 
 export function LoginSection({
