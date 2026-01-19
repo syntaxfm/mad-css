@@ -91,7 +91,7 @@
 	width: 100%;
 	height: 100%;
 	border-radius: 50%;
-	background: #888;
+	background: var(--inner-ring-color);
 	&::after {
 		content: "";
 		transform: translateY(-7px);
