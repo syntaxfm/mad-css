@@ -57,21 +57,54 @@ function useCountdown(deadline: string | undefined): CountdownTime {
 	return time;
 }
 
-function CountdownUnit({
-	value,
-	suffix,
-	pad = true,
-}: {
-	value: number;
-	suffix: string;
-	pad?: boolean;
-}) {
-	const displayValue = pad ? String(value).padStart(2, "0") : String(value);
+function ScoreboardUnit({ value, label }: { value: number; label: string }) {
+	const digits = String(value).padStart(2, "0");
 	return (
-		<span className="countdown-unit">
-			<span className="countdown-value">{displayValue}</span>
-			<span className="countdown-suffix">{suffix}</span>
-		</span>
+		<div className="scoreboard-unit">
+			<div className="scoreboard-digits">
+				<span className="scoreboard-digit">{digits[0]}</span>
+				<span className="scoreboard-digit">{digits[1]}</span>
+			</div>
+			<span className="scoreboard-label">{label}</span>
+		</div>
+	);
+}
+
+function ScoreboardSeparator() {
+	return (
+		<div className="scoreboard-separator">
+			<span className="separator-dot" />
+			<span className="separator-dot" />
+		</div>
+	);
+}
+
+function Scoreboard({
+	countdown,
+	isUrgent,
+}: {
+	countdown: CountdownTime;
+	isUrgent: boolean;
+}) {
+	return (
+		<div className={`scoreboard ${isUrgent ? "scoreboard--urgent" : ""}`}>
+			<div className="scoreboard-frame">
+				<div className="scoreboard-rivet scoreboard-rivet--tl" />
+				<div className="scoreboard-rivet scoreboard-rivet--tr" />
+				<div className="scoreboard-rivet scoreboard-rivet--bl" />
+				<div className="scoreboard-rivet scoreboard-rivet--br" />
+				<div className="scoreboard-display">
+					<ScoreboardUnit value={countdown.days} label="DAYS" />
+					<ScoreboardSeparator />
+					<ScoreboardUnit value={countdown.hours} label="HRS" />
+					<ScoreboardSeparator />
+					<ScoreboardUnit value={countdown.minutes} label="MIN" />
+					<ScoreboardSeparator />
+					<ScoreboardUnit value={countdown.seconds} label="SEC" />
+				</div>
+				<div className="scoreboard-scanlines" />
+			</div>
+		</div>
 	);
 }
 
@@ -146,23 +179,7 @@ export function LoginSection({
 									{pickCount} <span>/ {TOTAL_GAMES} picks</span>
 								</div>
 								{deadline && countdown.totalMs > 0 && (
-									<div
-										className={`countdown ${isUrgent ? "countdown--urgent" : ""}`}
-									>
-										<span className="countdown-label">Lock in</span>
-										<div className="countdown-timer">
-											{countdown.days > 0 && (
-												<CountdownUnit
-													value={countdown.days}
-													suffix="d"
-													pad={false}
-												/>
-											)}
-											<CountdownUnit value={countdown.hours} suffix="h" />
-											<CountdownUnit value={countdown.minutes} suffix="m" />
-											<CountdownUnit value={countdown.seconds} suffix="s" />
-										</div>
-									</div>
+									<Scoreboard countdown={countdown} isUrgent={isUrgent} />
 								)}
 							</div>
 						</div>
@@ -268,17 +285,7 @@ export function LoginSection({
 				mass internet clout. Perfect bracket = mass internet clout.
 			</p>
 			{deadline && countdown.totalMs > 0 && (
-				<div className={`countdown ${isUrgent ? "countdown--urgent" : ""}`}>
-					<span className="countdown-label">Lock in</span>
-					<div className="countdown-timer">
-						{countdown.days > 0 && (
-							<CountdownUnit value={countdown.days} suffix="d" pad={false} />
-						)}
-						<CountdownUnit value={countdown.hours} suffix="h" />
-						<CountdownUnit value={countdown.minutes} suffix="m" />
-						<CountdownUnit value={countdown.seconds} suffix="s" />
-					</div>
-				</div>
+				<Scoreboard countdown={countdown} isUrgent={isUrgent} />
 			)}
 			<button
 				type="button"

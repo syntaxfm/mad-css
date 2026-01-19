@@ -73,9 +73,8 @@
 	color: var(--orange);
 }
 
-/* Countdown in logged-out state - centered */
-.bracket-cta:not(.logged-in) .countdown {
-	align-items: center;
+/* Scoreboard in logged-out state - centered */
+.bracket-cta:not(.logged-in) .scoreboard {
 	margin-bottom: 20px;
 }
 
@@ -213,66 +212,208 @@
 	font-size: 0.9rem;
 }
 
-.countdown {
+/* ============================================
+   Retro Basketball Scoreboard
+   ============================================ */
+
+@font-face {
+	font-family: "DSEG7Classic";
+	src: url("/fonts/DSEG7Classic-Bold.woff2") format("woff2");
+	font-weight: bold;
+	font-style: normal;
+	font-display: swap;
+}
+
+.scoreboard {
+	--scoreboard-bg: #1a1a1a;
+	--scoreboard-inset: #0a0a0a;
+	--scoreboard-digit-color: var(--orange);
+	--scoreboard-glow: rgba(243, 55, 14, 0.6);
+	--scoreboard-label: rgba(255, 255, 255, 0.5);
+}
+
+.scoreboard-frame {
+	position: relative;
+	background: #1a1a1a;
+	border: 3px solid #444;
+	border-radius: 0;
+	padding: 16px 20px 12px;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* Corner rivets */
+.scoreboard-rivet {
+	position: absolute;
+	width: 6px;
+	height: 6px;
+	background: #333;
+	border-radius: 50%;
+}
+
+.scoreboard-rivet--tl {
+	top: 6px;
+	left: 6px;
+}
+
+.scoreboard-rivet--tr {
+	top: 6px;
+	right: 6px;
+}
+
+.scoreboard-rivet--bl {
+	bottom: 6px;
+	left: 6px;
+}
+
+.scoreboard-rivet--br {
+	bottom: 6px;
+	right: 6px;
+}
+
+.scoreboard-display {
+	display: flex;
+	align-items: flex-start;
+	justify-content: center;
+	gap: 4px;
+}
+
+.scoreboard-unit {
 	display: flex;
 	flex-direction: column;
-	align-items: flex-end;
-	gap: 2px;
+	align-items: center;
+	gap: 4px;
 }
 
-.countdown-label {
-	font-size: 0.7rem;
-	text-transform: uppercase;
-	letter-spacing: 0.08em;
-	color: var(--black);
-	opacity: 0.6;
-}
-
-.countdown-timer {
+.scoreboard-digits {
 	display: flex;
-	gap: 2px;
+	gap: 3px;
+}
+
+.scoreboard-digit {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 42px;
+	background: var(--scoreboard-inset);
+	border-radius: 2px;
+	font-family: "DSEG7Classic", monospace;
+	font-size: 1.8rem;
+	font-weight: bold;
+	color: var(--scoreboard-digit-color);
+	text-shadow:
+		0 0 6px var(--scoreboard-glow),
+		0 0 12px var(--scoreboard-glow);
+	line-height: 1;
+}
+
+/* Inactive segments - shows "8" outline */
+.scoreboard-digit::before {
+	content: "8";
+	position: absolute;
+	color: rgba(243, 55, 14, 0.12);
+	text-shadow: none;
+}
+
+.scoreboard-label {
 	font-family: var(--font-block);
+	font-size: 0.55rem;
+	text-transform: uppercase;
+	letter-spacing: 0.1em;
+	color: var(--scoreboard-label);
 }
 
-.countdown-unit {
+/* Separator dots */
+.scoreboard-separator {
 	display: flex;
-	align-items: baseline;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	height: 42px;
+	padding: 0 2px;
 }
 
-.countdown-value {
-	font-size: 1.1rem;
-	color: var(--orange);
-	font-variant-numeric: tabular-nums;
-	font-feature-settings: "tnum";
-	min-width: 2ch;
-	display: inline-block;
-	text-align: right;
+.separator-dot {
+	width: 5px;
+	height: 5px;
+	background: var(--scoreboard-digit-color);
+	border-radius: 50%;
+	box-shadow: 0 0 4px var(--scoreboard-glow);
+	animation: dot-pulse 1s ease-in-out infinite;
 }
 
-.countdown-suffix {
-	font-size: 0.7rem;
-	color: var(--black);
-	opacity: 0.5;
-	margin-right: 4px;
-}
-
-.countdown--urgent .countdown-value {
-	color: #f87171;
-	animation: pulse-urgent 1s ease-in-out infinite;
-}
-
-.countdown--urgent .countdown-label {
-	color: #f87171;
-}
-
-@keyframes pulse-urgent {
+@keyframes dot-pulse {
 	0%,
 	100% {
 		opacity: 1;
 	}
 	50% {
-		opacity: 0.6;
+		opacity: 0.4;
 	}
+}
+
+/* CRT scanlines overlay */
+.scoreboard-scanlines {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	pointer-events: none;
+	background: repeating-linear-gradient(
+		0deg,
+		rgba(0, 0, 0, 0.1) 0px,
+		rgba(0, 0, 0, 0.1) 1px,
+		transparent 1px,
+		transparent 2px
+	);
+	border-radius: 0;
+}
+
+/* Urgent state (< 24 hours) */
+.scoreboard--urgent .scoreboard-digit {
+	animation: urgent-glow 1s ease-in-out infinite;
+}
+
+.scoreboard--urgent .separator-dot {
+	animation: urgent-dot 0.5s ease-in-out infinite;
+}
+
+@keyframes urgent-glow {
+	0%,
+	100% {
+		text-shadow:
+			0 0 6px var(--scoreboard-glow),
+			0 0 12px var(--scoreboard-glow);
+	}
+	50% {
+		text-shadow:
+			0 0 10px var(--scoreboard-glow),
+			0 0 18px var(--scoreboard-glow);
+	}
+}
+
+@keyframes urgent-dot {
+	0%,
+	100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.5;
+	}
+}
+
+/* Logged-in state: smaller scoreboard in progress header */
+.cta-progress .scoreboard {
+	transform: scale(0.75);
+	transform-origin: right center;
+	margin: -8px -8px -8px 0;
+}
+
+.cta-progress .scoreboard-frame {
+	padding: 12px 16px 8px;
 }
 
 .progress-bar {
@@ -529,6 +670,50 @@
    Responsive
    ============================================ */
 
+@media (max-width: 600px) {
+	/* Scoreboard responsive - scale down */
+	.scoreboard-digit {
+		width: 22px;
+		height: 34px;
+		font-size: 1.4rem;
+	}
+
+	.scoreboard-separator {
+		height: 34px;
+		gap: 6px;
+	}
+
+	.separator-dot {
+		width: 5px;
+		height: 5px;
+	}
+
+	.scoreboard-frame {
+		padding: 12px 14px 10px;
+	}
+
+	.scoreboard-label {
+		font-size: 0.5rem;
+	}
+
+	/* Progress header layout stacks on mobile */
+	.progress-header {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 12px;
+	}
+
+	.cta-progress .scoreboard {
+		transform: none;
+		margin: 0;
+		width: 100%;
+	}
+
+	.cta-progress .scoreboard-display {
+		justify-content: space-between;
+	}
+}
+
 @media (max-width: 480px) {
 	.bracket-cta {
 		margin-left: 12px;
@@ -545,5 +730,51 @@
 	.btn-reset {
 		flex: none;
 		width: 100%;
+	}
+
+	/* Even smaller scoreboard for very narrow screens */
+	.scoreboard-digit {
+		width: 18px;
+		height: 28px;
+		font-size: 1.1rem;
+	}
+
+	.scoreboard-separator {
+		height: 28px;
+		gap: 4px;
+	}
+
+	.separator-dot {
+		width: 4px;
+		height: 4px;
+	}
+
+	.scoreboard-frame {
+		padding: 10px 12px 8px;
+	}
+
+	.scoreboard-rivet {
+		width: 6px;
+		height: 6px;
+	}
+
+	.scoreboard-rivet--tl,
+	.scoreboard-rivet--tr {
+		top: 4px;
+	}
+
+	.scoreboard-rivet--bl,
+	.scoreboard-rivet--br {
+		bottom: 4px;
+	}
+
+	.scoreboard-rivet--tl,
+	.scoreboard-rivet--bl {
+		left: 4px;
+	}
+
+	.scoreboard-rivet--tr,
+	.scoreboard-rivet--br {
+		right: 4px;
 	}
 }
