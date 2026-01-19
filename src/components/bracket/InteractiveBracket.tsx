@@ -23,7 +23,7 @@ import { getPickablePlayersForGame } from "@/hooks/usePredictions";
 import { EmptySlotFlow, PlayerNodeFlow } from "./PlayerNode";
 import "./bracket.css";
 
-export interface BracketProps {
+export interface InteractiveBracketProps {
 	predictions?: Record<string, string>;
 	onPick?: (gameId: string, playerId: string) => void;
 	isLocked?: boolean;
@@ -31,8 +31,7 @@ export interface BracketProps {
 	getPickablePlayers?: (gameId: string) => string[];
 }
 
-const LEFT_RING_COLOR = "#f3370e";
-const RIGHT_RING_COLOR = "#5CE1E6";
+const DEFAULT_RING_COLOR = "var(--yellow)";
 
 function BracketEdge({
 	sourceX,
@@ -189,7 +188,7 @@ function generateNodes(
 				`${game.id}-p1`,
 				player1,
 				game,
-				LEFT_RING_COLOR,
+				DEFAULT_RING_COLOR,
 				{ x: 0, y: baseY },
 				undefined,
 				p1Options,
@@ -202,7 +201,7 @@ function generateNodes(
 				`${game.id}-p2`,
 				player2,
 				game,
-				LEFT_RING_COLOR,
+				DEFAULT_RING_COLOR,
 				{ x: 0, y: baseY + MATCH_GAP },
 				undefined,
 				p2Options,
@@ -226,7 +225,7 @@ function generateNodes(
 				`${game.id}-p1`,
 				player1,
 				game,
-				LEFT_RING_COLOR,
+				DEFAULT_RING_COLOR,
 				{ x: ROUND_GAP, y: baseY },
 				"TBD",
 				p1Options,
@@ -239,7 +238,7 @@ function generateNodes(
 				`${game.id}-p2`,
 				player2,
 				game,
-				LEFT_RING_COLOR,
+				DEFAULT_RING_COLOR,
 				{ x: ROUND_GAP, y: baseY + 2 * MATCH_GAP },
 				"TBD",
 				p2Options,
@@ -263,7 +262,7 @@ function generateNodes(
 				`${game.id}-p1`,
 				player1,
 				game,
-				LEFT_RING_COLOR,
+				DEFAULT_RING_COLOR,
 				{ x: ROUND_GAP * 2, y: baseY },
 				"TBD",
 				p1Options,
@@ -276,7 +275,7 @@ function generateNodes(
 				`${game.id}-p2`,
 				player2,
 				game,
-				LEFT_RING_COLOR,
+				DEFAULT_RING_COLOR,
 				{ x: ROUND_GAP * 2, y: baseY + 4 * MATCH_GAP },
 				"TBD",
 				p2Options,
@@ -292,10 +291,10 @@ function generateNodes(
 	const leftFinalistOptions = getPredictionOptions(finalGame, leftFinalist);
 	nodes.push(
 		createNode(
-			`left-finalist`,
+			`final-p1`,
 			leftFinalist,
 			finalGame,
-			LEFT_RING_COLOR,
+			DEFAULT_RING_COLOR,
 			{ x: ROUND_GAP * 3, y: 3.5 * MATCH_GAP },
 			"Left Finalist",
 			leftFinalistOptions,
@@ -315,7 +314,7 @@ function generateNodes(
 				`${game.id}-p1`,
 				player1,
 				game,
-				RIGHT_RING_COLOR,
+				DEFAULT_RING_COLOR,
 				{ x: RIGHT_START_X, y: baseY },
 				undefined,
 				p1Options,
@@ -328,7 +327,7 @@ function generateNodes(
 				`${game.id}-p2`,
 				player2,
 				game,
-				RIGHT_RING_COLOR,
+				DEFAULT_RING_COLOR,
 				{ x: RIGHT_START_X, y: baseY + MATCH_GAP },
 				undefined,
 				p2Options,
@@ -352,7 +351,7 @@ function generateNodes(
 				`${game.id}-p1`,
 				player1,
 				game,
-				RIGHT_RING_COLOR,
+				DEFAULT_RING_COLOR,
 				{ x: RIGHT_START_X - ROUND_GAP, y: baseY },
 				"TBD",
 				p1Options,
@@ -365,7 +364,7 @@ function generateNodes(
 				`${game.id}-p2`,
 				player2,
 				game,
-				RIGHT_RING_COLOR,
+				DEFAULT_RING_COLOR,
 				{ x: RIGHT_START_X - ROUND_GAP, y: baseY + 2 * MATCH_GAP },
 				"TBD",
 				p2Options,
@@ -389,7 +388,7 @@ function generateNodes(
 				`${game.id}-p1`,
 				player1,
 				game,
-				RIGHT_RING_COLOR,
+				DEFAULT_RING_COLOR,
 				{ x: RIGHT_START_X - ROUND_GAP * 2, y: baseY },
 				"TBD",
 				p1Options,
@@ -402,7 +401,7 @@ function generateNodes(
 				`${game.id}-p2`,
 				player2,
 				game,
-				RIGHT_RING_COLOR,
+				DEFAULT_RING_COLOR,
 				{ x: RIGHT_START_X - ROUND_GAP * 2, y: baseY + 4 * MATCH_GAP },
 				"TBD",
 				p2Options,
@@ -417,10 +416,10 @@ function generateNodes(
 	const rightFinalistOptions = getPredictionOptions(finalGame, rightFinalist);
 	nodes.push(
 		createNode(
-			`right-finalist`,
+			`final-p2`,
 			rightFinalist,
 			finalGame,
-			RIGHT_RING_COLOR,
+			DEFAULT_RING_COLOR,
 			{ x: RIGHT_START_X - ROUND_GAP * 3, y: 3.5 * MATCH_GAP },
 			"Right Finalist",
 			rightFinalistOptions,
@@ -433,19 +432,15 @@ function generateNodes(
 		? players.find((p) => p.id === championId)
 		: undefined;
 
-	// ===========================================================================
-	// CHAMPIONSHIP (center)
-	// ===========================================================================
-	// Center between left finalist (x=3) and right finalist (x=4.5)
 	nodes.push({
 		id: "championship",
 		type: champion ? "playerNode" : "emptySlot",
 		position: {
-			x: ROUND_GAP * 3.75,
+			x: ROUND_GAP * 3.5,
 			y: 0,
 		},
 		data: champion
-			? playerToNodeData(champion, finalGame, "#FFD700")
+			? playerToNodeData(champion, finalGame, DEFAULT_RING_COLOR)
 			: { text: "CHAMPION" },
 	});
 
@@ -514,9 +509,9 @@ function generateEdges(): Edge[] {
 
 	semis.left.forEach((game) => {
 		edges.push({
-			id: `${game.id}-p1-to-left-finalist`,
+			id: `${game.id}-p1-to-final-p1`,
 			source: `${game.id}-p1`,
-			target: `left-finalist`,
+			target: `final-p1`,
 			type: "bracket",
 			style: edgeStyle,
 			sourceHandle: "out-right",
@@ -524,9 +519,9 @@ function generateEdges(): Edge[] {
 		});
 
 		edges.push({
-			id: `${game.id}-p2-to-left-finalist`,
+			id: `${game.id}-p2-to-final-p1`,
 			source: `${game.id}-p2`,
-			target: `left-finalist`,
+			target: `final-p1`,
 			type: "bracket",
 			style: edgeStyle,
 			sourceHandle: "out-right",
@@ -535,8 +530,8 @@ function generateEdges(): Edge[] {
 	});
 
 	edges.push({
-		id: "left-finalist-to-champ",
-		source: `left-finalist`,
+		id: "final-p1-to-champ",
+		source: `final-p1`,
 		target: "championship",
 		type: "bracket",
 		style: edgeStyle,
@@ -595,9 +590,9 @@ function generateEdges(): Edge[] {
 
 	semis.right.forEach((game) => {
 		edges.push({
-			id: `${game.id}-p1-to-right-finalist`,
+			id: `${game.id}-p1-to-final-p2`,
 			source: `${game.id}-p1`,
-			target: `right-finalist`,
+			target: `final-p2`,
 			type: "bracket",
 			style: edgeStyle,
 			sourceHandle: "out-left",
@@ -605,9 +600,9 @@ function generateEdges(): Edge[] {
 		});
 
 		edges.push({
-			id: `${game.id}-p2-to-right-finalist`,
+			id: `${game.id}-p2-to-final-p2`,
 			source: `${game.id}-p2`,
-			target: `right-finalist`,
+			target: `final-p2`,
 			type: "bracket",
 			style: edgeStyle,
 			sourceHandle: "out-left",
@@ -616,8 +611,8 @@ function generateEdges(): Edge[] {
 	});
 
 	edges.push({
-		id: "right-finalist-to-champ",
-		source: `right-finalist`,
+		id: "final-p2-to-champ",
+		source: `final-p2`,
 		target: "championship",
 		type: "bracket",
 		style: edgeStyle,
@@ -635,12 +630,22 @@ const defaultEdgeOptions = {
 
 const FIT_VIEW_PADDING = 0;
 
-function BracketContent({
+function BracketControls() {
+	return (
+		<Controls
+			orientation="horizontal"
+			showInteractive={false}
+			className="bracket-controls"
+		/>
+	);
+}
+
+function InteractiveBracketContent({
 	predictions = {},
 	onPick,
 	isLocked = false,
 	isAuthenticated = false,
-}: BracketProps) {
+}: InteractiveBracketProps) {
 	const nodes = useMemo(
 		() => generateNodes(predictions, onPick, isAuthenticated && !isLocked),
 		[predictions, onPick, isAuthenticated, isLocked],
@@ -748,7 +753,7 @@ function BracketContent({
 					[-500, -500],
 					[2500, 1500],
 				]}
-				onNodeClick={(event, node) => {
+				onNodeClick={(_event, node) => {
 					const data = node.data as {
 						isPickable?: boolean;
 						gameId?: string;
@@ -761,17 +766,13 @@ function BracketContent({
 				}}
 				onInit={handleInit}
 			>
-				<Controls
-					className="bracket-controls"
-					orientation="horizontal"
-					showInteractive={false}
-				/>
+				<BracketControls />
 			</ReactFlow>
 		</div>
 	);
 }
 
-export function Bracket(props: BracketProps) {
+export function InteractiveBracket(props: InteractiveBracketProps) {
 	const [mounted, setMounted] = useState(false);
 
 	useEffect(() => {
@@ -782,5 +783,5 @@ export function Bracket(props: BracketProps) {
 		return <div className="bracket-container" />;
 	}
 
-	return <BracketContent {...props} />;
+	return <InteractiveBracketContent {...props} />;
 }

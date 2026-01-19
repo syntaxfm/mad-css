@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Bracket } from "@/components/bracket/Bracket";
+import { InteractiveBracket } from "@/components/bracket/InteractiveBracket";
 import { LoginSection } from "@/components/LoginSection";
 import { Roster } from "@/components/roster/Roster";
 import { Rules } from "@/components/rules/Rules";
@@ -50,7 +50,7 @@ function TestPage() {
 					onLock={lockBracket}
 					onReset={resetPredictions}
 				/>
-				<Bracket
+				<InteractiveBracket
 					predictions={predictions}
 					onPick={setPrediction}
 					isLocked={isLocked}
