@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { Bracket } from "@/components/bracket/Bracket";
 import { LoginSection } from "@/components/LoginSection";
 import { Roster } from "@/components/roster/Roster";
@@ -27,6 +28,20 @@ function TestPage() {
 		lockBracket,
 		resetPredictions,
 	} = usePredictions(isAuthenticated);
+
+	// Auto-scroll to bracket after fresh OAuth login (only once per session)
+	useEffect(() => {
+		const hasScrolled = sessionStorage.getItem("bracket-scrolled");
+		if (isAuthenticated && !hasScrolled) {
+			sessionStorage.setItem("bracket-scrolled", "true");
+			// Small delay to let bracket render first
+			setTimeout(() => {
+				document
+					.getElementById("bracket")
+					?.scrollIntoView({ behavior: "smooth" });
+			}, 100);
+		}
+	}, [isAuthenticated]);
 
 	return (
 		<div>

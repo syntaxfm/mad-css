@@ -13,6 +13,10 @@ export function createAuth(d1: D1Database) {
 			provider: "sqlite",
 			schema,
 		}),
+		trustedOrigins: [
+			"http://localhost:3000",
+			process.env.BETTER_AUTH_URL,
+		].filter(Boolean) as string[],
 		socialProviders: {
 			github: {
 				clientId: process.env.GITHUB_CLIENT_ID || "",

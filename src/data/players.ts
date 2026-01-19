@@ -68,8 +68,29 @@ export const aniaKubow: Player = {
 	byline: "Code with Ania",
 };
 
+export const cassidyWilliams: Player = {
+	id: "cassidy-williams",
+	name: "Cassidy Williams",
+	photo: "/cards/cassidy williams card.jpg",
+	byline: "Contenda",
+};
+
+export const joshComeau: Player = {
+	id: "josh-comeau",
+	name: "Josh Comeau",
+	photo: "/cards/josh comeau card.jpg",
+	byline: "CSS for JS Devs",
+};
+
+export const kyleCook: Player = {
+	id: "kyle-cook",
+	name: "Kyle Cook",
+	photo: "/cards/kyle cook card.jpg",
+	byline: "Web Dev Simplified",
+};
+
 // -----------------------------------------------------------------------------
-// PLACEHOLDER PLAYERS (10 dummy CSS/web dev contestants)
+// PLACEHOLDER PLAYERS (7 dummy CSS/web dev contestants)
 // These use existing card images as placeholders
 // -----------------------------------------------------------------------------
 
@@ -78,13 +99,6 @@ export const sarasoueidan: Player = {
 	name: "Sara Soueidan",
 	photo: "/cards/Ania Kubow card.jpg",
 	byline: "SVG Specialist",
-};
-
-export const joshComeau: Player = {
-	id: "josh-comeau",
-	name: "Josh Comeau",
-	photo: "/cards/wes bos card.jpg",
-	byline: "CSS for JS Devs",
 };
 
 export const unaMravos: Player = {
@@ -152,10 +166,10 @@ export const players: Player[] = [
 	adamArgyle,
 	adamWathan,
 	aniaKubow,
-	sarasoueidan,
+	cassidyWilliams,
 	joshComeau,
 	// Round 1 - Right side (Games 4-7)
-	unaMravos,
+	kyleCook,
 	jenSimmons,
 	bramus,
 	rachelandrew,
@@ -259,22 +273,22 @@ export const bracket: Bracket = {
 			player2: aniaKubow,
 			// winner: undefined    // ← GAME NOT PLAYED YET
 		},
-		// Game 3: Sara Soueidan vs Josh Comeau
+		// Game 3: Cassidy Williams vs Josh Comeau
 		{
 			id: "r1-3",
 			date: "2026-02-02",
-			player1: sarasoueidan,
+			player1: cassidyWilliams,
 			player2: joshComeau,
 			// winner: undefined    // ← GAME NOT PLAYED YET
 		},
 
 		// ----- RIGHT SIDE (games 4-7) -----
 
-		// Game 4: Una Kravets vs Jen Simmons
+		// Game 4: Kyle Cook vs Jen Simmons
 		{
 			id: "r1-4",
 			date: "2026-02-01",
-			player1: unaMravos,
+			player1: kyleCook,
 			player2: jenSimmons,
 			// winner: undefined    // ← GAME NOT PLAYED YET
 		},

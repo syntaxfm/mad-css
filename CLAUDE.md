@@ -71,6 +71,19 @@ BETTER_AUTH_SECRET=your_random_secret
 BETTER_AUTH_URL=http://localhost:3000
 ```
 
+### GitHub OAuth Setup
+
+1. Go to GitHub Settings > Developer settings > OAuth Apps > New OAuth App
+2. Fill in:
+   - **Application name:** Mad CSS (Local) or similar
+   - **Homepage URL:** `http://localhost:3000/test`
+   - **Authorization callback URL:** `http://localhost:3000/api/auth/callback/github`
+3. Click "Register application"
+4. Copy the **Client ID** to `GITHUB_CLIENT_ID` in `.dev.vars`
+5. Generate a new **Client Secret** and copy to `GITHUB_CLIENT_SECRET`
+
+The login flow redirects to `/test` after authentication.
+
 ### Production Deployment
 
 1. Set secrets in Cloudflare dashboard (Workers > Settings > Variables):
