@@ -196,8 +196,8 @@
 
 /* Custom bracket controls styling */
 .bracket-controls.react-flow__controls {
-	top: 10px;
-	right: 10px;
+	top: 0;
+	right: 0;
 	bottom: auto;
 	left: auto;
 	box-shadow: none;
@@ -233,28 +233,4 @@
 
 .bracket-container .react-flow__attribution a {
 	color: var(--yellow);
-}
-
-/* Mobile responsive styles */
-@media (max-width: 768px) {
-	.player-node {
-		width: 200px;
-	}
-
-	.player-photo-ring {
-		--photo-size: 50px;
-	}
-
-	.player-info {
-		padding: 8px 14px 8px 18px;
-		min-width: 120px;
-	}
-
-	.player-name {
-		font-size: 0.9rem;
-	}
-
-	.bracket-controls.react-flow__controls {
-		top: 0;
-	}
 }
