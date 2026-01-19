@@ -628,7 +628,7 @@ const defaultEdgeOptions = {
 	style: edgeStyle,
 };
 
-const FIT_VIEW_PADDING = 0;
+const FIT_VIEW_PADDING = 0.05;
 
 function BracketControls() {
 	return (

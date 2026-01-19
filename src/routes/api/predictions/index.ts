@@ -1,6 +1,6 @@
 import { env } from "cloudflare:workers";
 import { createFileRoute } from "@tanstack/react-router";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { BRACKET_DEADLINE } from "@/data/players";
 import { createDb } from "@/db";
 import * as schema from "@/db/schema";
@@ -118,42 +118,19 @@ export const Route = createFileRoute("/api/predictions/")({
 					);
 				}
 
-				// Upsert each prediction
-				for (const prediction of predictions) {
-					const existingPrediction = await db
-						.select()
-						.from(schema.userPrediction)
-						.where(
-							and(
-								eq(schema.userPrediction.userId, session.user.id),
-								eq(schema.userPrediction.gameId, prediction.gameId),
-							),
-						)
-						.limit(1);
+				// Delete all existing predictions for this user, then insert new ones
+				await db
+					.delete(schema.userPrediction)
+					.where(eq(schema.userPrediction.userId, session.user.id));
 
-					if (existingPrediction.length > 0) {
-						// Update existing prediction
-						await db
-							.update(schema.userPrediction)
-							.set({
-								predictedWinnerId: prediction.predictedWinnerId,
-								updatedAt: new Date(),
-							})
-							.where(
-								and(
-									eq(schema.userPrediction.userId, session.user.id),
-									eq(schema.userPrediction.gameId, prediction.gameId),
-								),
-							);
-					} else {
-						// Insert new prediction
-						await db.insert(schema.userPrediction).values({
-							id: crypto.randomUUID(),
-							userId: session.user.id,
-							gameId: prediction.gameId,
-							predictedWinnerId: prediction.predictedWinnerId,
-						});
-					}
+				// Insert all new predictions
+				for (const prediction of predictions) {
+					await db.insert(schema.userPrediction).values({
+						id: crypto.randomUUID(),
+						userId: session.user.id,
+						gameId: prediction.gameId,
+						predictedWinnerId: prediction.predictedWinnerId,
+					});
 				}
 
 				return new Response(JSON.stringify({ success: true }), {
