@@ -280,11 +280,12 @@ function generateNodes(): Node[] {
 	// CHAMPIONSHIP (center)
 	// ===========================================================================
 	const finalGame = bracket.finals[0];
+	// Center between left finalist (x=3) and right finalist (x=4.5)
 	nodes.push({
 		id: "championship",
 		type: finalGame?.winner ? "playerNode" : "emptySlot",
 		position: {
-			x: ROUND_GAP * 3.5,
+			x: ROUND_GAP * 3.75,
 			y: 0,
 		},
 		data: finalGame?.winner
@@ -645,15 +646,9 @@ function BracketContent() {
 				onInit={handleInit}
 			>
 				<Controls
+					className="bracket-controls"
 					orientation="horizontal"
 					showInteractive={false}
-					style={{
-						position: "absolute",
-						top: 0,
-						bottom: "auto",
-						right: 0,
-						left: "auto",
-					}}
 				/>
 			</ReactFlow>
 		</div>
