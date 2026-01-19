@@ -2,6 +2,9 @@
 	display: grid;
 	--card-size: 300px;
 	grid-template-columns: repeat(auto-fill, minmax(var(--card-size), 1fr));
+	@media (max-width: 700px) {
+		--card-size: 200px;
+	}
 	@media (max-width: 500px) {
 		--card-size: 150px;
 	}
