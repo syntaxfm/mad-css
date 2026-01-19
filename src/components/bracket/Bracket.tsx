@@ -471,7 +471,7 @@ function generateNodes(
 		id: "championship",
 		type: champion ? "playerNode" : "emptySlot",
 		position: {
-			x: ROUND_GAP * 3.75,
+			x: ROUND_GAP * 3.5,
 			y: 0,
 		},
 		data: champion

@@ -6,7 +6,7 @@
 	gap: 0;
 	position: relative;
 
-	/* Shared styles for finalist and championship nodes - both modes */
+	/* Finalist and championship nodes - vertically stacked layout */
 	[data-id*="final-p"] &,
 	[data-id="championship"] & {
 		flex-direction: column;
@@ -25,18 +25,14 @@
 		}
 	}
 
-	/* Championship-specific size - only in interactive mode */
-	.bracket-container--interactive [data-id="championship"] & {
-		.player-photo-ring {
-			--photo-size: 100px;
-		}
+	/* Finalist sizing */
+	[data-id*="final-p"] & .player-photo-ring {
+		--photo-size: 65px;
 	}
 
-	/* Finalist-specific size - only in interactive mode */
-	.bracket-container--interactive [data-id*="final-p"] & {
-		.player-photo-ring {
-			--photo-size: 80px;
-		}
+	/* Championship sizing */
+	[data-id="championship"] & .player-photo-ring {
+		--photo-size: 80px;
 	}
 }
 
@@ -45,7 +41,7 @@
 	--inner-ring-color: var(--yellow);
 	--ring-thickness: 2px;
 	--gold-ring-thickness: 3px;
-	--photo-size: 70px;
+	--photo-size: 50px;
 	position: relative;
 	z-index: 2;
 	width: calc(
@@ -91,17 +87,18 @@
 	transition: filter 0.3s ease;
 }
 
-/* Placeholder for empty slots */
+/* Grey circle placeholder for empty slots */
 .player-photo-placeholder {
 	position: relative;
 	z-index: 1;
 	width: 100%;
 	height: 100%;
 	border-radius: 50%;
-	background: var(--inner-ring-color);
-	&::after {
+	background: var(--orange);
+	&:after {
 		content: "";
 		transform: translateY(-7px);
+		/* scale: 1.2; */
 		border-radius: 0 0 120% 120%;
 		position: absolute;
 		inset: 0 0 -7px 0;
@@ -142,6 +139,9 @@
 }
 
 /* Winner State */
+.player-node--winner .player-photo {
+	filter: grayscale(0%);
+}
 
 /* Eliminated State */
 .player-node--eliminated .player-photo-ring {
@@ -151,16 +151,9 @@
 
 .player-node--eliminated .player-photo {
 	border-color: #888;
-	filter: grayscale(100%);
 }
 
-/* Non-interactive mode - 50px sizing like original */
-.bracket-container:not(.bracket-container--interactive) .player-node
-	.player-photo-ring {
-	--photo-size: 50px;
-}
-
-/* Empty Slot State - default: yellow outer ring, red inner ring (for non-interactive/homepage) */
+/* Empty Slot State - default: yellow outer ring, orange inner ring (for non-interactive/homepage) */
 .player-node--empty .player-photo-ring {
 	--ring-color: var(--yellow);
 	--inner-ring-color: var(--orange);
@@ -173,18 +166,18 @@
 	--inner-ring-color: #888;
 }
 
-.bracket-container--interactive
-	.player-node--empty
-	.player-photo-placeholder::after {
+.bracket-container--interactive .player-node--empty .player-photo-placeholder {
+	background: var(--inner-ring-color);
+}
+
+.bracket-container--interactive .player-node--empty .player-photo-placeholder::after {
 	filter: grayscale(100%);
 }
 
 /* Pickable State - hoverable/clickable for making predictions */
 .player-node--pickable {
 	cursor: pointer;
-	transition:
-		transform 0.15s ease,
-		box-shadow 0.15s ease;
+	transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .player-node--pickable:hover {
@@ -192,9 +185,7 @@
 }
 
 .player-node--pickable:hover .player-photo-ring {
-	box-shadow:
-		0 0 0 3px var(--yellow),
-		0 0 15px rgba(255, 215, 0, 0.4);
+	box-shadow: 0 0 0 3px var(--yellow), 0 0 15px rgba(255, 215, 0, 0.4);
 }
 
 .player-node--pickable:focus {
@@ -202,16 +193,12 @@
 }
 
 .player-node--pickable:focus-visible .player-photo-ring {
-	box-shadow:
-		0 0 0 3px var(--yellow),
-		0 0 0 5px var(--black);
+	box-shadow: 0 0 0 3px var(--yellow), 0 0 0 5px var(--black);
 }
 
 /* Selected State - user has picked this player (checkmark badge) */
 .player-node--selected .player-photo-ring {
-	box-shadow:
-		0 0 0 2px var(--yellow),
-		0 0 12px rgba(255, 174, 0, 0.4);
+	box-shadow: 0 0 0 2px var(--yellow), 0 0 12px rgba(255, 174, 0, 0.4);
 }
 
 /* Checkmark entrance animation */
@@ -284,8 +271,8 @@
 
 /* Custom bracket controls styling */
 .bracket-controls.react-flow__controls {
-	top: 10px;
-	right: 10px;
+	top: 0;
+	right: 0;
 	bottom: auto;
 	left: auto;
 	box-shadow: none;
@@ -321,34 +308,4 @@
 
 .bracket-container .react-flow__attribution a {
 	color: var(--yellow);
-}
-
-/* Mobile responsive styles */
-@media (max-width: 768px) {
-	.player-node {
-		width: 200px;
-	}
-
-	.player-photo-ring {
-		--photo-size: 50px;
-	}
-
-	.player-info {
-		padding: 8px 14px 8px 18px;
-		min-width: 120px;
-	}
-
-	.player-name {
-		font-size: 0.9rem;
-	}
-
-	.bracket-controls .react-flow__controls-button {
-		width: 40px;
-		height: 40px;
-	}
-
-	.bracket-controls .react-flow__controls-button svg {
-		max-width: 18px;
-		max-height: 18px;
-	}
 }
