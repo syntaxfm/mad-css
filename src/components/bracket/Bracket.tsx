@@ -8,25 +8,31 @@ import {
 	ReactFlow,
 	type ReactFlowInstance,
 } from "@xyflow/react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "@xyflow/react/dist/style.css";
 import {
-	// bracket,
 	emptyBracket as bracket,
 	type Game,
 	isLoser,
 	isWinner,
 	type Player,
+	players,
 	splitForDisplay,
 } from "@/data/players";
+import { getPickablePlayersForGame } from "@/hooks/usePredictions";
 import { EmptySlotFlow, PlayerNodeFlow } from "./PlayerNode";
 import "./bracket.css";
 
-// Ring colors for each side
-const LEFT_RING_COLOR = "#f3370e";
-const RIGHT_RING_COLOR = "#5CE1E6";
+export interface BracketProps {
+	isInteractive?: boolean;
+	predictions?: Record<string, string>;
+	onPick?: (gameId: string, playerId: string) => void;
+	isLocked?: boolean;
+	isAuthenticated?: boolean;
+}
 
-// Custom edge component
+const DEFAULT_RING_COLOR = "var(--yellow)";
+
 function BracketEdge({
 	sourceX,
 	sourceY,
@@ -48,28 +54,30 @@ function BracketEdge({
 	return <path d={edgePath} fill="none" stroke="#FFFFFF" strokeWidth={3} />;
 }
 
-// Register custom node types
 const nodeTypes = {
 	playerNode: PlayerNodeFlow,
 	emptySlot: EmptySlotFlow,
 };
 
-// Register custom edge types
 const edgeTypes = {
 	bracket: BracketEdge,
 };
 
-// Node dimensions for positioning
 const NODE_HEIGHT = 70;
 const VERTICAL_GAP = 76;
 const MATCH_GAP = NODE_HEIGHT + VERTICAL_GAP;
 const ROUND_GAP = 220;
+const RIGHT_START_X = ROUND_GAP * 7;
 
-// Convert a Player to PlayerData for the node
 function playerToNodeData(
 	player: Player,
 	game: Game,
 	ringColor: string,
+	options?: {
+		isSelected?: boolean;
+		isPickable?: boolean;
+		onPick?: (gameId: string, playerId: string) => void;
+	},
 ): {
 	photo: string;
 	name: string;
@@ -77,6 +85,11 @@ function playerToNodeData(
 	ringColor: string;
 	isWinner: boolean;
 	isEliminated: boolean;
+	isSelected?: boolean;
+	isPickable?: boolean;
+	playerId?: string;
+	gameId?: string;
+	onPick?: (gameId: string, playerId: string) => void;
 } {
 	return {
 		photo: player.photo,
@@ -85,10 +98,14 @@ function playerToNodeData(
 		ringColor,
 		isWinner: isWinner(game, player),
 		isEliminated: isLoser(game, player),
+		isSelected: options?.isSelected,
+		isPickable: options?.isPickable,
+		playerId: player.id,
+		gameId: game.id,
+		onPick: options?.onPick,
 	};
 }
 
-// Create a node for either a player or an empty slot
 function createNode(
 	id: string,
 	player: Player | undefined,
@@ -96,13 +113,18 @@ function createNode(
 	ringColor: string,
 	position: { x: number; y: number },
 	emptyText?: string,
+	predictionOptions?: {
+		isSelected?: boolean;
+		isPickable?: boolean;
+		onPick?: (gameId: string, playerId: string) => void;
+	},
 ): Node {
 	if (player) {
 		return {
 			id,
 			type: "playerNode",
 			position,
-			data: playerToNodeData(player, game, ringColor),
+			data: playerToNodeData(player, game, ringColor, predictionOptions),
 		};
 	}
 	return {
@@ -113,213 +135,369 @@ function createNode(
 	};
 }
 
-// Generate nodes from bracket data
-function generateNodes(): Node[] {
+function generateNodes(
+	isInteractive: boolean,
+	predictions: Record<string, string> = {},
+	onPick?: (gameId: string, playerId: string) => void,
+	isPickingEnabled = false,
+): Node[] {
 	const nodes: Node[] = [];
 
-	// Split each round into left/right halves
+	const getPredictionOptions = (
+		game: Game,
+		player: Player | undefined,
+	): {
+		isSelected: boolean;
+		isPickable: boolean;
+		onPick?: (gameId: string, playerId: string) => void;
+	} => {
+		if (!isInteractive || !player) {
+			return { isSelected: false, isPickable: false };
+		}
+
+		const pickablePlayers = getPickablePlayersForGame(game.id, predictions);
+		const bothPlayersDetermined =
+			pickablePlayers[0] !== undefined && pickablePlayers[1] !== undefined;
+		const isPickable =
+			isPickingEnabled &&
+			bothPlayersDetermined &&
+			(player.id === pickablePlayers[0] || player.id === pickablePlayers[1]);
+		const isSelected = predictions[game.id] === player.id;
+
+		return {
+			isSelected,
+			isPickable,
+			onPick: isPickable ? onPick : undefined,
+		};
+	};
+
 	const round1 = splitForDisplay(bracket.round1);
 	const quarters = splitForDisplay(bracket.quarters);
 	const semis = splitForDisplay(bracket.semis);
 
-	// ===========================================================================
-	// LEFT SIDE (first half of each round)
-	// ===========================================================================
-
-	// Round 1 - Left side (games 0-3)
+	// LEFT SIDE
 	round1.left.forEach((game, gameIndex) => {
 		const baseY = gameIndex * 2 * MATCH_GAP;
+		const globalGameIndex = gameIndex;
+		const player1 = isInteractive ? players[globalGameIndex * 2] : undefined;
+		const player2 = isInteractive
+			? players[globalGameIndex * 2 + 1]
+			: undefined;
 
-		// Player 1
+		const p1Options = getPredictionOptions(game, player1);
 		nodes.push(
-			createNode(`${game.id}-p1`, game.player1, game, LEFT_RING_COLOR, {
-				x: 0,
-				y: baseY,
-			}),
+			createNode(
+				`${game.id}-p1`,
+				player1,
+				game,
+				DEFAULT_RING_COLOR,
+				{ x: 0, y: baseY },
+				"TBD",
+				p1Options,
+			),
 		);
 
-		// Player 2
+		const p2Options = getPredictionOptions(game, player2);
 		nodes.push(
-			createNode(`${game.id}-p2`, game.player2, game, LEFT_RING_COLOR, {
-				x: 0,
-				y: baseY + MATCH_GAP,
-			}),
+			createNode(
+				`${game.id}-p2`,
+				player2,
+				game,
+				DEFAULT_RING_COLOR,
+				{ x: 0, y: baseY + MATCH_GAP },
+				"TBD",
+				p2Options,
+			),
 		);
 	});
 
-	// Quarterfinals - Left side (games 0-1)
 	quarters.left.forEach((game, gameIndex) => {
 		const baseY = gameIndex * 4 * MATCH_GAP + MATCH_GAP / 2;
+		let player1: Player | undefined;
+		let player2: Player | undefined;
 
-		// Player 1
+		if (isInteractive) {
+			const pickablePlayers = getPickablePlayersForGame(game.id, predictions);
+			player1 = pickablePlayers[0]
+				? players.find((p) => p.id === pickablePlayers[0])
+				: undefined;
+			player2 = pickablePlayers[1]
+				? players.find((p) => p.id === pickablePlayers[1])
+				: undefined;
+		}
+
+		const p1Options = getPredictionOptions(game, player1);
 		nodes.push(
-			createNode(`${game.id}-p1`, game.player1, game, LEFT_RING_COLOR, {
-				x: ROUND_GAP,
-				y: baseY,
-			}),
+			createNode(
+				`${game.id}-p1`,
+				player1,
+				game,
+				DEFAULT_RING_COLOR,
+				{ x: ROUND_GAP, y: baseY },
+				"TBD",
+				p1Options,
+			),
 		);
 
-		// Player 2
+		const p2Options = getPredictionOptions(game, player2);
 		nodes.push(
-			createNode(`${game.id}-p2`, game.player2, game, LEFT_RING_COLOR, {
-				x: ROUND_GAP,
-				y: baseY + 2 * MATCH_GAP,
-			}),
+			createNode(
+				`${game.id}-p2`,
+				player2,
+				game,
+				DEFAULT_RING_COLOR,
+				{ x: ROUND_GAP, y: baseY + 2 * MATCH_GAP },
+				"TBD",
+				p2Options,
+			),
 		);
 	});
 
-	// Semifinals - Left side (game 0)
 	semis.left.forEach((game) => {
 		const baseY = 1.5 * MATCH_GAP;
+		let player1: Player | undefined;
+		let player2: Player | undefined;
 
-		// Player 1
+		if (isInteractive) {
+			const pickablePlayers = getPickablePlayersForGame(game.id, predictions);
+			player1 = pickablePlayers[0]
+				? players.find((p) => p.id === pickablePlayers[0])
+				: undefined;
+			player2 = pickablePlayers[1]
+				? players.find((p) => p.id === pickablePlayers[1])
+				: undefined;
+		}
+
+		const p1Options = getPredictionOptions(game, player1);
 		nodes.push(
-			createNode(`${game.id}-p1`, game.player1, game, LEFT_RING_COLOR, {
-				x: ROUND_GAP * 2,
-				y: baseY,
-			}),
+			createNode(
+				`${game.id}-p1`,
+				player1,
+				game,
+				DEFAULT_RING_COLOR,
+				{ x: ROUND_GAP * 2, y: baseY },
+				"TBD",
+				p1Options,
+			),
 		);
 
-		// Player 2
+		const p2Options = getPredictionOptions(game, player2);
 		nodes.push(
-			createNode(`${game.id}-p2`, game.player2, game, LEFT_RING_COLOR, {
-				x: ROUND_GAP * 2,
-				y: baseY + 4 * MATCH_GAP,
-			}),
+			createNode(
+				`${game.id}-p2`,
+				player2,
+				game,
+				DEFAULT_RING_COLOR,
+				{ x: ROUND_GAP * 2, y: baseY + 4 * MATCH_GAP },
+				"TBD",
+				p2Options,
+			),
 		);
 	});
 
-	// Left finalist slot
-	nodes.push({
-		id: `left-finalist`,
-		type: "emptySlot",
-		position: { x: ROUND_GAP * 3, y: 3.5 * MATCH_GAP },
-		data: { text: "Left Finalist" },
-	});
+	// Left finalist (final-p1)
+	const finalGame = bracket.finals[0];
+	let leftFinalist: Player | undefined;
+	if (isInteractive) {
+		const leftFinalistId = predictions["sf-0"];
+		leftFinalist = leftFinalistId
+			? players.find((p) => p.id === leftFinalistId)
+			: undefined;
+	}
+	const leftFinalistOptions = getPredictionOptions(finalGame, leftFinalist);
+	nodes.push(
+		createNode(
+			`final-p1`,
+			leftFinalist,
+			finalGame,
+			DEFAULT_RING_COLOR,
+			{ x: ROUND_GAP * 3, y: 3.5 * MATCH_GAP },
+			"Left Finalist",
+			leftFinalistOptions,
+		),
+	);
 
-	// ===========================================================================
-	// RIGHT SIDE (second half of each round)
-	// ===========================================================================
-	const rightStartX = ROUND_GAP * 7;
-
-	// Round 1 - Right side (games 4-7)
+	// RIGHT SIDE
 	round1.right.forEach((game, gameIndex) => {
 		const baseY = gameIndex * 2 * MATCH_GAP;
+		const globalGameIndex = gameIndex + 4;
+		const player1 = isInteractive ? players[globalGameIndex * 2] : undefined;
+		const player2 = isInteractive
+			? players[globalGameIndex * 2 + 1]
+			: undefined;
 
-		// Player 1
+		const p1Options = getPredictionOptions(game, player1);
 		nodes.push(
-			createNode(`${game.id}-p1`, game.player1, game, RIGHT_RING_COLOR, {
-				x: rightStartX,
-				y: baseY,
-			}),
+			createNode(
+				`${game.id}-p1`,
+				player1,
+				game,
+				DEFAULT_RING_COLOR,
+				{ x: RIGHT_START_X, y: baseY },
+				"TBD",
+				p1Options,
+			),
 		);
 
-		// Player 2
+		const p2Options = getPredictionOptions(game, player2);
 		nodes.push(
-			createNode(`${game.id}-p2`, game.player2, game, RIGHT_RING_COLOR, {
-				x: rightStartX,
-				y: baseY + MATCH_GAP,
-			}),
+			createNode(
+				`${game.id}-p2`,
+				player2,
+				game,
+				DEFAULT_RING_COLOR,
+				{ x: RIGHT_START_X, y: baseY + MATCH_GAP },
+				"TBD",
+				p2Options,
+			),
 		);
 	});
 
-	// Quarterfinals - Right side (games 2-3) ROUND 2
 	quarters.right.forEach((game, gameIndex) => {
 		const baseY = gameIndex * 4 * MATCH_GAP + MATCH_GAP / 2;
+		let player1: Player | undefined;
+		let player2: Player | undefined;
 
-		// Player 1
+		if (isInteractive) {
+			const pickablePlayers = getPickablePlayersForGame(game.id, predictions);
+			player1 = pickablePlayers[0]
+				? players.find((p) => p.id === pickablePlayers[0])
+				: undefined;
+			player2 = pickablePlayers[1]
+				? players.find((p) => p.id === pickablePlayers[1])
+				: undefined;
+		}
+
+		const p1Options = getPredictionOptions(game, player1);
 		nodes.push(
-			createNode(`${game.id}-p1`, game.player1, game, RIGHT_RING_COLOR, {
-				x: rightStartX - ROUND_GAP,
-				y: baseY,
-			}),
+			createNode(
+				`${game.id}-p1`,
+				player1,
+				game,
+				DEFAULT_RING_COLOR,
+				{ x: RIGHT_START_X - ROUND_GAP, y: baseY },
+				"TBD",
+				p1Options,
+			),
 		);
 
-		// Player 2
+		const p2Options = getPredictionOptions(game, player2);
 		nodes.push(
-			createNode(`${game.id}-p2`, game.player2, game, RIGHT_RING_COLOR, {
-				x: rightStartX - ROUND_GAP,
-				y: baseY + 2 * MATCH_GAP,
-			}),
+			createNode(
+				`${game.id}-p2`,
+				player2,
+				game,
+				DEFAULT_RING_COLOR,
+				{ x: RIGHT_START_X - ROUND_GAP, y: baseY + 2 * MATCH_GAP },
+				"TBD",
+				p2Options,
+			),
 		);
 	});
 
-	// Semifinals - Right side (game 1) ROUND 3
 	semis.right.forEach((game) => {
 		const baseY = 1.5 * MATCH_GAP;
+		let player1: Player | undefined;
+		let player2: Player | undefined;
 
-		// Player 1
+		if (isInteractive) {
+			const pickablePlayers = getPickablePlayersForGame(game.id, predictions);
+			player1 = pickablePlayers[0]
+				? players.find((p) => p.id === pickablePlayers[0])
+				: undefined;
+			player2 = pickablePlayers[1]
+				? players.find((p) => p.id === pickablePlayers[1])
+				: undefined;
+		}
+
+		const p1Options = getPredictionOptions(game, player1);
 		nodes.push(
-			createNode(`${game.id}-p1`, game.player1, game, RIGHT_RING_COLOR, {
-				x: rightStartX - ROUND_GAP * 2,
-				y: baseY,
-			}),
+			createNode(
+				`${game.id}-p1`,
+				player1,
+				game,
+				DEFAULT_RING_COLOR,
+				{ x: RIGHT_START_X - ROUND_GAP * 2, y: baseY },
+				"TBD",
+				p1Options,
+			),
 		);
 
-		// Player 2
+		const p2Options = getPredictionOptions(game, player2);
 		nodes.push(
-			createNode(`${game.id}-p2`, game.player2, game, RIGHT_RING_COLOR, {
-				x: rightStartX - ROUND_GAP * 2,
-				y: baseY + 4 * MATCH_GAP,
-			}),
+			createNode(
+				`${game.id}-p2`,
+				player2,
+				game,
+				DEFAULT_RING_COLOR,
+				{ x: RIGHT_START_X - ROUND_GAP * 2, y: baseY + 4 * MATCH_GAP },
+				"TBD",
+				p2Options,
+			),
 		);
 	});
 
-	// Right finalist slot
-	nodes.push({
-		id: `right-finalist`,
-		type: "emptySlot",
-		position: { x: rightStartX - ROUND_GAP * 2.5, y: 3.5 * MATCH_GAP },
-		// position: { x: ROUND_GAP * 3, y: 3.5 * MATCH_GAP },
-		data: {
-			text: "Right Finalist",
-		},
-	});
+	// Right finalist (final-p2)
+	let rightFinalist: Player | undefined;
+	if (isInteractive) {
+		const rightFinalistId = predictions["sf-1"];
+		rightFinalist = rightFinalistId
+			? players.find((p) => p.id === rightFinalistId)
+			: undefined;
+	}
+	const rightFinalistOptions = getPredictionOptions(finalGame, rightFinalist);
+	nodes.push(
+		createNode(
+			`final-p2`,
+			rightFinalist,
+			finalGame,
+			DEFAULT_RING_COLOR,
+			{ x: RIGHT_START_X - ROUND_GAP * 3, y: 3.5 * MATCH_GAP },
+			"Right Finalist",
+			rightFinalistOptions,
+		),
+	);
 
-	// ===========================================================================
-	// CHAMPIONSHIP (center)
-	// ===========================================================================
-	const finalGame = bracket.finals[0];
+	// CHAMPIONSHIP
+	let champion: Player | undefined;
+	if (isInteractive) {
+		const championId = predictions.final;
+		champion = championId
+			? players.find((p) => p.id === championId)
+			: undefined;
+	}
+
 	nodes.push({
 		id: "championship",
-		type: finalGame?.winner ? "playerNode" : "emptySlot",
+		type: champion ? "playerNode" : "emptySlot",
 		position: {
 			x: ROUND_GAP * 3.5,
 			y: 0,
 		},
-		data: finalGame?.winner
-			? playerToNodeData(finalGame.winner, finalGame, "#FFD700")
+		data: champion
+			? playerToNodeData(champion, finalGame, DEFAULT_RING_COLOR)
 			: { text: "CHAMPION" },
 	});
 
 	return nodes;
 }
 
-// Edge style
 const edgeStyle: React.CSSProperties = {
 	stroke: "#ffffff",
 	strokeWidth: 3,
 	filter: "drop-shadow(0px 0px 7px black)",
 };
 
-// Generate edges connecting the bracket
 function generateEdges(): Edge[] {
 	const edges: Edge[] = [];
-
-	// Split each round into left/right halves
 	const round1 = splitForDisplay(bracket.round1);
 	const quarters = splitForDisplay(bracket.quarters);
 	const semis = splitForDisplay(bracket.semis);
 
-	// ===========================================================================
 	// LEFT SIDE EDGES
-	// ===========================================================================
-
-	// Round 1 to Quarters (left)
 	round1.left.forEach((game, gameIndex) => {
 		const quarterGame = quarters.left[Math.floor(gameIndex / 2)];
 
-		// Player 1 to quarter game
 		edges.push({
 			id: `${game.id}-p1-to-${quarterGame.id}`,
 			source: `${game.id}-p1`,
@@ -330,7 +508,6 @@ function generateEdges(): Edge[] {
 			targetHandle: "in-top",
 		});
 
-		// Player 2 to quarter game
 		edges.push({
 			id: `${game.id}-p2-to-${quarterGame.id}`,
 			source: `${game.id}-p2`,
@@ -341,7 +518,6 @@ function generateEdges(): Edge[] {
 		});
 	});
 
-	// Quarters to Semis (left)
 	quarters.left.forEach((game, gameIndex) => {
 		const semiGame = semis.left[0];
 
@@ -366,12 +542,11 @@ function generateEdges(): Edge[] {
 		});
 	});
 
-	// Semis to Left Finalist
 	semis.left.forEach((game) => {
 		edges.push({
-			id: `${game.id}-p1-to-left-finalist`,
+			id: `${game.id}-p1-to-final-p1`,
 			source: `${game.id}-p1`,
-			target: `left-finalist`,
+			target: `final-p1`,
 			type: "bracket",
 			style: edgeStyle,
 			sourceHandle: "out-right",
@@ -379,9 +554,9 @@ function generateEdges(): Edge[] {
 		});
 
 		edges.push({
-			id: `${game.id}-p2-to-left-finalist`,
+			id: `${game.id}-p2-to-final-p1`,
 			source: `${game.id}-p2`,
-			target: `left-finalist`,
+			target: `final-p1`,
 			type: "bracket",
 			style: edgeStyle,
 			sourceHandle: "out-right",
@@ -389,10 +564,9 @@ function generateEdges(): Edge[] {
 		});
 	});
 
-	// Left finalist to Championship
 	edges.push({
-		id: "left-finalist-to-champ",
-		source: `left-finalist`,
+		id: "final-p1-to-champ",
+		source: `final-p1`,
 		target: "championship",
 		type: "bracket",
 		style: edgeStyle,
@@ -400,11 +574,7 @@ function generateEdges(): Edge[] {
 		targetHandle: "in-bottom",
 	});
 
-	// ===========================================================================
 	// RIGHT SIDE EDGES
-	// ===========================================================================
-
-	// Round 1 to Quarters (right)
 	round1.right.forEach((game, gameIndex) => {
 		const quarterGame = quarters.right[Math.floor(gameIndex / 2)];
 
@@ -429,7 +599,6 @@ function generateEdges(): Edge[] {
 		});
 	});
 
-	// Quarters to Semis (right)
 	quarters.right.forEach((game, gameIndex) => {
 		const semiGame = semis.right[0];
 
@@ -454,12 +623,11 @@ function generateEdges(): Edge[] {
 		});
 	});
 
-	// Semis to Right Finalist
 	semis.right.forEach((game) => {
 		edges.push({
-			id: `${game.id}-p1-to-right-finalist`,
+			id: `${game.id}-p1-to-final-p2`,
 			source: `${game.id}-p1`,
-			target: `right-finalist`,
+			target: `final-p2`,
 			type: "bracket",
 			style: edgeStyle,
 			sourceHandle: "out-left",
@@ -467,9 +635,9 @@ function generateEdges(): Edge[] {
 		});
 
 		edges.push({
-			id: `${game.id}-p2-to-right-finalist`,
+			id: `${game.id}-p2-to-final-p2`,
 			source: `${game.id}-p2`,
-			target: `right-finalist`,
+			target: `final-p2`,
 			type: "bracket",
 			style: edgeStyle,
 			sourceHandle: "out-left",
@@ -477,10 +645,9 @@ function generateEdges(): Edge[] {
 		});
 	});
 
-	// Right finalist to Championship
 	edges.push({
-		id: "right-finalist-to-champ",
-		source: `right-finalist`,
+		id: "final-p2-to-champ",
+		source: `final-p2`,
 		target: "championship",
 		type: "bracket",
 		style: edgeStyle,
@@ -491,24 +658,42 @@ function generateEdges(): Edge[] {
 	return edges;
 }
 
-const initialNodes = generateNodes();
-const initialEdges = generateEdges();
-
 const defaultEdgeOptions = {
 	type: "bracket",
 	style: edgeStyle,
 };
 
-// Padding used for fitView
 const FIT_VIEW_PADDING = 0.05;
 
-function BracketContent() {
+function BracketControls() {
+	return (
+		<Controls
+			orientation="horizontal"
+			showInteractive={false}
+			className="bracket-controls"
+		/>
+	);
+}
+
+function BracketContent({
+	isInteractive = false,
+	predictions = {},
+	onPick,
+	isLocked = false,
+	isAuthenticated = false,
+}: BracketProps) {
+	const isPickingEnabled = isInteractive && isAuthenticated && !isLocked;
+
+	const nodes = useMemo(
+		() => generateNodes(isInteractive, predictions, onPick, isPickingEnabled),
+		[isInteractive, predictions, onPick, isPickingEnabled],
+	);
+	const edges = useMemo(() => generateEdges(), []);
+
 	const containerRef = useRef<HTMLDivElement>(null);
 	const [containerHeight, setContainerHeight] = useState<number | null>(null);
 	const rfInstanceRef = useRef<ReactFlowInstance | null>(null);
 	const boundsRef = useRef<{ width: number; height: number } | null>(null);
-
-	// Scroll zoom lock state - prevents scroll trap
 	const [scrollZoomLocked, setScrollZoomLocked] = useState(true);
 	const unlockTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -520,7 +705,6 @@ function BracketContent() {
 	}, []);
 
 	const handleMouseEnter = useCallback(() => {
-		// Start 1.5s timer to unlock scroll zoom
 		clearUnlockTimer();
 		unlockTimerRef.current = setTimeout(() => {
 			setScrollZoomLocked(false);
@@ -528,18 +712,15 @@ function BracketContent() {
 	}, [clearUnlockTimer]);
 
 	const handleMouseLeave = useCallback(() => {
-		// Lock scroll zoom and cancel any pending unlock
 		clearUnlockTimer();
 		setScrollZoomLocked(true);
 	}, [clearUnlockTimer]);
 
 	const handleClick = useCallback(() => {
-		// Instantly unlock on click
 		clearUnlockTimer();
 		setScrollZoomLocked(false);
 	}, [clearUnlockTimer]);
 
-	// Cleanup timer on unmount
 	useEffect(() => {
 		return () => clearUnlockTimer();
 	}, [clearUnlockTimer]);
@@ -551,14 +732,8 @@ function BracketContent() {
 		if (containerWidth === 0) return;
 
 		const { width: contentWidth, height: contentHeight } = boundsRef.current;
-
-		// Calculate the aspect ratio of the bracket content
 		const aspectRatio = contentHeight / contentWidth;
-
-		// Account for fitView padding
 		const paddingMultiplier = 1 + FIT_VIEW_PADDING * 2;
-
-		// Calculate height based on width and aspect ratio
 		const scaledHeight = containerWidth * aspectRatio * paddingMultiplier;
 
 		setContainerHeight(scaledHeight);
@@ -566,101 +741,84 @@ function BracketContent() {
 
 	const handleInit = (instance: ReactFlowInstance) => {
 		rfInstanceRef.current = instance;
-
-		// Get the bounds of all nodes (includes node dimensions)
 		const nodes = instance.getNodes();
 		const bounds = getNodesBounds(nodes);
-
-		// Store bounds for recalculation on resize
 		boundsRef.current = { width: bounds.width, height: bounds.height };
-
 		calculateHeight();
+
+		requestAnimationFrame(() => {
+			requestAnimationFrame(() => {
+				instance.fitView({ padding: FIT_VIEW_PADDING });
+			});
+		});
 	};
 
-	// Re-fit view when height changes
-	useEffect(() => {
-		if (containerHeight && rfInstanceRef.current) {
-			// Small delay to let the DOM update with new height
-			const timer = setTimeout(() => {
-				rfInstanceRef.current?.fitView({ padding: FIT_VIEW_PADDING });
-			}, 10);
-			return () => clearTimeout(timer);
-		}
-	}, [containerHeight]);
-
-	// Recalculate height on window resize
 	useEffect(() => {
 		const handleResize = () => {
 			calculateHeight();
+			rfInstanceRef.current?.fitView({ padding: FIT_VIEW_PADDING });
 		};
-
 		window.addEventListener("resize", handleResize);
 		return () => window.removeEventListener("resize", handleResize);
 	}, [calculateHeight]);
 
+	const handleNodeClick = useCallback(
+		(_event: React.MouseEvent, node: Node) => {
+			if (!isInteractive) return;
+
+			const data = node.data as {
+				isPickable?: boolean;
+				gameId?: string;
+				playerId?: string;
+				onPick?: (gameId: string, playerId: string) => void;
+			};
+			if (data.isPickable && data.onPick && data.gameId && data.playerId) {
+				data.onPick(data.gameId, data.playerId);
+			}
+		},
+		[isInteractive],
+	);
+
 	return (
-		// biome-ignore lint/a11y/useKeyWithClickEvents: this is a enhancement for mouse users. Feature still fully accessible.
+		// biome-ignore lint/a11y/useKeyWithClickEvents: enhancement for mouse users
 		// biome-ignore lint/a11y/noStaticElementInteractions: see above
 		<div
 			ref={containerRef}
-			className="bracket-container"
+			className={`bracket-container${isInteractive ? " bracket-container--interactive" : ""}`}
 			style={containerHeight ? { height: containerHeight } : undefined}
 			onMouseEnter={handleMouseEnter}
 			onMouseLeave={handleMouseLeave}
 			onClick={handleClick}
 		>
-			{/* Debug indicator for scroll zoom lock state */}
-			{/* <div
-				style={{
-					position: "relative",
-					zIndex: 10,
-					top: 10,
-					left: 10,
-					zIndex: 10,
-					padding: "4px 8px",
-					background: scrollZoomLocked ? "#ff4444" : "#44ff44",
-					color: scrollZoomLocked ? "#fff" : "#000",
-					fontFamily: "monospace",
-					fontSize: 12,
-					borderRadius: 4,
-				}}
-			>
-				Scroll Zoom: {scrollZoomLocked ? "LOCKED" : "UNLOCKED"}
-			</div> */}
 			<ReactFlow
-				nodes={initialNodes}
-				edges={initialEdges}
+				nodes={nodes}
+				edges={edges}
 				nodeTypes={nodeTypes}
 				edgeTypes={edgeTypes}
 				defaultEdgeOptions={defaultEdgeOptions}
-				fitView
-				fitViewOptions={{ padding: FIT_VIEW_PADDING }}
-				minZoom={0.1}
+				minZoom={0.05}
 				maxZoom={1.5}
 				nodesDraggable={false}
 				nodesConnectable={false}
 				elementsSelectable={false}
 				zoomOnScroll={!scrollZoomLocked}
+				zoomOnPinch={true}
+				panOnDrag={true}
 				preventScrolling={!scrollZoomLocked}
+				translateExtent={[
+					[-500, -500],
+					[2500, 1500],
+				]}
+				onNodeClick={isInteractive ? handleNodeClick : undefined}
 				onInit={handleInit}
 			>
-				<Controls
-					orientation="horizontal"
-					showInteractive={false}
-					style={{
-						position: "absolute",
-						top: 0,
-						bottom: "auto",
-						right: 0,
-						left: "auto",
-					}}
-				/>
+				<BracketControls />
 			</ReactFlow>
 		</div>
 	);
 }
 
-export function Bracket() {
+export function Bracket(props: BracketProps = {}) {
 	const [mounted, setMounted] = useState(false);
 
 	useEffect(() => {
@@ -671,5 +829,5 @@ export function Bracket() {
 		return <div className="bracket-container" />;
 	}
 
-	return <BracketContent />;
+	return <BracketContent {...props} />;
 }

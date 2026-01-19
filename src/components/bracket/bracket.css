@@ -6,7 +6,7 @@
 	gap: 0;
 	position: relative;
 
-	/* Shared styles for finalist and championship nodes */
+	/* Shared styles for finalist and championship nodes - both modes */
 	[data-id*="final-p"] &,
 	[data-id="championship"] & {
 		flex-direction: column;
@@ -25,10 +25,17 @@
 		}
 	}
 
-	/* Championship-specific overrides */
-	[data-id="championship"] & {
+	/* Championship-specific size - only in interactive mode */
+	.bracket-container--interactive [data-id="championship"] & {
 		.player-photo-ring {
 			--photo-size: 100px;
+		}
+	}
+
+	/* Finalist-specific size - only in interactive mode */
+	.bracket-container--interactive [data-id*="final-p"] & {
+		.player-photo-ring {
+			--photo-size: 80px;
 		}
 	}
 }
@@ -84,7 +91,7 @@
 	transition: filter 0.3s ease;
 }
 
-/* Grey circle placeholder for empty slots */
+/* Placeholder for empty slots */
 .player-photo-placeholder {
 	position: relative;
 	z-index: 1;
@@ -102,7 +109,6 @@
 		background-size: 500%;
 		background-position: var(--x) var(--y);
 		background-repeat: no-repeat;
-		filter: grayscale(100%);
 	}
 }
 
@@ -148,11 +154,29 @@
 	filter: grayscale(100%);
 }
 
-/* Empty Slot State - grey version of player node */
+/* Non-interactive mode - 50px sizing like original */
+.bracket-container:not(.bracket-container--interactive) .player-node
+	.player-photo-ring {
+	--photo-size: 50px;
+}
+
+/* Empty Slot State - default: yellow outer ring, red inner ring (for non-interactive/homepage) */
 .player-node--empty .player-photo-ring {
+	--ring-color: var(--yellow);
+	--inner-ring-color: var(--orange);
+	overflow: visible;
+}
+
+/* Empty Slot State - interactive mode: gray rings, grayscale */
+.bracket-container--interactive .player-node--empty .player-photo-ring {
 	--ring-color: #666;
 	--inner-ring-color: #888;
-	overflow: visible;
+}
+
+.bracket-container--interactive
+	.player-node--empty
+	.player-photo-placeholder::after {
+	filter: grayscale(100%);
 }
 
 /* Pickable State - hoverable/clickable for making predictions */
