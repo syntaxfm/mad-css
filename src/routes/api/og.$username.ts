@@ -10,91 +10,57 @@ export const Route = createFileRoute("/api/og/$username")({
 	server: {
 		handlers: {
 			GET: async ({ params, request }) => {
-				// In development, redirect to static OG image (WASM init fails on hot reload)
-				if (import.meta.env.DEV) {
-					return new Response(null, {
-						status: 302,
-						headers: { Location: "/og.jpg" },
-					});
-				}
-
 				const { username } = params;
 				const url = new URL(request.url);
+				const db = createDb(env.DB);
 
-				// Test mode: bypass DB and use mock data to verify image generation
-				const isTestMode = url.searchParams.get("test") === "true";
+				// Find user by username
+				const users = await db
+					.select({
+						id: schema.user.id,
+						name: schema.user.name,
+						image: schema.user.image,
+						username: schema.user.username,
+					})
+					.from(schema.user)
+					.where(eq(schema.user.username, username))
+					.limit(1);
 
-				let user: {
-					name: string | null;
-					image: string | null;
-					username: string;
-				};
-				let champion: (typeof players)[number] | null = null;
-
-				if (isTestMode) {
-					user = {
-						name: "Test User",
-						image: "https://avatars.githubusercontent.com/u/1?v=4",
-						username,
-					};
-					// Use mock champion with external image for testing
-					champion = {
-						id: "test",
-						name: "Wes Bos",
-						photo: "https://avatars.githubusercontent.com/u/176013?v=4",
-						byline: "Test",
-					};
-				} else {
-					const db = createDb(env.DB);
-
-					// Find user by username
-					const users = await db
-						.select({
-							id: schema.user.id,
-							name: schema.user.name,
-							image: schema.user.image,
-							username: schema.user.username,
-						})
-						.from(schema.user)
-						.where(eq(schema.user.username, username))
-						.limit(1);
-
-					if (users.length === 0 || !users[0].username) {
-						return new Response("User not found", { status: 404 });
-					}
-
-					user = users[0] as typeof user;
-
-					// Check if bracket is locked
-					const bracketStatus = await db
-						.select()
-						.from(schema.userBracketStatus)
-						.where(eq(schema.userBracketStatus.userId, users[0].id))
-						.limit(1);
-
-					if (!bracketStatus[0]?.isLocked) {
-						return new Response("Bracket not locked", { status: 403 });
-					}
-
-					// Get champion pick
-					const championPick = await db
-						.select({
-							predictedWinnerId: schema.userPrediction.predictedWinnerId,
-						})
-						.from(schema.userPrediction)
-						.where(
-							and(
-								eq(schema.userPrediction.userId, users[0].id),
-								eq(schema.userPrediction.gameId, "final"),
-							),
-						)
-						.limit(1);
-
-					const championId = championPick[0]?.predictedWinnerId;
-					champion = championId
-						? (players.find((p) => p.id === championId) ?? null)
-						: null;
+				if (users.length === 0 || !users[0].username) {
+					return new Response("User not found", { status: 404 });
 				}
+
+				const user = users[0];
+
+				// Check if bracket is locked
+				const bracketStatus = await db
+					.select()
+					.from(schema.userBracketStatus)
+					.where(eq(schema.userBracketStatus.userId, users[0].id))
+					.limit(1);
+
+				if (!bracketStatus[0]?.isLocked) {
+					return new Response("Bracket not locked", { status: 403 });
+				}
+
+				// Get champion pick
+				const championPick = await db
+					.select({
+						predictedWinnerId: schema.userPrediction.predictedWinnerId,
+					})
+					.from(schema.userPrediction)
+					.where(
+						and(
+							eq(schema.userPrediction.userId, users[0].id),
+							eq(schema.userPrediction.gameId, "final"),
+						),
+					)
+					.limit(1);
+
+				const championId = championPick[0]?.predictedWinnerId;
+				const champion = championId
+					? (players.find((p) => p.id === championId) ?? null)
+					: null;
 
 				// Build absolute URLs for images
 				const baseUrl = `${url.protocol}//${url.host}`;

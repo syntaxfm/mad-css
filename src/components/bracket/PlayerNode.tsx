@@ -13,6 +13,8 @@ export interface PlayerData {
 	isWinner?: boolean;
 	isEliminated?: boolean;
 	isSelected?: boolean;
+	isCorrect?: boolean;
+	isIncorrect?: boolean;
 	isPickable?: boolean;
 	playerId?: string;
 	gameId?: string;
@@ -28,6 +30,8 @@ interface PlayerNodeProps {
 	isWinner?: boolean;
 	isEliminated?: boolean;
 	isSelected?: boolean;
+	isCorrect?: boolean;
+	isIncorrect?: boolean;
 	isPickable?: boolean;
 	playerId?: string;
 	gameId?: string;
@@ -42,6 +46,8 @@ export function PlayerNode({
 	isWinner = false,
 	isEliminated = false,
 	isSelected = false,
+	isCorrect = false,
+	isIncorrect = false,
 	isPickable = false,
 	playerId,
 	gameId,
@@ -52,6 +58,8 @@ export function PlayerNode({
 		isWinner && "player-node--winner",
 		isEliminated && "player-node--eliminated",
 		isSelected && "player-node--selected",
+		isCorrect && "player-node--correct",
+		isIncorrect && "player-node--incorrect",
 		isPickable && "player-node--pickable",
 	]
 		.filter(Boolean)
@@ -92,8 +100,47 @@ export function PlayerNode({
 				style={{ "--ring-color": ringColor } as React.CSSProperties}
 			>
 				<img src={photo} alt={name} className="player-photo" />
-				{isSelected && (
-					<div className="player-node__checkmark">
+				{isCorrect && (
+					<div className="player-node__badge player-node__badge--correct">
+						<svg
+							width="14"
+							height="14"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							strokeWidth="3"
+							strokeLinecap="round"
+							strokeLinejoin="round"
+							role="img"
+							aria-label="Correct pick"
+						>
+							<title>Correct pick</title>
+							<polyline points="20 6 9 17 4 12" />
+						</svg>
+					</div>
+				)}
+				{isIncorrect && (
+					<div className="player-node__badge player-node__badge--incorrect">
+						<svg
+							width="14"
+							height="14"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							strokeWidth="3"
+							strokeLinecap="round"
+							strokeLinejoin="round"
+							role="img"
+							aria-label="Incorrect pick"
+						>
+							<title>Incorrect pick</title>
+							<line x1="18" y1="6" x2="6" y2="18" />
+							<line x1="6" y1="6" x2="18" y2="18" />
+						</svg>
+					</div>
+				)}
+				{isSelected && !isCorrect && !isIncorrect && (
+					<div className="player-node__badge player-node__badge--pending">
 						<svg
 							width="14"
 							height="14"
@@ -171,6 +218,8 @@ export const PlayerNodeFlow = memo(function PlayerNodeFlow({
 				isWinner={data.isWinner}
 				isEliminated={data.isEliminated}
 				isSelected={data.isSelected}
+				isCorrect={data.isCorrect}
+				isIncorrect={data.isIncorrect}
 				isPickable={data.isPickable}
 				playerId={data.playerId}
 				gameId={data.gameId}
