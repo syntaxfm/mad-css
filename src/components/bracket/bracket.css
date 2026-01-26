@@ -41,6 +41,7 @@
 	/* Championship sizing */
 	[data-id="championship"] & .player-photo-ring {
 		--photo-size: 80px;
+		transform: translateX(10px);
 	}
 }
 
