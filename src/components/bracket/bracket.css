@@ -7,7 +7,7 @@
 	position: relative;
 
 	/* Finalist and championship nodes - vertically stacked layout */
-	[data-id*="finalist"] &,
+	[data-id*="final-p"] &,
 	[data-id="championship"] & {
 		flex-direction: column;
 		justify-content: center;
@@ -26,7 +26,7 @@
 	}
 
 	/* Finalist sizing */
-	[data-id*="finalist"] & .player-photo-ring {
+	[data-id*="final-p"] & .player-photo-ring {
 		--photo-size: 65px;
 	}
 
@@ -41,7 +41,7 @@
 	--inner-ring-color: var(--yellow);
 	--ring-thickness: 2px;
 	--gold-ring-thickness: 3px;
-	--photo-size: 70px;
+	--photo-size: 50px;
 	position: relative;
 	z-index: 2;
 	width: calc(
