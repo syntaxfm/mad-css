@@ -14,12 +14,10 @@ export function Leaderboard() {
 				return res.json();
 			})
 			.then((data) => {
-				console.log("Leaderboard data:", data);
 				setEntries(data.leaderboard || []);
 				setLoading(false);
 			})
-			.catch((err) => {
-				console.error("Leaderboard fetch error:", err);
+			.catch(() => {
 				setLoading(false);
 			});
 	}, []);

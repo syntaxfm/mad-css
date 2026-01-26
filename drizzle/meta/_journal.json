@@ -5,29 +5,8 @@
     {
       "idx": 0,
       "version": "6",
-      "when": 1767919267096,
-      "tag": "0000_rare_juggernaut",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1768619353770,
-      "tag": "0001_wooden_nomad",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1768857220942,
-      "tag": "0002_real_annihilus",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "6",
-      "when": 1769370064440,
-      "tag": "0003_superb_exiles",
+      "when": 1769443421416,
+      "tag": "0000_wonderful_warpath",
       "breakpoints": true
     }
   ]
