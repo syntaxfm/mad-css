@@ -215,21 +215,36 @@
 	}
 }
 
-.player-node__checkmark {
+.player-node__badge {
 	position: absolute;
 	top: -2px;
 	right: -2px;
 	width: 22px;
 	height: 22px;
-	background: var(--yellow);
 	border: 2px solid var(--black);
 	border-radius: 50%;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	z-index: 10;
-	color: var(--black);
 	animation: checkmark-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.player-node__badge--pending {
+	background: var(--yellow);
+	color: var(--black);
+}
+
+.player-node__badge--correct {
+	--badge-correct: #22c55e;
+	background: var(--badge-correct);
+	color: var(--white);
+}
+
+.player-node__badge--incorrect {
+	--badge-incorrect: #ef4444;
+	background: var(--badge-incorrect);
+	color: var(--white);
 }
 
 /* React Flow Container */
