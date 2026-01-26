@@ -11,10 +11,13 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TestRouteImport } from './routes/test'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as BracketUsernameRouteImport } from './routes/bracket/$username'
 import { Route as ApiPredictionsIndexRouteImport } from './routes/api/predictions/index'
 import { Route as ApiLeaderboardIndexRouteImport } from './routes/api/leaderboard/index'
 import { Route as ApiPredictionsLockRouteImport } from './routes/api/predictions/lock'
+import { Route as ApiOgUsernameRouteImport } from './routes/api/og.$username'
 import { Route as ApiLeaderboardCalculateRouteImport } from './routes/api/leaderboard/calculate'
+import { Route as ApiBracketUsernameRouteImport } from './routes/api/bracket/$username'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const TestRoute = TestRouteImport.update({
@@ -25,6 +28,11 @@ const TestRoute = TestRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BracketUsernameRoute = BracketUsernameRouteImport.update({
+  id: '/bracket/$username',
+  path: '/bracket/$username',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPredictionsIndexRoute = ApiPredictionsIndexRouteImport.update({
@@ -42,9 +50,19 @@ const ApiPredictionsLockRoute = ApiPredictionsLockRouteImport.update({
   path: '/api/predictions/lock',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiOgUsernameRoute = ApiOgUsernameRouteImport.update({
+  id: '/api/og/$username',
+  path: '/api/og/$username',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiLeaderboardCalculateRoute = ApiLeaderboardCalculateRouteImport.update({
   id: '/api/leaderboard/calculate',
   path: '/api/leaderboard/calculate',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiBracketUsernameRoute = ApiBracketUsernameRouteImport.update({
+  id: '/api/bracket/$username',
+  path: '/api/bracket/$username',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
@@ -56,8 +74,11 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/test': typeof TestRoute
+  '/bracket/$username': typeof BracketUsernameRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/bracket/$username': typeof ApiBracketUsernameRoute
   '/api/leaderboard/calculate': typeof ApiLeaderboardCalculateRoute
+  '/api/og/$username': typeof ApiOgUsernameRoute
   '/api/predictions/lock': typeof ApiPredictionsLockRoute
   '/api/leaderboard': typeof ApiLeaderboardIndexRoute
   '/api/predictions': typeof ApiPredictionsIndexRoute
@@ -65,8 +86,11 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/test': typeof TestRoute
+  '/bracket/$username': typeof BracketUsernameRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/bracket/$username': typeof ApiBracketUsernameRoute
   '/api/leaderboard/calculate': typeof ApiLeaderboardCalculateRoute
+  '/api/og/$username': typeof ApiOgUsernameRoute
   '/api/predictions/lock': typeof ApiPredictionsLockRoute
   '/api/leaderboard': typeof ApiLeaderboardIndexRoute
   '/api/predictions': typeof ApiPredictionsIndexRoute
@@ -75,8 +99,11 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/test': typeof TestRoute
+  '/bracket/$username': typeof BracketUsernameRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/bracket/$username': typeof ApiBracketUsernameRoute
   '/api/leaderboard/calculate': typeof ApiLeaderboardCalculateRoute
+  '/api/og/$username': typeof ApiOgUsernameRoute
   '/api/predictions/lock': typeof ApiPredictionsLockRoute
   '/api/leaderboard/': typeof ApiLeaderboardIndexRoute
   '/api/predictions/': typeof ApiPredictionsIndexRoute
@@ -86,8 +113,11 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/test'
+    | '/bracket/$username'
     | '/api/auth/$'
+    | '/api/bracket/$username'
     | '/api/leaderboard/calculate'
+    | '/api/og/$username'
     | '/api/predictions/lock'
     | '/api/leaderboard'
     | '/api/predictions'
@@ -95,8 +125,11 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/test'
+    | '/bracket/$username'
     | '/api/auth/$'
+    | '/api/bracket/$username'
     | '/api/leaderboard/calculate'
+    | '/api/og/$username'
     | '/api/predictions/lock'
     | '/api/leaderboard'
     | '/api/predictions'
@@ -104,8 +137,11 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/test'
+    | '/bracket/$username'
     | '/api/auth/$'
+    | '/api/bracket/$username'
     | '/api/leaderboard/calculate'
+    | '/api/og/$username'
     | '/api/predictions/lock'
     | '/api/leaderboard/'
     | '/api/predictions/'
@@ -114,8 +150,11 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   TestRoute: typeof TestRoute
+  BracketUsernameRoute: typeof BracketUsernameRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiBracketUsernameRoute: typeof ApiBracketUsernameRoute
   ApiLeaderboardCalculateRoute: typeof ApiLeaderboardCalculateRoute
+  ApiOgUsernameRoute: typeof ApiOgUsernameRoute
   ApiPredictionsLockRoute: typeof ApiPredictionsLockRoute
   ApiLeaderboardIndexRoute: typeof ApiLeaderboardIndexRoute
   ApiPredictionsIndexRoute: typeof ApiPredictionsIndexRoute
@@ -135,6 +174,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bracket/$username': {
+      id: '/bracket/$username'
+      path: '/bracket/$username'
+      fullPath: '/bracket/$username'
+      preLoaderRoute: typeof BracketUsernameRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/predictions/': {
@@ -158,11 +204,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPredictionsLockRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/og/$username': {
+      id: '/api/og/$username'
+      path: '/api/og/$username'
+      fullPath: '/api/og/$username'
+      preLoaderRoute: typeof ApiOgUsernameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/leaderboard/calculate': {
       id: '/api/leaderboard/calculate'
       path: '/api/leaderboard/calculate'
       fullPath: '/api/leaderboard/calculate'
       preLoaderRoute: typeof ApiLeaderboardCalculateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/bracket/$username': {
+      id: '/api/bracket/$username'
+      path: '/api/bracket/$username'
+      fullPath: '/api/bracket/$username'
+      preLoaderRoute: typeof ApiBracketUsernameRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/auth/$': {
@@ -178,8 +238,11 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   TestRoute: TestRoute,
+  BracketUsernameRoute: BracketUsernameRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiBracketUsernameRoute: ApiBracketUsernameRoute,
   ApiLeaderboardCalculateRoute: ApiLeaderboardCalculateRoute,
+  ApiOgUsernameRoute: ApiOgUsernameRoute,
   ApiPredictionsLockRoute: ApiPredictionsLockRoute,
   ApiLeaderboardIndexRoute: ApiLeaderboardIndexRoute,
   ApiPredictionsIndexRoute: ApiPredictionsIndexRoute,

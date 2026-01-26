@@ -9,6 +9,7 @@ export type LeaderboardEntry = {
 	userId: string;
 	userName: string;
 	userImage: string | null;
+	username: string | null;
 	round1Score: number;
 	round2Score: number;
 	round3Score: number;
@@ -32,12 +33,10 @@ export const Route = createFileRoute("/api/leaderboard/")({
 						totalScore: schema.userScore.totalScore,
 						userName: schema.user.name,
 						userImage: schema.user.image,
+						username: schema.user.username,
 					})
 					.from(schema.userScore)
-					.innerJoin(
-						schema.user,
-						eq(schema.userScore.userId, schema.user.id),
-					)
+					.innerJoin(schema.user, eq(schema.userScore.userId, schema.user.id))
 					.orderBy(desc(schema.userScore.totalScore))
 					.limit(100);
 
@@ -46,6 +45,7 @@ export const Route = createFileRoute("/api/leaderboard/")({
 					userId: score.userId,
 					userName: score.userName,
 					userImage: score.userImage,
+					username: score.username,
 					round1Score: score.round1Score,
 					round2Score: score.round2Score,
 					round3Score: score.round3Score,

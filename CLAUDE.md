@@ -16,6 +16,7 @@ event website featuring 16 developers battling for CSS glory. Built with React
 ```bash
 # Development
 pnpm dev          # Start dev server on port 3000
+[Note] I will run the dev command myself unless otherwise specified
 
 # Build & Deploy
 pnpm build        # Build for production

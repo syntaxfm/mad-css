@@ -1,4 +1,10 @@
-export function ScoreboardUnit({ value, label }: { value: number; label: string }) {
+export function ScoreboardUnit({
+	value,
+	label,
+}: {
+	value: number;
+	label: string;
+}) {
 	const digits = String(value).padStart(2, "0");
 	return (
 		<div className="scoreboard-unit">

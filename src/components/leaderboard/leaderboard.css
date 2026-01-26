@@ -143,6 +143,22 @@
 	text-align: left;
 }
 
+.leaderboard-player--link {
+	text-decoration: none;
+	border-radius: 4px;
+	padding: 4px 8px;
+	margin: -4px -8px;
+	transition: background-color 0.15s ease;
+}
+
+.leaderboard-player--link:hover {
+	background: rgba(255, 174, 0, 0.15);
+}
+
+.leaderboard-player--link:hover .leaderboard-name {
+	color: var(--yellow);
+}
+
 .leaderboard-avatar {
 	width: 36px;
 	height: 36px;

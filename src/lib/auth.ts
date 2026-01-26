@@ -2,6 +2,7 @@ import type { D1Database } from "@cloudflare/workers-types";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { tanstackStartCookies } from "better-auth/tanstack-start";
+import { eq } from "drizzle-orm";
 import { createDb } from "@/db";
 import * as schema from "@/db/schema";
 
@@ -21,6 +22,47 @@ export function createAuth(d1: D1Database) {
 			github: {
 				clientId: process.env.GITHUB_CLIENT_ID || "",
 				clientSecret: process.env.GITHUB_CLIENT_SECRET || "",
+				mapProfileToUser: (profile) => ({
+					username: profile.login,
+				}),
+			},
+		},
+		user: {
+			additionalFields: {
+				username: {
+					type: "string",
+					required: false,
+				},
+			},
+		},
+		databaseHooks: {
+			user: {
+				create: {
+					after: async (user) => {
+						// Backfill username from GitHub account if not set
+						if (!user.username) {
+							const accounts = await db
+								.select()
+								.from(schema.account)
+								.where(eq(schema.account.userId, user.id));
+							const githubAccount = accounts.find(
+								(a) => a.providerId === "github",
+							);
+							if (githubAccount?.accountId) {
+								// accountId is the GitHub user ID, we'll fetch the username via API
+								// For now, use the name as fallback
+								const username =
+									user.name?.toLowerCase().replace(/\s+/g, "") || null;
+								if (username) {
+									await db
+										.update(schema.user)
+										.set({ username })
+										.where(eq(schema.user.id, user.id));
+								}
+							}
+						}
+					},
+				},
 			},
 		},
 		plugins: [tanstackStartCookies()],

@@ -57,18 +57,36 @@ export function Leaderboard() {
 										<tr key={entry.userId}>
 											<td className="leaderboard-rank">{entry.rank}</td>
 											<td>
-												<div className="leaderboard-player">
-													{entry.userImage && (
-														<img
-															src={entry.userImage}
-															alt=""
-															className="leaderboard-avatar"
-														/>
-													)}
-													<span className="leaderboard-name">
-														{entry.userName}
-													</span>
-												</div>
+												{entry.username ? (
+													<a
+														href={`/bracket/${entry.username}`}
+														className="leaderboard-player leaderboard-player--link"
+													>
+														{entry.userImage && (
+															<img
+																src={entry.userImage}
+																alt=""
+																className="leaderboard-avatar"
+															/>
+														)}
+														<span className="leaderboard-name">
+															{entry.userName}
+														</span>
+													</a>
+												) : (
+													<div className="leaderboard-player">
+														{entry.userImage && (
+															<img
+																src={entry.userImage}
+																alt=""
+																className="leaderboard-avatar"
+															/>
+														)}
+														<span className="leaderboard-name">
+															{entry.userName}
+														</span>
+													</div>
+												)}
 											</td>
 											<td className="leaderboard-total">
 												<LeaderboardScore value={entry.totalScore} isTotal />

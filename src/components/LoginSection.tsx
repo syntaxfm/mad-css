@@ -13,6 +13,7 @@ export interface LoginSectionProps {
 	error?: string | null;
 	deadline?: string;
 	isDeadlinePassed?: boolean;
+	username?: string | null;
 	onSave?: () => void;
 	onLock?: () => void;
 	onReset?: () => void;
@@ -26,15 +27,44 @@ export function LoginSection({
 	error = null,
 	deadline,
 	isDeadlinePassed = false,
+	username = null,
 	onSave,
 	onLock,
 	onReset,
 }: LoginSectionProps) {
 	const { data: session, isPending } = authClient.useSession();
 	const [showLockConfirm, setShowLockConfirm] = useState(false);
+	const [copied, setCopied] = useState(false);
 	const countdown = useCountdown(deadline);
 	const isUrgent =
 		countdown.totalMs > 0 && countdown.totalMs < 24 * 60 * 60 * 1000;
+
+	const shareUrl = username
+		? `${typeof window !== "undefined" ? window.location.origin : ""}/bracket/${username}`
+		: null;
+
+	const handleCopyLink = async () => {
+		if (!shareUrl) return;
+		try {
+			await navigator.clipboard.writeText(shareUrl);
+			setCopied(true);
+			setTimeout(() => setCopied(false), 2000);
+		} catch {
+			// Fallback for older browsers
+			const input = document.createElement("input");
+			input.value = shareUrl;
+			document.body.appendChild(input);
+			input.select();
+			document.execCommand("copy");
+			document.body.removeChild(input);
+			setCopied(true);
+			setTimeout(() => setCopied(false), 2000);
+		}
+	};
+
+	const twitterShareUrl = username
+		? `https://twitter.com/intent/tweet?text=${encodeURIComponent(`Check out my March Mad CSS bracket picks! \ud83c\udfc0\n\n${shareUrl}`)}`
+		: null;
 
 	if (isPending) {
 		return (
@@ -73,7 +103,88 @@ export function LoginSection({
 
 				{/* Status badges for locked/deadline states */}
 				{isLocked && (
-					<div className="cta-status locked">✓ Your bracket is locked in!</div>
+					<>
+						<div className="cta-status locked">
+							✓ Your bracket is locked in!
+						</div>
+
+						{/* Share section - only show when locked and username exists */}
+						{shareUrl && (
+							<div className="cta-share">
+								<div className="cta-share-label">
+									<svg
+										width="18"
+										height="18"
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										strokeWidth="2"
+										strokeLinecap="round"
+										strokeLinejoin="round"
+										aria-hidden="true"
+									>
+										<path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+										<polyline points="16 6 12 2 8 6" />
+										<line x1="12" x2="12" y1="2" y2="15" />
+									</svg>
+									Share your bracket
+								</div>
+								<div className="cta-share-actions">
+									<button
+										type="button"
+										className={`btn-share btn-share--copy${copied ? " copied" : ""}`}
+										onClick={handleCopyLink}
+									>
+										<svg
+											className="share-icon"
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke="currentColor"
+											strokeWidth="2"
+											strokeLinecap="round"
+											strokeLinejoin="round"
+											aria-hidden="true"
+										>
+											{copied ? (
+												<path d="M20 6 9 17l-5-5" />
+											) : (
+												<>
+													<rect
+														width="14"
+														height="14"
+														x="8"
+														y="8"
+														rx="2"
+														ry="2"
+													/>
+													<path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+												</>
+											)}
+										</svg>
+										{copied ? "Copied!" : "Copy Link"}
+									</button>
+									{twitterShareUrl && (
+										<a
+											href={twitterShareUrl}
+											target="_blank"
+											rel="noopener noreferrer"
+											className="btn-share btn-share--twitter"
+										>
+											<svg
+												className="share-icon"
+												viewBox="0 0 24 24"
+												fill="currentColor"
+												aria-hidden="true"
+											>
+												<path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+											</svg>
+											Share on X
+										</a>
+									)}
+								</div>
+							</div>
+						)}
+					</>
 				)}
 
 				{isDeadlinePassed && !isLocked && (

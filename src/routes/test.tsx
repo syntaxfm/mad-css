@@ -62,6 +62,7 @@ function TestPage() {
 					error={error}
 					deadline={deadline}
 					isDeadlinePassed={isDeadlinePassed}
+					username={(session?.user as { username?: string })?.username}
 					onSave={savePredictions}
 					onLock={lockBracket}
 					onReset={resetPredictions}

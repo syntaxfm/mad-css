@@ -1,7 +1,10 @@
 export function LeaderboardScore({
 	value,
 	isTotal,
-}: { value: number; isTotal?: boolean }) {
+}: {
+	value: number;
+	isTotal?: boolean;
+}) {
 	const digits = String(value).padStart(isTotal ? 3 : 2, "0");
 	return (
 		<div
