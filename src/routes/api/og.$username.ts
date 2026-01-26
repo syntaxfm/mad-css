@@ -1,6 +1,6 @@
 import { env } from "cloudflare:workers";
 import { createFileRoute } from "@tanstack/react-router";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { ImageResponse } from "workers-og";
 import { players } from "@/data/players";
 import { createDb } from "@/db";
@@ -82,8 +82,12 @@ export const Route = createFileRoute("/api/og/$username")({
 							predictedWinnerId: schema.userPrediction.predictedWinnerId,
 						})
 						.from(schema.userPrediction)
-						.where(eq(schema.userPrediction.userId, users[0].id))
-						.where(eq(schema.userPrediction.gameId, "final"))
+						.where(
+							and(
+								eq(schema.userPrediction.userId, users[0].id),
+								eq(schema.userPrediction.gameId, "final"),
+							),
+						)
 						.limit(1);
 
 					const championId = championPick[0]?.predictedWinnerId;
