@@ -36,8 +36,6 @@
 	display: flex;
 	align-items: center;
 	gap: 16px;
-	padding-bottom: 20px;
-	border-bottom: 2px solid var(--black);
 	margin-bottom: 20px;
 }
 
@@ -69,32 +67,9 @@
 	opacity: 0.6;
 }
 
-/* Champion Pick Section */
-.share-bracket-champion {
-	background: var(--black);
-	padding: 16px 20px;
-	border: 3px solid var(--black);
-	text-align: center;
-}
-
-.champion-label {
-	display: block;
-	font-family: var(--font-block);
-	font-size: 0.7rem;
-	text-transform: uppercase;
-	letter-spacing: 0.1em;
-	color: var(--white);
-	opacity: 0.7;
-	margin-bottom: 6px;
-}
-
-.champion-name {
-	display: block;
-	font-family: var(--font-block);
-	font-size: 1.4rem;
-	color: var(--yellow);
-	text-transform: uppercase;
-	letter-spacing: 0.03em;
+/* CTA button inside header card */
+.share-bracket-header .btn-primary {
+	width: 100%;
 }
 
 /* ============================================
@@ -141,17 +116,6 @@
 	margin: 0 0 28px;
 	font-size: 1rem;
 	line-height: 1.5;
-}
-
-/* ============================================
-   CTA Section
-   ============================================ */
-
-.share-bracket-cta {
-	max-width: 600px;
-	margin: 2rem auto 0;
-	text-align: center;
-	padding-bottom: 2rem;
 }
 
 /* ============================================
@@ -212,10 +176,6 @@
 		font-size: 1.25rem;
 	}
 
-	.champion-name {
-		font-size: 1.2rem;
-	}
-
 	.share-bracket-error {
 		margin-left: 12px;
 		margin-right: 12px;
@@ -224,11 +184,6 @@
 
 	.share-bracket-error h1 {
 		font-size: 1.5rem;
-	}
-
-	.share-bracket-cta {
-		padding-left: 12px;
-		padding-right: 12px;
 	}
 
 	.btn-primary {
