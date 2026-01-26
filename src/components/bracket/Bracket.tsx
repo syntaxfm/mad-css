@@ -11,8 +11,7 @@ import {
 import { useCallback, useEffect, useRef, useState } from "react";
 import "@xyflow/react/dist/style.css";
 import {
-	// bracket,
-	emptyBracket as bracket,
+	bracket,
 	type Game,
 	isLoser,
 	isWinner,
@@ -34,18 +33,35 @@ function BracketEdge({
 	targetY,
 	sourcePosition,
 	targetPosition,
+	target,
 }: EdgeProps) {
+	// For finalist-to-champ edges, draw a custom path with lowered horizontal line
+	if (target === "championship") {
+		const horizontalY = sourceY + 30; // Lower the horizontal line to connect finalists
+		// Extend the line up to close the gap to the champion card
+		const edgePath = `M ${sourceX} ${sourceY} L ${sourceX} ${horizontalY} L ${targetX} ${horizontalY} L ${targetX} ${targetY - 35}`;
+		// No drop-shadow filter to avoid shadow overlap where lines meet
+		return (
+			<path
+				d={edgePath}
+				fill="none"
+				stroke="#FFFFFF"
+				strokeWidth={10}
+				style={{ filter: "none" }}
+			/>
+		);
+	}
+
 	const [edgePath] = getSmoothStepPath({
 		sourceX,
 		sourceY,
 		targetX,
-		targetY,
+		targetY: targetY - 7, // Extend line to close gap with target card
 		sourcePosition,
 		targetPosition,
 		borderRadius: 0,
 	});
-
-	return <path d={edgePath} fill="none" stroke="#FFFFFF" strokeWidth={3} />;
+	return <path d={edgePath} fill="none" stroke="#FFFFFF" strokeWidth={10} />;
 }
 
 // Register custom node types
@@ -70,6 +86,8 @@ function playerToNodeData(
 	player: Player,
 	game: Game,
 	ringColor: string,
+	side: "left" | "right",
+	round: "round1" | "later" = "later",
 ): {
 	photo: string;
 	name: string;
@@ -77,6 +95,8 @@ function playerToNodeData(
 	ringColor: string;
 	isWinner: boolean;
 	isEliminated: boolean;
+	side: "left" | "right";
+	round: "round1" | "later";
 } {
 	return {
 		photo: player.photo,
@@ -85,6 +105,8 @@ function playerToNodeData(
 		ringColor,
 		isWinner: isWinner(game, player),
 		isEliminated: isLoser(game, player),
+		side,
+		round,
 	};
 }
 
@@ -95,6 +117,8 @@ function createNode(
 	game: Game,
 	ringColor: string,
 	position: { x: number; y: number },
+	side: "left" | "right",
+	round: "round1" | "later" = "later",
 	emptyText?: string,
 ): Node {
 	if (player) {
@@ -102,14 +126,14 @@ function createNode(
 			id,
 			type: "playerNode",
 			position,
-			data: playerToNodeData(player, game, ringColor),
+			data: playerToNodeData(player, game, ringColor, side, round),
 		};
 	}
 	return {
 		id,
 		type: "emptySlot",
 		position,
-		data: { text: emptyText },
+		data: { text: emptyText, side, ringColor, round },
 	};
 }
 
@@ -132,39 +156,69 @@ function generateNodes(): Node[] {
 
 		// Player 1
 		nodes.push(
-			createNode(`${game.id}-p1`, game.player1, game, LEFT_RING_COLOR, {
-				x: 0,
-				y: baseY,
-			}),
+			createNode(
+				`${game.id}-p1`,
+				game.player1,
+				game,
+				LEFT_RING_COLOR,
+				{
+					x: 0,
+					y: baseY,
+				},
+				"left",
+				"round1",
+			),
 		);
 
 		// Player 2
 		nodes.push(
-			createNode(`${game.id}-p2`, game.player2, game, LEFT_RING_COLOR, {
-				x: 0,
-				y: baseY + MATCH_GAP,
-			}),
+			createNode(
+				`${game.id}-p2`,
+				game.player2,
+				game,
+				LEFT_RING_COLOR,
+				{
+					x: 0,
+					y: baseY + MATCH_GAP,
+				},
+				"left",
+				"round1",
+			),
 		);
 	});
 
 	// Quarterfinals - Left side (games 0-1)
 	quarters.left.forEach((game, gameIndex) => {
-		const baseY = gameIndex * 4 * MATCH_GAP + MATCH_GAP / 2;
+		const baseY = gameIndex * 4 * MATCH_GAP + MATCH_GAP * 0.62;
 
 		// Player 1
 		nodes.push(
-			createNode(`${game.id}-p1`, game.player1, game, LEFT_RING_COLOR, {
-				x: ROUND_GAP,
-				y: baseY,
-			}),
+			createNode(
+				`${game.id}-p1`,
+				game.player1,
+				game,
+				LEFT_RING_COLOR,
+				{
+					x: ROUND_GAP,
+					y: baseY,
+				},
+				"left",
+			),
 		);
 
 		// Player 2
 		nodes.push(
-			createNode(`${game.id}-p2`, game.player2, game, LEFT_RING_COLOR, {
-				x: ROUND_GAP,
-				y: baseY + 2 * MATCH_GAP,
-			}),
+			createNode(
+				`${game.id}-p2`,
+				game.player2,
+				game,
+				LEFT_RING_COLOR,
+				{
+					x: ROUND_GAP,
+					y: baseY + 2 * MATCH_GAP,
+				},
+				"left",
+			),
 		);
 	});
 
@@ -174,18 +228,32 @@ function generateNodes(): Node[] {
 
 		// Player 1
 		nodes.push(
-			createNode(`${game.id}-p1`, game.player1, game, LEFT_RING_COLOR, {
-				x: ROUND_GAP * 2,
-				y: baseY,
-			}),
+			createNode(
+				`${game.id}-p1`,
+				game.player1,
+				game,
+				LEFT_RING_COLOR,
+				{
+					x: ROUND_GAP * 2,
+					y: baseY,
+				},
+				"left",
+			),
 		);
 
 		// Player 2
 		nodes.push(
-			createNode(`${game.id}-p2`, game.player2, game, LEFT_RING_COLOR, {
-				x: ROUND_GAP * 2,
-				y: baseY + 4 * MATCH_GAP,
-			}),
+			createNode(
+				`${game.id}-p2`,
+				game.player2,
+				game,
+				LEFT_RING_COLOR,
+				{
+					x: ROUND_GAP * 2,
+					y: baseY + 4 * MATCH_GAP,
+				},
+				"left",
+			),
 		);
 	});
 
@@ -193,8 +261,8 @@ function generateNodes(): Node[] {
 	nodes.push({
 		id: `left-finalist`,
 		type: "emptySlot",
-		position: { x: ROUND_GAP * 3, y: 3.5 * MATCH_GAP },
-		data: { text: "Left Finalist" },
+		position: { x: ROUND_GAP * 3 + 23, y: 3.5 * MATCH_GAP },
+		data: { text: "Finalist TBD", side: "left", ringColor: LEFT_RING_COLOR },
 	});
 
 	// ===========================================================================
@@ -208,39 +276,69 @@ function generateNodes(): Node[] {
 
 		// Player 1
 		nodes.push(
-			createNode(`${game.id}-p1`, game.player1, game, RIGHT_RING_COLOR, {
-				x: rightStartX,
-				y: baseY,
-			}),
+			createNode(
+				`${game.id}-p1`,
+				game.player1,
+				game,
+				RIGHT_RING_COLOR,
+				{
+					x: rightStartX,
+					y: baseY,
+				},
+				"right",
+				"round1",
+			),
 		);
 
 		// Player 2
 		nodes.push(
-			createNode(`${game.id}-p2`, game.player2, game, RIGHT_RING_COLOR, {
-				x: rightStartX,
-				y: baseY + MATCH_GAP,
-			}),
+			createNode(
+				`${game.id}-p2`,
+				game.player2,
+				game,
+				RIGHT_RING_COLOR,
+				{
+					x: rightStartX,
+					y: baseY + MATCH_GAP,
+				},
+				"right",
+				"round1",
+			),
 		);
 	});
 
 	// Quarterfinals - Right side (games 2-3) ROUND 2
 	quarters.right.forEach((game, gameIndex) => {
-		const baseY = gameIndex * 4 * MATCH_GAP + MATCH_GAP / 2;
+		const baseY = gameIndex * 4 * MATCH_GAP + MATCH_GAP * 0.64;
 
 		// Player 1
 		nodes.push(
-			createNode(`${game.id}-p1`, game.player1, game, RIGHT_RING_COLOR, {
-				x: rightStartX - ROUND_GAP,
-				y: baseY,
-			}),
+			createNode(
+				`${game.id}-p1`,
+				game.player1,
+				game,
+				RIGHT_RING_COLOR,
+				{
+					x: rightStartX - ROUND_GAP,
+					y: baseY,
+				},
+				"right",
+			),
 		);
 
 		// Player 2
 		nodes.push(
-			createNode(`${game.id}-p2`, game.player2, game, RIGHT_RING_COLOR, {
-				x: rightStartX - ROUND_GAP,
-				y: baseY + 2 * MATCH_GAP,
-			}),
+			createNode(
+				`${game.id}-p2`,
+				game.player2,
+				game,
+				RIGHT_RING_COLOR,
+				{
+					x: rightStartX - ROUND_GAP,
+					y: baseY + 2 * MATCH_GAP,
+				},
+				"right",
+			),
 		);
 	});
 
@@ -250,18 +348,32 @@ function generateNodes(): Node[] {
 
 		// Player 1
 		nodes.push(
-			createNode(`${game.id}-p1`, game.player1, game, RIGHT_RING_COLOR, {
-				x: rightStartX - ROUND_GAP * 2,
-				y: baseY,
-			}),
+			createNode(
+				`${game.id}-p1`,
+				game.player1,
+				game,
+				RIGHT_RING_COLOR,
+				{
+					x: rightStartX - ROUND_GAP * 2,
+					y: baseY,
+				},
+				"right",
+			),
 		);
 
 		// Player 2
 		nodes.push(
-			createNode(`${game.id}-p2`, game.player2, game, RIGHT_RING_COLOR, {
-				x: rightStartX - ROUND_GAP * 2,
-				y: baseY + 4 * MATCH_GAP,
-			}),
+			createNode(
+				`${game.id}-p2`,
+				game.player2,
+				game,
+				RIGHT_RING_COLOR,
+				{
+					x: rightStartX - ROUND_GAP * 2,
+					y: baseY + 4 * MATCH_GAP,
+				},
+				"right",
+			),
 		);
 	});
 
@@ -270,9 +382,10 @@ function generateNodes(): Node[] {
 		id: `right-finalist`,
 		type: "emptySlot",
 		position: { x: rightStartX - ROUND_GAP * 2.5, y: 3.5 * MATCH_GAP },
-		// position: { x: ROUND_GAP * 3, y: 3.5 * MATCH_GAP },
 		data: {
-			text: "Right Finalist",
+			text: "Finalist TBD",
+			side: "right",
+			ringColor: RIGHT_RING_COLOR,
 		},
 	});
 
@@ -288,8 +401,8 @@ function generateNodes(): Node[] {
 			y: 0,
 		},
 		data: finalGame?.winner
-			? playerToNodeData(finalGame.winner, finalGame, "#FFD700")
-			: { text: "CHAMPION" },
+			? playerToNodeData(finalGame.winner, finalGame, "#FFD700", "left")
+			: { text: "CHAMPION", side: "left", ringColor: "#FFD700" },
 	});
 
 	return nodes;
@@ -575,6 +688,11 @@ function BracketContent() {
 		boundsRef.current = { width: bounds.width, height: bounds.height };
 
 		calculateHeight();
+
+		// Call fitView after a small delay to ensure nodes are fully rendered
+		requestAnimationFrame(() => {
+			instance.fitView({ padding: FIT_VIEW_PADDING });
+		});
 	};
 
 	// Re-fit view when height changes
