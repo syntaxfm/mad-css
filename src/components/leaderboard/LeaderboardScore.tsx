@@ -11,6 +11,7 @@ export function LeaderboardScore({
 			className={`leaderboard-digits ${isTotal ? "leaderboard-digits--total" : ""}`}
 		>
 			{digits.split("").map((d, i) => (
+				// biome-ignore lint/suspicious/noArrayIndexKey: Digits don't reorder and spans are stateless
 				<span key={i} className="leaderboard-digit">
 					{d}
 				</span>
