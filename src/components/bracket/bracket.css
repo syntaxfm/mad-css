@@ -5,25 +5,42 @@
 	align-items: center;
 	gap: 0;
 	position: relative;
-	[data-id*="finalist"] & {
-		/* border: 3px solid var(--yellow); */
+
+	/* Finalist and championship nodes - vertically stacked layout */
+	[data-id*="finalist"] &,
+	[data-id="championship"] & {
 		flex-direction: column;
 		justify-content: center;
 		align-items: center;
 		width: auto;
-		/* margin-left: -20px; */
 		.player-name {
 			padding-top: 20px;
+		}
+		.player-info {
+			text-align: center;
+			margin-left: 0;
 		}
 		.player-photo-ring {
 			margin-bottom: -30px;
 		}
 	}
-	[data-id="left-finalist"] & {
+	
+  [data-id="left-finalist"] & {
 		transform: translateX(10px) translateY(-5px);
 	}
+
 	[data-id*="right-finalist"] & {
 		transform: translateX(-10px) translateY(-5px);
+  }
+
+	/* Finalist sizing */
+	[data-id*="finalist"] & .player-photo-ring {
+		--photo-size: 65px;
+	}
+
+	/* Championship sizing */
+	[data-id="championship"] & .player-photo-ring {
+		--photo-size: 80px;
 	}
 }
 
@@ -220,4 +237,45 @@
 	background: red;
 	border: 2px solid black;
 	border-radius: 50%;
+}
+
+/* Custom bracket controls styling */
+.bracket-controls.react-flow__controls {
+	top: 0;
+	right: 0;
+	bottom: auto;
+	left: auto;
+	box-shadow: none;
+}
+
+.bracket-controls .react-flow__controls-button {
+	background: var(--black);
+	border: 2px solid var(--yellow) !important;
+	border-radius: 0;
+	color: var(--yellow);
+	width: 32px;
+	height: 32px;
+}
+
+.bracket-controls .react-flow__controls-button:hover {
+	background: var(--yellow);
+}
+
+.bracket-controls .react-flow__controls-button svg {
+	fill: var(--yellow);
+	max-width: 14px;
+	max-height: 14px;
+}
+
+.bracket-controls .react-flow__controls-button:hover svg {
+	fill: var(--black);
+}
+
+.bracket-container .react-flow__attribution {
+	background: var(--black);
+	padding: 4px 8px;
+}
+
+.bracket-container .react-flow__attribution a {
+	color: var(--yellow);
 }
