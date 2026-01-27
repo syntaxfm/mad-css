@@ -56,7 +56,7 @@ function BracketEdge({
 		sourceX,
 		sourceY,
 		targetX,
-		targetY: targetY - 7, // Extend line to close gap with target card
+		targetY: targetY, // Extend line to close gap with target card
 		sourcePosition,
 		targetPosition,
 		borderRadius: 0,

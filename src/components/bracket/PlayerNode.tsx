@@ -74,7 +74,7 @@ function Handles() {
 				type="target"
 				position={Position.Bottom}
 				className="bracket-handle"
-				style={{ bottom: 0 }}
+				style={{ bottom: 15 }}
 				id="in-bottom"
 			/>
 			<Handle
