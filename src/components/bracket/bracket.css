@@ -1,7 +1,7 @@
 /* Player Node Base Styles */
 .player-node {
 	display: flex;
-	width: 280px;
+	width: 320px;
 	align-items: center;
 	gap: 0;
 	position: relative;
@@ -25,6 +25,14 @@
 		}
 	}
 
+	[data-id="left-finalist"] & {
+		transform: translateX(10px) translateY(-5px);
+	}
+
+	[data-id*="right-finalist"] & {
+		transform: translateX(-10px) translateY(-5px);
+	}
+
 	/* Finalist sizing */
 	[data-id*="finalist"] & .player-photo-ring {
 		--photo-size: 65px;
@@ -33,7 +41,19 @@
 	/* Championship sizing */
 	[data-id="championship"] & .player-photo-ring {
 		--photo-size: 80px;
+		transform: translateX(10px);
 	}
+}
+
+/* Smaller avatars for non-round1 matches */
+.player-node:not(.player-node--round1) .player-photo-ring {
+	--photo-size: 50px;
+}
+
+/* Keep large avatars for finalists and champion */
+[data-id*="finalist"] .player-node .player-photo-ring,
+[data-id*="champion"] .player-node .player-photo-ring {
+	--photo-size: 85px;
 }
 
 .player-photo-ring {
@@ -41,9 +61,10 @@
 	--inner-ring-color: var(--yellow);
 	--ring-thickness: 2px;
 	--gold-ring-thickness: 3px;
-	--photo-size: 70px;
+	--photo-size: 85px;
 	position: relative;
 	z-index: 2;
+	margin-left: -20px;
 	width: calc(
 		var(--photo-size) +
 		var(--ring-thickness) *
@@ -76,13 +97,30 @@
 }
 
 .player-photo {
+	--brain-size: 20px;
 	position: relative;
 	z-index: 1;
 	width: 100%;
-	height: 100%;
-	border-radius: 50%;
+	height: calc(100% + var(--brain-size));
 	object-fit: cover;
-	filter: grayscale(100%);
+	filter: grayscale(10%);
+	transform: translateY(calc(var(--brain-size) * -1));
+	--circle-size: 45px;
+	/* Top 50% visible */
+	mask-image:
+		linear-gradient(to bottom, black 0%, black 50%, transparent 50%),
+		/* Circle cutout */
+		radial-gradient(
+			circle at center center,
+			black 0%,
+			black var(--circle-size),
+			transparent var(--circle-size),
+			transparent 100%
+		);
+	mask-repeat: no-repeat, no-repeat;
+	mask-position:
+		center center,
+		center calc(var(--brain-size) / 2 + 0.5px);
 }
 
 /* Grey circle placeholder for empty slots */
@@ -109,12 +147,12 @@
 
 .player-info {
 	background: var(--beige);
-	padding: 10px 20px 10px 24px;
+	padding: 10px 16px 10px 24px;
 	margin-left: -16px;
 	position: relative;
 	z-index: 1;
 	flex: 1;
-	min-width: 180px;
+	min-width: 200px;
 	border: 2px solid var(--black);
 }
 
@@ -127,13 +165,14 @@
 	line-height: 1.1;
 	text-transform: uppercase;
 	letter-spacing: 0.02em;
-	text-wrap: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
 }
 
 .player-byline {
-	display: none;
+	font-size: 0.75rem;
+	color: var(--black);
+	margin: 4px 0 0;
+	opacity: 0.7;
+	white-space: nowrap;
 }
 
 /* Winner State */
@@ -155,7 +194,36 @@
 .player-node--empty .player-photo-ring {
 	--ring-color: var(--yellow);
 	--inner-ring-color: #aaa;
-	--photo-size: 50px;
+	img {
+		height: 100%;
+		transform: none;
+		border-radius: 50%;
+	}
+}
+
+.player-node--empty .player-info {
+	text-align: center;
+}
+
+/* Right Side - flip layout to have avatar on right */
+.player-node--right {
+	flex-direction: row-reverse;
+}
+
+.player-node--right .player-photo-ring {
+	margin-left: 0;
+	margin-right: -20px;
+}
+
+.player-node--right .player-info {
+	margin-left: 0;
+	margin-right: -16px;
+	padding: 10px 24px 10px 16px;
+	text-align: right;
+}
+
+.player-node--empty.player-node--right .player-info {
+	text-align: center;
 }
 
 /* React Flow Container */

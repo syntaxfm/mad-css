@@ -1,8 +1,5 @@
 import { Handle, Position } from "@xyflow/react";
 import "./bracket.css";
-import { useLocation } from "@tanstack/react-router";
-import { cfImage } from "@/lib/cfImage";
-import placeholder from "/avatars/placeholders.png";
 
 export interface PlayerData {
 	photo: string;
@@ -11,6 +8,8 @@ export interface PlayerData {
 	ringColor?: string;
 	isWinner?: boolean;
 	isEliminated?: boolean;
+	side?: "left" | "right";
+	round?: "round1" | "later";
 	[key: string]: unknown;
 }
 
@@ -21,6 +20,8 @@ interface PlayerNodeProps {
 	ringColor?: string;
 	isWinner?: boolean;
 	isEliminated?: boolean;
+	side?: "left" | "right";
+	round?: "round1" | "later";
 }
 
 export function PlayerNode({
@@ -30,11 +31,15 @@ export function PlayerNode({
 	ringColor = "var(--orange)",
 	isWinner = false,
 	isEliminated = false,
+	side = "left",
+	round = "later",
 }: PlayerNodeProps) {
 	const classNames = [
 		"player-node",
 		isWinner && "player-node--winner",
 		isEliminated && "player-node--eliminated",
+		side === "right" && "player-node--right",
+		round === "round1" && "player-node--round1",
 	]
 		.filter(Boolean)
 		.join(" ");
@@ -101,6 +106,8 @@ export function PlayerNodeFlow({ data }: { data: PlayerData }) {
 				ringColor={data.ringColor}
 				isWinner={data.isWinner}
 				isEliminated={data.isEliminated}
+				side={data.side}
+				round={data.round}
 			/>
 			<Handles />
 		</div>
@@ -108,30 +115,37 @@ export function PlayerNodeFlow({ data }: { data: PlayerData }) {
 }
 
 // Empty slot for matches not yet played
-export function EmptySlot({ text }: { text?: string }) {
-	const location = useLocation();
-	const placeholderUrl = cfImage(placeholder, {
-		width: 600,
-		origin: location.url.origin,
-	});
-	const xPositions = [0, 25, 50, 75, 100];
-	const yPositions = [0, 50, 100];
-	const randomX = xPositions[Math.floor(Math.random() * xPositions.length)];
-	const randomY = yPositions[Math.floor(Math.random() * yPositions.length)];
+export function EmptySlot({
+	text,
+	side = "left",
+	ringColor,
+	round = "later",
+}: {
+	text?: string;
+	side?: "left" | "right";
+	ringColor?: string;
+	round?: "round1" | "later";
+}) {
+	const classNames = [
+		"player-node",
+		"player-node--empty",
+		side === "right" && "player-node--right",
+		round === "round1" && "player-node--round1",
+	]
+		.filter(Boolean)
+		.join(" ");
 
 	return (
-		<div className="player-node player-node--empty">
-			<div className="player-photo-ring">
-				<div
-					className="player-photo-placeholder"
-					style={
-						{
-							"--placeholder-url": `url(${placeholderUrl})`,
-							"--x": `${randomX}%`,
-							"--y": `${randomY}%`,
-						} as React.CSSProperties
-					}
-				/>
+		<div className={classNames}>
+			<div
+				className="player-photo-ring"
+				style={
+					ringColor
+						? ({ "--ring-color": ringColor } as React.CSSProperties)
+						: undefined
+				}
+			>
+				<img src="/avatars/tbd.png" alt="TBD" className="player-photo" />
 			</div>
 			<div className="player-info">
 				<h3 className="player-name">{text || "TBD"}</h3>
@@ -141,10 +155,24 @@ export function EmptySlot({ text }: { text?: string }) {
 }
 
 // React Flow wrapper for EmptySlot
-export function EmptySlotFlow({ data }: { data: { text?: string } }) {
+export function EmptySlotFlow({
+	data,
+}: {
+	data: {
+		text?: string;
+		side?: "left" | "right";
+		ringColor?: string;
+		round?: "round1" | "later";
+	};
+}) {
 	return (
 		<div style={{ position: "relative" }}>
-			<EmptySlot text={data?.text} />
+			<EmptySlot
+				text={data?.text}
+				side={data?.side}
+				ringColor={data?.ringColor}
+				round={data?.round}
+			/>
 			<Handles />
 		</div>
 	);
