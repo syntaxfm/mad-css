@@ -112,7 +112,7 @@ p {
 }
 
 .section-content {
-	max-width: 1000px;
+	max-width: var(--max-width, 1000px);
 	margin: 0 auto;
 	padding: 20px;
 }

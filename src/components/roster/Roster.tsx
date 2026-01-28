@@ -49,12 +49,32 @@ export function Roster() {
 			name: "Julia Miocene",
 			image: "/cards/julia miocene card.png",
 		},
+		{
+			name: "Ben Hong",
+			image: "/cards/Ben Hong Card.jpg",
+		},
+		{
+			name: "Bree Hall",
+			image: "/cards/Bree Hall Card.jpg",
+		},
+		{
+			name: "Chris Coyier",
+			image: "/cards/chris coyier card.jpg",
+		},
+		{
+			name: "Jason Lengstorf",
+			image: "/cards/Jason Lengstorf Card.jpg",
+		},
+		{
+			name: "Shaundai Person",
+			image: "/cards/Shaundai Person Card.jpg",
+		},
 	];
 	return (
 		<div className="roster">
 			<h2 className="center font_block uppercase">The Roster</h2>
 			<p className="center">
-				16 players total. Here are the Lucky {players.length} thave have been
+				16 players total. Here are the Lucky {players.length} that have been
 				drafted so far.
 			</p>
 			<div className="cards">
