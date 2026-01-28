@@ -3,10 +3,10 @@
 	"name": "mad-css",
 	// account_id is set via CLOUDFLARE_ACCOUNT_ID env var
 	"compatibility_date": "2026-01-07",
-	// "routes": [
-	// 	{ "pattern": "madcss.com/*", "zone_name": "madcss.com" },
-	// 	{ "pattern": "www.madcss.com/*", "zone_name": "madcss.com" }
-	// ],
+	"routes": [
+		{ "pattern": "madcss.com/*", "zone_name": "madcss.com" },
+		{ "pattern": "www.madcss.com/*", "zone_name": "madcss.com" }
+	],
 	"preview_urls": true,
 	"compatibility_flags": [
 		"nodejs_compat"
