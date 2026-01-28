@@ -113,6 +113,13 @@ export const adamArgyle: Player = {
 	byline: "CSS Genius + CSSWG member",
 };
 
+export const benHong: Player = {
+	id: "ben-hong",
+	name: "Ben Hong",
+	photo: "/avatars/ben-hong.png",
+	byline: "@BenCodeZen | Vue.js Core Team",
+};
+
 // All players array
 export const players: Player[] = [
 	jasonLengstorf,
@@ -129,6 +136,7 @@ export const players: Player[] = [
 	wesBos,
 	aniaKubow,
 	adamArgyle,
+	benHong,
 ];
 
 // =============================================================================
@@ -250,7 +258,7 @@ export const bracket: Bracket = {
 			id: "r1-6",
 			date: "2026-02-02",
 			player1: wesBos,
-			// player2: TBD
+			player2: benHong,
 		},
 		// Game 7: Ania Kubow vs Adam Argyle
 		{

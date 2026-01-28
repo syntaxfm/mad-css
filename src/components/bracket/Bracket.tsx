@@ -56,7 +56,7 @@ function BracketEdge({
 		sourceX,
 		sourceY,
 		targetX,
-		targetY: targetY, // Extend line to close gap with target card
+		targetY: targetY - 7, // Extend line to close gap with target card
 		sourcePosition,
 		targetPosition,
 		borderRadius: 0,
@@ -81,6 +81,16 @@ const VERTICAL_GAP = 76;
 const MATCH_GAP = NODE_HEIGHT + VERTICAL_GAP;
 const ROUND_GAP = 220;
 
+// Get the appropriate photo path based on elimination status
+function getPhotoPath(player: Player, isEliminated: boolean): string {
+	// Photos are stored as /avatars/color/name.png and /avatars/bw/name.png
+	// player.photo is like /avatars/name.png, so we need to insert the subfolder
+	const filename = player.photo.replace("/avatars/", "");
+	return isEliminated
+		? `/avatars/bw/${filename}`
+		: `/avatars/color/${filename}`;
+}
+
 // Convert a Player to PlayerData for the node
 function playerToNodeData(
 	player: Player,
@@ -98,13 +108,14 @@ function playerToNodeData(
 	side: "left" | "right";
 	round: "round1" | "later";
 } {
+	const eliminated = isLoser(game, player);
 	return {
-		photo: player.photo,
+		photo: getPhotoPath(player, eliminated),
 		name: player.name,
 		byline: player.byline,
 		ringColor,
 		isWinner: isWinner(game, player),
-		isEliminated: isLoser(game, player),
+		isEliminated: eliminated,
 		side,
 		round,
 	};
