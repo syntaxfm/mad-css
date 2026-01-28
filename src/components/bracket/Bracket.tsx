@@ -56,7 +56,7 @@ function BracketEdge({
 		sourceX,
 		sourceY,
 		targetX,
-		targetY: targetY - 7, // Extend line to close gap with target card
+		targetY,
 		sourcePosition,
 		targetPosition,
 		borderRadius: 0,
@@ -108,14 +108,14 @@ function playerToNodeData(
 	side: "left" | "right";
 	round: "round1" | "later";
 } {
-	const eliminated = isLoser(game, player);
+	const isEliminated = isLoser(game, player);
 	return {
-		photo: getPhotoPath(player, eliminated),
+		photo: getPhotoPath(player, isEliminated),
 		name: player.name,
 		byline: player.byline,
 		ringColor,
 		isWinner: isWinner(game, player),
-		isEliminated: eliminated,
+		isEliminated,
 		side,
 		round,
 	};
