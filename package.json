@@ -10,11 +10,13 @@
     "lint": "biome lint",
     "check": "biome check",
     "deploy": "npm run build && wrangler deploy",
+    "deploy:syntax": "npm run build && wrangler deploy -c wrangler.syntax.jsonc",
     "preview": "npm run build && vite preview",
     "cf-typegen": "wrangler types",
     "db:generate": "drizzle-kit generate",
     "db:migrate:local": "wrangler d1 migrations apply mad-css-db --local",
     "db:migrate:prod": "wrangler d1 migrations apply mad-css-db --remote",
+    "db:migrate:syntax": "wrangler d1 migrations apply mad-css-db --remote -c wrangler.syntax.jsonc",
     "db:studio": "drizzle-kit studio",
     "db:setup": "npm run db:generate && npm run db:migrate:local"
   },
