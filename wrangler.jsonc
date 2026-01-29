@@ -28,7 +28,7 @@
 			"database_name": "mad-css-db",
 			"database_id": "f44ee260-2c14-49fd-9e98-b27d7add0ef2",
 			// Create staging DB: npx wrangler d1 create mad-css-db-staging
-			"preview_database_id": "YOUR_STAGING_DATABASE_ID",
+			"preview_database_id": "c61911d8-dd63-425a-aed6-1276334202eb",
 			"migrations_dir": "drizzle"
 		},
 		{
