@@ -3,11 +3,14 @@
 	"name": "mad-css",
 	// account_id is set via CLOUDFLARE_ACCOUNT_ID env var
 	"compatibility_date": "2026-01-07",
+	"build": {
+		"command": "pnpm run build"
+	},
 	"routes": [
 		{ "pattern": "madcss.com/*", "zone_name": "madcss.com" },
 		{ "pattern": "www.madcss.com/*", "zone_name": "madcss.com" }
 	],
-  "preview_urls": true,
+	"preview_urls": true,
 	"compatibility_flags": [
 		"nodejs_compat"
 	],
@@ -19,8 +22,8 @@
 		{
 			"binding": "DB",
 			// Create your own D1 database: npx wrangler d1 create mad-css-db
-      "database_name": "mad-css-db",
-			"database_id": "7b4f8fba-ee53-480b-afcf-150ca0902688",
+			"database_name": "mad-css-db",
+			"database_id": "f44ee260-2c14-49fd-9e98-b27d7add0ef2",
 			"migrations_dir": "drizzle"
 		}
 	]
