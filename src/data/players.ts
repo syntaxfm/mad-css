@@ -1,4 +1,64 @@
 // =============================================================================
+// TOURNAMENT CONFIG
+// =============================================================================
+
+// Deadline for locking brackets (ISO 8601 format)
+// After this time, no new brackets can be created or locked
+export const BRACKET_DEADLINE = "2026-02-28T00:00:00Z";
+
+// Game schedule - when results will be announced for each round
+export const GAME_SCHEDULE = {
+	"left-r1": "2026-03-02T18:00:00Z",
+	"right-r1": "2026-03-09T18:00:00Z",
+	qf: "2026-03-16T18:00:00Z",
+	sf: "2026-03-23T18:00:00Z",
+	final: "2026-03-30T18:00:00Z",
+} as const;
+
+// Get the next upcoming game time (or null if all games are done)
+export function getNextGameTime(): { round: string; time: string } | null {
+	const now = Date.now();
+	const rounds = Object.entries(GAME_SCHEDULE) as [string, string][];
+	for (const [round, time] of rounds) {
+		if (new Date(time).getTime() > now) {
+			return { round, time };
+		}
+	}
+	return null;
+}
+
+// Total number of games in the bracket (8 + 4 + 2 + 1 = 15)
+export const TOTAL_GAMES = 15;
+
+// Game IDs by round
+export const ROUND_1_GAME_IDS = [
+	"r1-0",
+	"r1-1",
+	"r1-2",
+	"r1-3",
+	"r1-4",
+	"r1-5",
+	"r1-6",
+	"r1-7",
+] as const;
+
+export const QUARTER_GAME_IDS = ["qf-0", "qf-1", "qf-2", "qf-3"] as const;
+
+export const SEMI_GAME_IDS = ["sf-0", "sf-1"] as const;
+
+export const FINAL_GAME_IDS = ["final"] as const;
+
+// All game IDs in tournament order
+export const ALL_GAME_IDS = [
+	...ROUND_1_GAME_IDS,
+	...QUARTER_GAME_IDS,
+	...SEMI_GAME_IDS,
+	...FINAL_GAME_IDS,
+] as const;
+
+export type GameId = (typeof ALL_GAME_IDS)[number];
+
+// =============================================================================
 // PLAYER DEFINITIONS
 // =============================================================================
 // Each player needs: id (slug), name, photo path, and byline
@@ -239,12 +299,12 @@ export const bracket: Bracket = {
 
 		// ----- RIGHT SIDE (games 4-7) -----
 
-		// Game 4: Kevin Powell vs TBD
+		// Game 4: Kevin Powell (bye round)
 		{
 			id: "r1-4",
 			date: "2026-02-01",
 			player1: kevinPowell,
-			// player2: TBD
+			player2: kevinPowell,
 		},
 		// Game 5: Josh Comeau vs Cassidy Williams
 		{
@@ -366,3 +426,28 @@ export function splitForDisplay<T>(games: T[]): { left: T[]; right: T[] } {
 		right: games.slice(mid),
 	};
 }
+
+/** Get all completed game results from the bracket */
+export function getResultsFromBracket(): {
+	gameId: string;
+	winnerId: string;
+}[] {
+	const results: { gameId: string; winnerId: string }[] = [];
+	for (const game of getAllGames()) {
+		if (game.winner) {
+			results.push({ gameId: game.id, winnerId: game.winner.id });
+		}
+	}
+	return results;
+}
+
+/** Mapping of which games feed into each slot (p1 from first, p2 from second) */
+export const FEEDER_GAMES: Record<string, [string, string]> = {
+	"qf-0": ["r1-0", "r1-1"],
+	"qf-1": ["r1-2", "r1-3"],
+	"qf-2": ["r1-4", "r1-5"],
+	"qf-3": ["r1-6", "r1-7"],
+	"sf-0": ["qf-0", "qf-1"],
+	"sf-1": ["qf-2", "qf-3"],
+	final: ["sf-0", "sf-1"],
+};

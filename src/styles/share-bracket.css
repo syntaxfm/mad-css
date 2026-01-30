@@ -1,0 +1,195 @@
+/* ============================================
+   SHARE BRACKET PAGE
+   Retro Tournament Aesthetic (matches test page)
+   ============================================ */
+
+/* ============================================
+   Header Card - Paper Style
+   ============================================ */
+
+.share-bracket-header {
+	max-width: 600px;
+	margin: 0 auto 2rem;
+	padding: 40px 30px;
+	background: var(--beige);
+	border-radius: 15px;
+	/* Torn paper edge effect */
+	mask-image:
+		url("./assets/paper/repeating-paper-top.png"),
+		url("./assets/paper/repeating-paper-bottom.png"),
+		linear-gradient(black, black);
+	mask-size:
+		auto 23px,
+		auto 40px,
+		100% 100%;
+	mask-position:
+		center 0px,
+		center calc(100% + 15px),
+		center;
+	mask-repeat: repeat-x, repeat-x, no-repeat;
+	mask-composite: exclude;
+	mask-mode: alpha;
+}
+
+/* User info row */
+.share-bracket-user {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	margin-bottom: 20px;
+}
+
+.share-bracket-avatar {
+	width: 64px;
+	height: 64px;
+	border-radius: 50%;
+	border: 4px solid var(--orange);
+	flex-shrink: 0;
+}
+
+.share-bracket-user-info {
+	flex: 1;
+}
+
+.share-bracket-user-info h1 {
+	font-family: var(--font-block);
+	font-size: 1.5rem;
+	margin: 0 0 4px;
+	color: var(--orange);
+	text-transform: uppercase;
+	letter-spacing: 0.02em;
+}
+
+.share-bracket-username {
+	font-family: var(--font-sans);
+	font-size: 0.95rem;
+	color: var(--black);
+	opacity: 0.6;
+}
+
+/* CTA button inside header card */
+.share-bracket-header .btn-primary {
+	width: 100%;
+}
+
+/* ============================================
+   Error States - Paper Card Style
+   ============================================ */
+
+.share-bracket-error {
+	max-width: 500px;
+	margin: 4rem auto;
+	padding: 50px 40px;
+	background: var(--beige);
+	border-radius: 15px;
+	text-align: center;
+	/* Torn paper edge effect */
+	mask-image:
+		url("./assets/paper/repeating-paper-top.png"),
+		url("./assets/paper/repeating-paper-bottom.png"),
+		linear-gradient(black, black);
+	mask-size:
+		auto 23px,
+		auto 40px,
+		100% 100%;
+	mask-position:
+		center 0px,
+		center calc(100% + 15px),
+		center;
+	mask-repeat: repeat-x, repeat-x, no-repeat;
+	mask-composite: exclude;
+	mask-mode: alpha;
+}
+
+.share-bracket-error h1 {
+	font-family: var(--font-block);
+	font-size: 1.75rem;
+	color: var(--orange);
+	margin: 0 0 12px;
+	text-transform: uppercase;
+	letter-spacing: 0.02em;
+}
+
+.share-bracket-error p {
+	font-family: var(--font-sans);
+	color: var(--black);
+	margin: 0 0 28px;
+	font-size: 1rem;
+	line-height: 1.5;
+}
+
+/* ============================================
+   Primary Button - Retro Style
+   ============================================ */
+
+.btn-primary {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	padding: 16px 32px;
+	background: var(--yellow);
+	color: var(--black);
+	font-family: var(--font-block);
+	font-size: 1rem;
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+	text-decoration: none;
+	border: 3px solid var(--black);
+	border-radius: 0;
+	cursor: pointer;
+	transition:
+		transform 0.1s,
+		box-shadow 0.1s;
+	box-shadow: 4px 4px 0 var(--black);
+}
+
+.btn-primary:hover {
+	transform: translate(2px, 2px);
+	box-shadow: 2px 2px 0 var(--black);
+}
+
+.btn-primary:active {
+	transform: translate(4px, 4px);
+	box-shadow: none;
+}
+
+/* ============================================
+   Responsive
+   ============================================ */
+
+@media (max-width: 600px) {
+	.share-bracket-header {
+		margin-left: 12px;
+		margin-right: 12px;
+		padding: 30px 20px;
+	}
+
+	.share-bracket-user {
+		gap: 12px;
+	}
+
+	.share-bracket-avatar {
+		width: 52px;
+		height: 52px;
+	}
+
+	.share-bracket-user-info h1 {
+		font-size: 1.25rem;
+	}
+
+	.share-bracket-error {
+		margin-left: 12px;
+		margin-right: 12px;
+		padding: 40px 24px;
+	}
+
+	.share-bracket-error h1 {
+		font-size: 1.5rem;
+	}
+
+	.btn-primary {
+		width: 100%;
+		padding: 14px 24px;
+	}
+}

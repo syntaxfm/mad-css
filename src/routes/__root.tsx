@@ -6,6 +6,7 @@ import {
 	Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
+import { AdminButton } from "@/components/AdminButton";
 import { Footer } from "@/components/footer/Footer";
 import { Header } from "@/components/Header";
 import appCss from "../styles/styles.css?url";
@@ -98,6 +99,7 @@ function RootDocument() {
 				<Header />
 				<Outlet />
 				<Footer />
+				<AdminButton />
 				{process.env.NODE_ENV === "development" && (
 					<TanStackDevtools
 						config={{

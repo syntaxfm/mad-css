@@ -1,3 +1,15 @@
+@property --ring-color {
+	syntax: "<color>";
+	inherits: true;
+	initial-value: #f97316;
+}
+
+@property --inner-ring-color {
+	syntax: "<color>";
+	inherits: true;
+	initial-value: #facc15;
+}
+
 /* Player Node Base Styles */
 .player-node {
 	display: flex;
@@ -9,7 +21,7 @@
 	/* Finalist and championship nodes - vertically stacked layout */
 	[data-id*="finalist"] &,
 	[data-id="championship"] & {
-		flex-direction: column;
+		flex-direction: column !important;
 		justify-content: center;
 		align-items: center;
 		width: auto;
@@ -19,29 +31,14 @@
 		.player-info {
 			text-align: center;
 			margin-left: 0;
+			margin-right: 0;
+			padding: 10px 16px;
 		}
 		.player-photo-ring {
+			margin-left: 0;
+			margin-right: 0;
 			margin-bottom: -30px;
 		}
-	}
-
-	[data-id="left-finalist"] & {
-		transform: translateX(10px) translateY(-5px);
-	}
-
-	[data-id*="right-finalist"] & {
-		transform: translateX(-10px) translateY(-5px);
-	}
-
-	/* Finalist sizing */
-	[data-id*="finalist"] & .player-photo-ring {
-		--photo-size: 65px;
-	}
-
-	/* Championship sizing */
-	[data-id="championship"] & .player-photo-ring {
-		--photo-size: 80px;
-		transform: translateX(10px);
 	}
 }
 
@@ -50,10 +47,28 @@
 	--photo-size: 50px;
 }
 
+.player-node:not(.player-node--round1) .player-photo {
+	--brain-size: 13px;
+	--circle-size: 29px;
+}
+
 /* Keep large avatars for finalists and champion */
-[data-id*="finalist"] .player-node .player-photo-ring,
-[data-id*="champion"] .player-node .player-photo-ring {
-	--photo-size: 85px;
+[data-id*="finalist"] .player-node .player-photo-ring {
+	--photo-size: 75px;
+}
+
+[data-id*="finalist"] .player-node .player-photo {
+	--brain-size: 18px;
+	--circle-size: 40px;
+}
+
+[data-id="championship"] .player-node .player-photo-ring {
+	--photo-size: 95px;
+}
+
+[data-id="championship"] .player-node .player-photo {
+	--brain-size: 22px;
+	--circle-size: 50px;
 }
 
 .player-photo-ring {
@@ -85,6 +100,10 @@
 		linear-gradient(var(--ring-color), var(--ring-color)) border-box;
 	padding: var(--ring-thickness);
 	flex-shrink: 0;
+	transition:
+		box-shadow 0.3s ease,
+		--ring-color 0.3s ease,
+		--inner-ring-color 0.3s ease;
 }
 
 .player-photo-ring::before {
@@ -94,6 +113,7 @@
 	border-radius: 50%;
 	background: var(--inner-ring-color);
 	padding: var(--gold-ring-thickness);
+	transition: background 0.3s ease;
 }
 
 .player-photo {
@@ -105,6 +125,7 @@
 	object-fit: cover;
 	filter: grayscale(10%);
 	transform: translateY(calc(var(--brain-size) * -1));
+	transform-origin: center bottom;
 	--circle-size: 45px;
 	/* Top 50% visible */
 	mask-image:
@@ -121,6 +142,9 @@
 	mask-position:
 		center center,
 		center calc(var(--brain-size) / 2 + 0.5px);
+	transition:
+		filter 0.3s ease,
+		transform 0.3s ease;
 }
 
 /* Grey circle placeholder for empty slots */
@@ -190,6 +214,16 @@
 	border-color: #888;
 }
 
+/* Loser State - shows actual tournament losers with gray styling */
+.player-node--loser .player-photo-ring {
+	--ring-color: #666;
+	--inner-ring-color: #888;
+}
+
+.player-node--loser .player-photo {
+	filter: grayscale(100%);
+}
+
 /* Empty Slot State - grey version of player node */
 .player-node--empty .player-photo-ring {
 	--ring-color: var(--yellow);
@@ -224,6 +258,91 @@
 
 .player-node--empty.player-node--right .player-info {
 	text-align: center;
+}
+
+/* Pickable State - hoverable/clickable for making predictions */
+.player-node--pickable {
+	cursor: pointer;
+}
+
+.player-node--pickable:hover .player-photo {
+	transform: translateY(calc(var(--brain-size) * -1)) scale(1.1);
+}
+
+.player-node--pickable:focus {
+	outline: none;
+}
+
+.player-node--pickable:focus-visible .player-photo-ring {
+	box-shadow:
+		0 0 0 3px var(--yellow),
+		0 0 0 5px var(--black);
+}
+
+/* Selected State - user has picked this player (checkmark badge) */
+.player-node--selected .player-photo {
+	filter: grayscale(0%);
+}
+
+.player-node--selected .player-photo-ring {
+	--ring-color: var(--yellow);
+}
+
+/* Unpicked State - opponent of a picked player (gray ring) */
+.player-node--unpicked .player-photo-ring {
+	--ring-color: #666;
+	--inner-ring-color: #888;
+}
+
+.player-node--unpicked .player-photo {
+	filter: grayscale(100%);
+}
+
+/* Checkmark entrance animation */
+@keyframes checkmark-pop {
+	0% {
+		transform: scale(0);
+		opacity: 0;
+	}
+	60% {
+		transform: scale(1.2);
+	}
+	100% {
+		transform: scale(1);
+		opacity: 1;
+	}
+}
+
+.player-node__badge {
+	position: absolute;
+	top: -2px;
+	right: -2px;
+	width: 22px;
+	height: 22px;
+	border: 2px solid var(--black);
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 10;
+	animation: checkmark-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.player-node__badge--pending {
+	background: var(--yellow);
+	color: var(--black);
+}
+
+.player-node__badge--correct {
+	--badge-correct: #22c55e;
+	background: var(--badge-correct);
+	color: var(--white);
+}
+
+.player-node__badge--incorrect {
+	--badge-incorrect: #ef4444;
+	background: var(--badge-incorrect);
+	color: var(--white);
 }
 
 /* React Flow Container */
