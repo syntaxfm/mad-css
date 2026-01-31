@@ -6,8 +6,8 @@ import { Leaderboard } from "@/components/leaderboard/Leaderboard";
 import { Roster } from "@/components/roster/Roster";
 import { Rules } from "@/components/rules/Rules";
 import { Ticket } from "@/components/Ticket";
+import { PredictionsProvider } from "@/context/PredictionsContext";
 import { getResultsFromBracket } from "@/data/players";
-import { usePredictions } from "@/hooks/usePredictions";
 import { authClient } from "@/lib/auth-client";
 
 // Initialize tournament results from bracket data (single source of truth)
@@ -47,21 +47,6 @@ function TestPage() {
 			window.removeEventListener("tournament-results-changed", handler);
 	}, []);
 
-	const {
-		predictions,
-		isLocked,
-		isSaving,
-		error,
-		pickCount,
-		deadline,
-		isDeadlinePassed,
-		hasChanges,
-		setPrediction,
-		savePredictions,
-		lockBracket,
-		resetPredictions,
-	} = usePredictions(isAuthenticated);
-
 	// Auto-scroll to bracket after fresh OAuth login (only once per session)
 	useEffect(() => {
 		const hasScrolled = sessionStorage.getItem("bracket-scrolled");
@@ -84,33 +69,22 @@ function TestPage() {
 					<Roster />
 				</div>
 			</div>
-			<div id="bracket" className="section">
-				<h2>The Bracket</h2>
-				<LoginSection
-					pickCount={pickCount}
-					isLocked={isLocked}
-					isSaving={isSaving}
-					hasChanges={hasChanges}
-					error={error}
-					deadline={deadline}
-					isDeadlinePassed={isDeadlinePassed}
-					username={(session?.user as { username?: string })?.username}
-					onSave={savePredictions}
-					onLock={lockBracket}
-					onReset={resetPredictions}
-					showPicks={showPicks}
-					onToggleShowPicks={() => setShowPicks(!showPicks)}
-				/>
-				<Bracket
-					isInteractive
-					predictions={predictions}
-					onPick={setPrediction}
-					isLocked={isLocked}
-					isAuthenticated={isAuthenticated}
-					tournamentResults={tournamentResults}
-					showPicks={showPicks}
-				/>
-			</div>
+			<PredictionsProvider isAuthenticated={isAuthenticated}>
+				<div id="bracket" className="section">
+					<h2>The Bracket</h2>
+					<LoginSection
+						username={(session?.user as { username?: string })?.username}
+						showPicks={showPicks}
+						onToggleShowPicks={() => setShowPicks(!showPicks)}
+					/>
+					<Bracket
+						isInteractive
+						isAuthenticated={isAuthenticated}
+						tournamentResults={tournamentResults}
+						showPicks={showPicks}
+					/>
+				</div>
+			</PredictionsProvider>
 			<Leaderboard />
 			<Rules />
 		</div>

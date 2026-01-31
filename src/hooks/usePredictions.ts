@@ -112,6 +112,8 @@ function getGamesToClear(
 	return gamesToClear;
 }
 
+export type UsePredictionsReturn = ReturnType<typeof usePredictions>;
+
 export function usePredictions(isAuthenticated: boolean) {
 	const [predictions, setPredictions] = useState<Record<string, string>>({});
 	const [isLocked, setIsLocked] = useState(false);

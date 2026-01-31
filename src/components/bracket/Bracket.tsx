@@ -10,6 +10,7 @@ import {
 } from "@xyflow/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "@xyflow/react/dist/style.css";
+import { usePredictionsContext } from "@/context/PredictionsContext";
 import { ALL_GAME_IDS, bracket, splitForDisplay } from "@/data/players";
 import { getPickablePlayersForGame } from "@/hooks/usePredictions";
 import type { NodeContext } from "./bracketTypes";
@@ -310,13 +311,20 @@ const FIT_VIEW_PADDING = 0.05;
 
 function BracketContent({
 	isInteractive = false,
-	predictions = {},
-	onPick,
-	isLocked = false,
+	predictions: propsPredictions,
+	onPick: propsOnPick,
+	isLocked: propsIsLocked,
 	isAuthenticated = false,
 	tournamentResults = {},
 	showPicks = false,
 }: BracketProps) {
+	const ctx = usePredictionsContext();
+
+	// Use context if available, otherwise fall back to props
+	const predictions = ctx?.predictions ?? propsPredictions ?? {};
+	const onPick = ctx?.setPrediction ?? propsOnPick;
+	const isLocked = ctx?.isLocked ?? propsIsLocked ?? false;
+
 	const isPickingEnabled = isInteractive && isAuthenticated && !isLocked;
 	const nodes = useMemo(
 		() =>

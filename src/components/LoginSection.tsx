@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { usePredictionsContext } from "@/context/PredictionsContext";
 import { getNextGameTime, TOTAL_GAMES } from "@/data/players";
 import { useCountdown } from "@/hooks/useCountdown";
 import { authClient } from "@/lib/auth-client";
@@ -14,36 +15,28 @@ const ROUND_LABELS: Record<string, string> = {
 };
 
 export interface LoginSectionProps {
-	pickCount?: number;
-	isLocked?: boolean;
-	isSaving?: boolean;
-	hasChanges?: boolean;
-	error?: string | null;
-	deadline?: string;
-	isDeadlinePassed?: boolean;
 	username?: string | null;
-	onSave?: () => void;
-	onLock?: () => void;
-	onReset?: () => void;
 	showPicks?: boolean;
 	onToggleShowPicks?: () => void;
 }
 
 export function LoginSection({
-	pickCount = 0,
-	isLocked = false,
-	isSaving = false,
-	hasChanges = false,
-	error = null,
-	deadline,
-	isDeadlinePassed = false,
 	username = null,
-	onSave,
-	onLock,
-	onReset,
 	showPicks = false,
 	onToggleShowPicks,
 }: LoginSectionProps) {
+	const ctx = usePredictionsContext();
+
+	const pickCount = ctx?.pickCount ?? 0;
+	const isLocked = ctx?.isLocked ?? false;
+	const isSaving = ctx?.isSaving ?? false;
+	const hasChanges = ctx?.hasChanges ?? false;
+	const error = ctx?.error ?? null;
+	const deadline = ctx?.deadline;
+	const isDeadlinePassed = ctx?.isDeadlinePassed ?? false;
+	const onSave = ctx?.savePredictions;
+	const onLock = ctx?.lockBracket;
+	const onReset = ctx?.resetPredictions;
 	const { data: session, isPending } = authClient.useSession();
 	const [showLockConfirm, setShowLockConfirm] = useState(false);
 	const [copied, setCopied] = useState(false);
