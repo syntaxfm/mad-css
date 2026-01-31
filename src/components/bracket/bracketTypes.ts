@@ -22,7 +22,7 @@ export interface RoundGeneratorOptions {
 export const NODE_HEIGHT = 70;
 export const VERTICAL_GAP = 76;
 export const MATCH_GAP = NODE_HEIGHT + VERTICAL_GAP; // 146
-export const ROUND_GAP = 340;
+export const ROUND_GAP = 220;
 export const RIGHT_START_X = ROUND_GAP * 7; // 2380
 
 export const LEFT_RING_COLOR = "#f3370e";
