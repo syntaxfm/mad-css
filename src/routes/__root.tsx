@@ -1,4 +1,5 @@
 import { TanStackDevtools } from "@tanstack/react-devtools";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
 	createRootRoute,
 	HeadContent,
@@ -10,6 +11,15 @@ import { AdminButton } from "@/components/AdminButton";
 import { Footer } from "@/components/footer/Footer";
 import { Header } from "@/components/Header";
 import appCss from "../styles/styles.css?url";
+
+const queryClient = new QueryClient({
+	defaultOptions: {
+		queries: {
+			staleTime: 1000 * 60 * 5, // 5 min default
+			retry: 2,
+		},
+	},
+});
 
 export const Route = createRootRoute({
 	head: () => ({
@@ -96,23 +106,25 @@ function RootDocument() {
 				<HeadContent />
 			</head>
 			<body>
-				<Header />
-				<Outlet />
-				<Footer />
-				<AdminButton />
-				{process.env.NODE_ENV === "development" && (
-					<TanStackDevtools
-						config={{
-							position: "bottom-right",
-						}}
-						plugins={[
-							{
-								name: "Tanstack Router",
-								render: <TanStackRouterDevtoolsPanel />,
-							},
-						]}
-					/>
-				)}
+				<QueryClientProvider client={queryClient}>
+					<Header />
+					<Outlet />
+					<Footer />
+					<AdminButton />
+					{process.env.NODE_ENV === "development" && (
+						<TanStackDevtools
+							config={{
+								position: "bottom-right",
+							}}
+							plugins={[
+								{
+									name: "Tanstack Router",
+									render: <TanStackRouterDevtoolsPanel />,
+								},
+							]}
+						/>
+					)}
+				</QueryClientProvider>
 				<Scripts />
 			</body>
 		</html>

@@ -19,11 +19,14 @@ function getBracketResults(): Record<string, string> {
 	return results;
 }
 
-export const Route = createFileRoute("/test")({ component: TestPage });
+export const Route = createFileRoute("/test")({
+	component: TestPage,
+});
 
 function TestPage() {
 	const { data: session } = authClient.useSession();
 	const isAuthenticated = !!session?.user;
+	const userId = session?.user?.id;
 	const [tournamentResults, setTournamentResults] =
 		useState<Record<string, string>>(getBracketResults);
 	const [showPicks, setShowPicks] = useState(true);
@@ -69,7 +72,7 @@ function TestPage() {
 					<Roster />
 				</div>
 			</div>
-			<PredictionsProvider isAuthenticated={isAuthenticated}>
+			<PredictionsProvider isAuthenticated={isAuthenticated} userId={userId}>
 				<div id="bracket" className="section">
 					<h2>The Bracket</h2>
 					<LoginSection

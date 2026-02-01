@@ -1,5 +1,10 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { BRACKET_DEADLINE, bracket, TOTAL_GAMES } from "@/data/players";
+import {
+	useLockBracketMutation,
+	usePredictionsQuery,
+	useSavePredictionsMutation,
+} from "./usePredictionsQuery";
 
 export type Prediction = {
 	gameId: string;
@@ -114,71 +119,83 @@ function getGamesToClear(
 
 export type UsePredictionsReturn = ReturnType<typeof usePredictions>;
 
-export function usePredictions(isAuthenticated: boolean) {
-	const [predictions, setPredictions] = useState<Record<string, string>>({});
-	const [isLocked, setIsLocked] = useState(false);
-	const [lockedAt, setLockedAt] = useState<string | null>(null);
-	const [isLoading, setIsLoading] = useState(true);
-	const [isSaving, setIsSaving] = useState(false);
-	const [error, setError] = useState<string | null>(null);
-	const [hasChanges, setHasChanges] = useState(false);
+export function usePredictions(isAuthenticated: boolean, userId?: string) {
+	// TanStack Query for fetching predictions
+	const {
+		data: queryData,
+		isLoading: queryIsLoading,
+		error: queryError,
+	} = usePredictionsQuery(isAuthenticated ? userId : undefined);
+
+	// Mutations
+	const saveMutation = useSavePredictionsMutation(userId);
+	const lockMutation = useLockBracketMutation(userId);
+
+	// Local state for optimistic updates while picking
+	const [localPredictions, setLocalPredictions] = useState<Record<
+		string,
+		string
+	> | null>(null);
+
+	// Track if local state differs from server state
+	const hasChanges = useMemo(() => {
+		if (!localPredictions || !queryData) return false;
+		const serverKeys = Object.keys(queryData.predictions);
+		const localKeys = Object.keys(localPredictions);
+		if (serverKeys.length !== localKeys.length) return true;
+		return localKeys.some(
+			(key) => localPredictions[key] !== queryData.predictions[key],
+		);
+	}, [localPredictions, queryData]);
+
+	// Sync local state when query data changes (initial load or after mutation)
+	useEffect(() => {
+		if (queryData && !localPredictions) {
+			setLocalPredictions(queryData.predictions);
+		}
+	}, [queryData, localPredictions]);
+
+	// Reset local state when user logs out
+	useEffect(() => {
+		if (!isAuthenticated) {
+			setLocalPredictions(null);
+		}
+	}, [isAuthenticated]);
+
+	// The actual predictions to use (local if available, otherwise from query)
+	const predictions = localPredictions ?? queryData?.predictions ?? {};
+	const isLocked = queryData?.isLocked ?? false;
+	const lockedAt = queryData?.lockedAt ?? null;
 
 	// Calculate deadline status
 	const isDeadlinePassed = new Date() > new Date(BRACKET_DEADLINE);
 
-	// Fetch predictions on mount, clear on sign out
-	useEffect(() => {
-		if (!isAuthenticated) {
-			setPredictions({});
-			setIsLocked(false);
-			setLockedAt(null);
-			setIsLoading(false);
-			setHasChanges(false);
-			setError(null);
-			return;
-		}
+	// Determine loading state
+	const isLoading = isAuthenticated && queryIsLoading;
 
-		async function fetchPredictions() {
-			try {
-				const response = await fetch("/api/predictions/");
-				if (!response.ok) {
-					throw new Error("Failed to fetch predictions");
-				}
-				const data = await response.json();
+	// Determine saving state
+	const isSaving = saveMutation.isPending || lockMutation.isPending;
 
-				// Convert array to record
-				const predictionsRecord: Record<string, string> = {};
-				for (const pred of data.predictions) {
-					predictionsRecord[pred.gameId] = pred.predictedWinnerId;
-				}
-
-				setPredictions(predictionsRecord);
-				setIsLocked(data.isLocked);
-				setLockedAt(data.lockedAt);
-			} catch (err) {
-				setError(
-					err instanceof Error ? err.message : "Failed to load predictions",
-				);
-			} finally {
-				setIsLoading(false);
-			}
-		}
-
-		fetchPredictions();
-	}, [isAuthenticated]);
+	// Determine error state
+	const error =
+		queryError?.message ||
+		saveMutation.error?.message ||
+		lockMutation.error?.message ||
+		null;
 
 	// Set a prediction with cascading logic
 	const setPrediction = useCallback(
 		(gameId: string, playerId: string) => {
 			if (isLocked || isDeadlinePassed) return;
 
-			setPredictions((prev) => {
-				const newPredictions = { ...prev };
-				const oldPlayerId = prev[gameId];
+			setLocalPredictions((prev) => {
+				const current = prev ?? queryData?.predictions ?? {};
+				const newPredictions = { ...current };
+				const oldPlayerId = current[gameId];
 
 				// If changing pick, clear any cascaded picks of the old player
 				if (oldPlayerId && oldPlayerId !== playerId) {
-					const gamesToClear = getGamesToClear(gameId, oldPlayerId, prev);
+					const gamesToClear = getGamesToClear(gameId, oldPlayerId, current);
 					for (const clearGameId of gamesToClear) {
 						delete newPredictions[clearGameId];
 					}
@@ -189,56 +206,29 @@ export function usePredictions(isAuthenticated: boolean) {
 
 				return newPredictions;
 			});
-
-			setHasChanges(true);
-			setError(null);
 		},
-		[isLocked, isDeadlinePassed],
+		[isLocked, isDeadlinePassed, queryData?.predictions],
 	);
 
 	// Save predictions to the server
 	const savePredictions = useCallback(async () => {
-		if (isLocked || isDeadlinePassed || !isAuthenticated) return;
+		if (isLocked || isDeadlinePassed || !isAuthenticated || !localPredictions)
+			return;
 
-		setIsSaving(true);
-		setError(null);
-
-		try {
-			const predictionsArray = Object.entries(predictions).map(
-				([gameId, predictedWinnerId]) => ({
-					gameId,
-					predictedWinnerId,
-				}),
-			);
-
-			const response = await fetch("/api/predictions/", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ predictions: predictionsArray }),
-			});
-
-			if (!response.ok) {
-				const data = await response.json();
-				throw new Error(data.error || "Failed to save predictions");
-			}
-
-			setHasChanges(false);
-		} catch (err) {
-			setError(
-				err instanceof Error ? err.message : "Failed to save predictions",
-			);
-		} finally {
-			setIsSaving(false);
-		}
-	}, [predictions, isLocked, isDeadlinePassed, isAuthenticated]);
+		await saveMutation.mutateAsync(localPredictions);
+	}, [
+		localPredictions,
+		isLocked,
+		isDeadlinePassed,
+		isAuthenticated,
+		saveMutation,
+	]);
 
 	// Reset all predictions
 	const resetPredictions = useCallback(() => {
 		if (isLocked || isDeadlinePassed) return;
 
-		setPredictions({});
-		setHasChanges(true);
-		setError(null);
+		setLocalPredictions({});
 	}, [isLocked, isDeadlinePassed]);
 
 	// Lock the bracket
@@ -246,39 +236,19 @@ export function usePredictions(isAuthenticated: boolean) {
 		if (isLocked || isDeadlinePassed || !isAuthenticated) return;
 
 		// First save any unsaved predictions
-		if (hasChanges) {
-			await savePredictions();
+		if (hasChanges && localPredictions) {
+			await saveMutation.mutateAsync(localPredictions);
 		}
 
-		setIsSaving(true);
-		setError(null);
-
-		try {
-			const response = await fetch("/api/predictions/lock", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-			});
-
-			if (!response.ok) {
-				const data = await response.json();
-				throw new Error(data.error || "Failed to lock bracket");
-			}
-
-			const data = await response.json();
-			setIsLocked(true);
-			setLockedAt(data.lockedAt);
-			setHasChanges(false);
-		} catch (err) {
-			setError(err instanceof Error ? err.message : "Failed to lock bracket");
-		} finally {
-			setIsSaving(false);
-		}
+		await lockMutation.mutateAsync();
 	}, [
 		isLocked,
 		isDeadlinePassed,
 		isAuthenticated,
 		hasChanges,
-		savePredictions,
+		localPredictions,
+		saveMutation,
+		lockMutation,
 	]);
 
 	const pickCount = Object.keys(predictions).length;

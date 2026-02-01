@@ -18,6 +18,7 @@ import {
 	RIGHT_START_X,
 	ROUND_GAP,
 } from "./bracketTypes";
+import type { InteractionMode, PickState, PredictionState } from "./PlayerNode";
 
 // Node is large if its feeder is decided AND the current game is not decided
 function isNodeLarge(
@@ -60,14 +61,9 @@ function playerToNodeData(
 	side: "left" | "right",
 	round: "round1" | "later" = "later",
 	options?: {
-		isSelected?: boolean;
-		isPickable?: boolean;
-		isCorrect?: boolean;
-		isIncorrect?: boolean;
-		isUnpicked?: boolean;
+		prediction?: PredictionState;
 		isLoser?: boolean;
 		showBio?: boolean;
-		onPick?: (gameId: string, playerId: string) => void;
 	},
 ): {
 	photo: string;
@@ -80,14 +76,9 @@ function playerToNodeData(
 	showBio: boolean;
 	side: "left" | "right";
 	round: "round1" | "later";
-	isSelected?: boolean;
-	isPickable?: boolean;
-	isCorrect?: boolean;
-	isIncorrect?: boolean;
-	isUnpicked?: boolean;
+	prediction?: PredictionState;
 	playerId?: string;
 	gameId?: string;
-	onPick?: (gameId: string, playerId: string) => void;
 } {
 	const isEliminated =
 		options?.isLoser !== undefined ? options.isLoser : isLoser(game, player);
@@ -102,14 +93,9 @@ function playerToNodeData(
 		showBio: options?.showBio ?? true,
 		side,
 		round,
-		isSelected: options?.isSelected,
-		isPickable: options?.isPickable,
-		isCorrect: options?.isCorrect,
-		isIncorrect: options?.isIncorrect,
-		isUnpicked: options?.isUnpicked,
+		prediction: options?.prediction,
 		playerId: player.id,
 		gameId: game.id,
-		onPick: options?.onPick,
 	};
 }
 
@@ -122,15 +108,10 @@ function createNode(
 	side: "left" | "right",
 	round: "round1" | "later" = "later",
 	emptyText?: string,
-	predictionOptions?: {
-		isSelected?: boolean;
-		isPickable?: boolean;
-		isCorrect?: boolean;
-		isIncorrect?: boolean;
-		isUnpicked?: boolean;
+	nodeOptions?: {
+		prediction?: PredictionState;
 		isLoser?: boolean;
 		showBio?: boolean;
-		onPick?: (gameId: string, playerId: string) => void;
 	},
 ): Node {
 	if (player) {
@@ -138,14 +119,7 @@ function createNode(
 			id,
 			type: "playerNode",
 			position,
-			data: playerToNodeData(
-				player,
-				game,
-				ringColor,
-				side,
-				round,
-				predictionOptions,
-			),
+			data: playerToNodeData(player, game, ringColor, side, round, nodeOptions),
 		};
 	}
 	return {
@@ -160,47 +134,25 @@ function getPredictionOptions(
 	game: Game,
 	player: Player | undefined,
 	ctx: NodeContext,
-): {
-	isSelected: boolean;
-	isPickable: boolean;
-	isCorrect: boolean;
-	isIncorrect: boolean;
-	isUnpicked: boolean;
-	onPick?: (gameId: string, playerId: string) => void;
-} {
+): PredictionState | undefined {
+	// If not showing picks, don't return any pick state
+	if (!ctx.showPicks) {
+		return undefined;
+	}
+
 	const userPick = ctx.predictions[game.id];
 	const actualWinner = ctx.tournamentResults[game.id];
 
-	const defaults = {
-		isSelected: false,
-		isPickable: false,
-		isCorrect: false,
-		isIncorrect: false,
-		isUnpicked: false,
-		onPick: undefined as
-			| ((gameId: string, playerId: string) => void)
-			| undefined,
+	const defaults: PredictionState = {
+		pickState: { status: "none" },
+		interactionMode: "view",
 	};
 
 	if (!player) {
 		return defaults;
 	}
 
-	if (actualWinner) {
-		if (ctx.isLocked && !ctx.showPicks) {
-			return defaults;
-		}
-		const isWinnerPlayer = actualWinner === player.id;
-		const wasPickedForThisGame = userPick === player.id;
-		return {
-			isSelected: !ctx.isLocked && wasPickedForThisGame,
-			isPickable: false,
-			isCorrect: wasPickedForThisGame && isWinnerPlayer,
-			isIncorrect: wasPickedForThisGame && !isWinnerPlayer,
-			isUnpicked: !isWinnerPlayer,
-		};
-	}
-
+	// Determine if this player can be picked
 	const pickablePlayers = ctx.pickablePlayersCache[game.id];
 	const bothPlayersDetermined =
 		pickablePlayers[0] !== undefined && pickablePlayers[1] !== undefined;
@@ -209,31 +161,42 @@ function getPredictionOptions(
 		ctx.isPickingEnabled &&
 		bothPlayersDetermined &&
 		(player.id === pickablePlayers[0] || player.id === pickablePlayers[1]);
+	const interactionMode: InteractionMode = canPick ? "pickable" : "view";
+	const onPick = canPick ? ctx.onPick : undefined;
 
-	if (userPick) {
+	// Game has a result - determine correct/incorrect
+	if (actualWinner) {
 		if (ctx.isLocked && !ctx.showPicks) {
-			return {
-				...defaults,
-				isPickable: canPick,
-				onPick: canPick ? ctx.onPick : undefined,
-			};
+			return defaults;
 		}
-		const isPickedForThisGame = userPick === player.id;
-		return {
-			isSelected: !ctx.isLocked && isPickedForThisGame,
-			isPickable: canPick,
-			isCorrect: false,
-			isIncorrect: false,
-			isUnpicked: !isPickedForThisGame,
-			onPick: canPick ? ctx.onPick : undefined,
-		};
+		const isWinnerPlayer = actualWinner === player.id;
+		const wasPickedForThisGame = userPick === player.id;
+
+		let pickState: PickState;
+		if (wasPickedForThisGame) {
+			pickState = isWinnerPlayer
+				? { status: "correct" }
+				: { status: "incorrect" };
+		} else {
+			pickState = { status: "none" };
+		}
+
+		return { pickState, interactionMode: "view" };
 	}
 
-	return {
-		...defaults,
-		isPickable: canPick,
-		onPick: canPick ? ctx.onPick : undefined,
-	};
+	// No result yet - determine pending/none pick state
+	if (userPick) {
+		if (ctx.isLocked && !ctx.showPicks) {
+			return { pickState: { status: "none" }, interactionMode, onPick };
+		}
+		const isPickedForThisGame = userPick === player.id;
+		const pickState: PickState = isPickedForThisGame
+			? { status: "pending" }
+			: { status: "none" };
+		return { pickState, interactionMode, onPick };
+	}
+
+	return { pickState: { status: "none" }, interactionMode, onPick };
 }
 
 function isPlayerLoser(
@@ -281,7 +244,7 @@ export function generateRound1Nodes({
 				side,
 				gameLarge ? "round1" : "later",
 				undefined,
-				{ ...p1Options, showBio: true, isLoser: p1Loser },
+				{ prediction: p1Options, showBio: true, isLoser: p1Loser },
 			),
 		);
 
@@ -297,7 +260,7 @@ export function generateRound1Nodes({
 				side,
 				gameLarge ? "round1" : "later",
 				undefined,
-				{ ...p2Options, showBio: true, isLoser: p2Loser },
+				{ prediction: p2Options, showBio: true, isLoser: p2Loser },
 			),
 		);
 	});
@@ -362,7 +325,7 @@ export function generateQuarterNodes({
 				side,
 				p1Large ? "round1" : "later",
 				"TBD",
-				{ ...p1Options, showBio: false, isLoser: p1Loser },
+				{ prediction: p1Options, showBio: false, isLoser: p1Loser },
 			),
 		);
 
@@ -378,7 +341,7 @@ export function generateQuarterNodes({
 				side,
 				p2Large ? "round1" : "later",
 				"TBD",
-				{ ...p2Options, showBio: false, isLoser: p2Loser },
+				{ prediction: p2Options, showBio: false, isLoser: p2Loser },
 			),
 		);
 	});
@@ -443,7 +406,7 @@ export function generateSemiNodes({
 				side,
 				p1Large ? "round1" : "later",
 				"TBD",
-				{ ...p1Options, showBio: false, isLoser: p1Loser },
+				{ prediction: p1Options, showBio: false, isLoser: p1Loser },
 			),
 		);
 
@@ -459,7 +422,7 @@ export function generateSemiNodes({
 				side,
 				p2Large ? "round1" : "later",
 				"TBD",
-				{ ...p2Options, showBio: false, isLoser: p2Loser },
+				{ prediction: p2Options, showBio: false, isLoser: p2Loser },
 			),
 		);
 	});
@@ -520,7 +483,7 @@ export function generateFinalistNode({
 		side,
 		finalistLarge ? "round1" : "later",
 		"Finalist TBD",
-		{ ...finalistOptions, showBio: false, isLoser: finalistLoser },
+		{ prediction: finalistOptions, showBio: false, isLoser: finalistLoser },
 	);
 }
 
@@ -548,7 +511,8 @@ export function generateChampionshipNode(ctx: NodeContext): Node {
 		},
 		data: champion
 			? playerToNodeData(champion, finalGame, "#FFD700", "left", "later", {
-					isPickable: false,
+					isLoser: false,
+					showBio: false,
 				})
 			: { text: "CHAMPION", side: "left", ringColor: "#FFD700" },
 	};

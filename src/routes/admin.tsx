@@ -1,9 +1,11 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { getRequestHeaders } from "@tanstack/react-start/server";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { TOTAL_GAMES } from "@/data/players";
+import { invalidateAllPredictions } from "@/hooks/usePredictionsQuery";
 import type { AdminStats, AdminUser } from "@/routes/api/admin/users";
 import "@/styles/admin.css";
 
@@ -253,6 +255,7 @@ function StatCard({ label, value }: { label: string; value: number }) {
 
 function AdminPage() {
 	const loaderData = Route.useLoaderData();
+	const queryClient = useQueryClient();
 
 	const [users, setUsers] = useState<AdminUser[]>(loaderData.users);
 	const [stats, setStats] = useState<AdminStats>(loaderData.stats);
@@ -357,6 +360,8 @@ function AdminPage() {
 					type: "success",
 					text: `Unlocked bracket for ${userName}`,
 				});
+				// Invalidate predictions cache so unlocked user sees fresh data
+				invalidateAllPredictions(queryClient);
 				// Refresh current page data
 				fetchData(pagination.page, searchQuery);
 			} else {

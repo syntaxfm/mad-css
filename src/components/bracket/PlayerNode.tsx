@@ -2,6 +2,54 @@ import { Handle, Position } from "@xyflow/react";
 import { memo } from "react";
 import "./bracket.css";
 
+// User's pick state for this player in this game
+export type PickState =
+	| { status: "none" } // User hasn't picked (or this is the unpicked option)
+	| { status: "pending" } // User picked this player, waiting for result
+	| { status: "correct" } // User picked this player and they won
+	| { status: "incorrect" }; // User picked this player and they lost
+
+// Interaction mode for this node
+export type InteractionMode = "view" | "pickable";
+
+// Tournament result state for this player
+export type TournamentResult = "pending" | "winner" | "eliminated";
+
+// Prediction options using structured types
+export interface PredictionState {
+	pickState: PickState;
+	interactionMode: InteractionMode;
+	onPick?: (gameId: string, playerId: string) => void;
+}
+
+// Helper to derive CSS class flags from structured types
+function deriveClassFlags(prediction?: PredictionState): {
+	isSelected: boolean;
+	isCorrect: boolean;
+	isIncorrect: boolean;
+	isPickable: boolean;
+	isUnpicked: boolean;
+} {
+	if (!prediction) {
+		return {
+			isSelected: false,
+			isCorrect: false,
+			isIncorrect: false,
+			isPickable: false,
+			isUnpicked: false,
+		};
+	}
+
+	const { pickState, interactionMode } = prediction;
+	return {
+		isSelected: pickState.status === "pending",
+		isCorrect: pickState.status === "correct",
+		isIncorrect: pickState.status === "incorrect",
+		isPickable: interactionMode === "pickable",
+		isUnpicked: pickState.status === "none",
+	};
+}
+
 export interface PlayerData {
 	photo: string;
 	name: string;
@@ -13,6 +61,9 @@ export interface PlayerData {
 	side?: "left" | "right";
 	round?: "round1" | "later";
 	showBio?: boolean;
+	// Structured prediction state (preferred)
+	prediction?: PredictionState;
+	// Legacy boolean flags (for backward compatibility)
 	isSelected?: boolean;
 	isCorrect?: boolean;
 	isIncorrect?: boolean;
@@ -35,6 +86,9 @@ interface PlayerNodeProps {
 	side?: "left" | "right";
 	round?: "round1" | "later";
 	showBio?: boolean;
+	// Structured prediction state (preferred)
+	prediction?: PredictionState;
+	// Legacy boolean flags (for backward compatibility)
 	isSelected?: boolean;
 	isCorrect?: boolean;
 	isIncorrect?: boolean;
@@ -56,15 +110,26 @@ export function PlayerNode({
 	side = "left",
 	round = "later",
 	showBio = true,
-	isSelected = false,
-	isCorrect = false,
-	isIncorrect = false,
-	isPickable = false,
-	isUnpicked = false,
+	prediction,
+	// Legacy boolean props (used if prediction is not provided)
+	isSelected: legacySelected = false,
+	isCorrect: legacyCorrect = false,
+	isIncorrect: legacyIncorrect = false,
+	isPickable: legacyPickable = false,
+	isUnpicked: legacyUnpicked = false,
 	playerId,
 	gameId,
-	onPick,
+	onPick: legacyOnPick,
 }: PlayerNodeProps) {
+	// Derive flags from structured prediction state or use legacy props
+	const derived = prediction ? deriveClassFlags(prediction) : null;
+	const isSelected = derived?.isSelected ?? legacySelected;
+	const isCorrect = derived?.isCorrect ?? legacyCorrect;
+	const isIncorrect = derived?.isIncorrect ?? legacyIncorrect;
+	const isPickable = derived?.isPickable ?? legacyPickable;
+	const isUnpicked = derived?.isUnpicked ?? legacyUnpicked;
+	const onPick = prediction?.onPick ?? legacyOnPick;
+
 	const classNames = [
 		"player-node",
 		isWinner && "player-node--winner",
@@ -240,6 +305,7 @@ export const PlayerNodeFlow = memo(function PlayerNodeFlow({
 				side={data.side}
 				round={data.round}
 				showBio={data.showBio}
+				prediction={data.prediction}
 				isSelected={data.isSelected}
 				isCorrect={data.isCorrect}
 				isIncorrect={data.isIncorrect}
