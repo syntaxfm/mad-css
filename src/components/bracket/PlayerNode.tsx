@@ -4,7 +4,8 @@ import "./bracket.css";
 
 // User's pick state for this player in this game
 export type PickState =
-	| { status: "none" } // User hasn't picked (or this is the unpicked option)
+	| { status: "noPick" } // No pick made for this game yet
+	| { status: "none" } // Opponent was picked (this is the unpicked option)
 	| { status: "pending" } // User picked this player, waiting for result
 	| { status: "correct" } // User picked this player and they won
 	| { status: "incorrect" }; // User picked this player and they lost
@@ -61,17 +62,9 @@ export interface PlayerData {
 	side?: "left" | "right";
 	round?: "round1" | "later";
 	showBio?: boolean;
-	// Structured prediction state (preferred)
 	prediction?: PredictionState;
-	// Legacy boolean flags (for backward compatibility)
-	isSelected?: boolean;
-	isCorrect?: boolean;
-	isIncorrect?: boolean;
-	isPickable?: boolean;
-	isUnpicked?: boolean;
 	playerId?: string;
 	gameId?: string;
-	onPick?: (gameId: string, playerId: string) => void;
 	[key: string]: unknown;
 }
 
@@ -86,17 +79,9 @@ interface PlayerNodeProps {
 	side?: "left" | "right";
 	round?: "round1" | "later";
 	showBio?: boolean;
-	// Structured prediction state (preferred)
 	prediction?: PredictionState;
-	// Legacy boolean flags (for backward compatibility)
-	isSelected?: boolean;
-	isCorrect?: boolean;
-	isIncorrect?: boolean;
-	isPickable?: boolean;
-	isUnpicked?: boolean;
 	playerId?: string;
 	gameId?: string;
-	onPick?: (gameId: string, playerId: string) => void;
 }
 
 export function PlayerNode({
@@ -111,24 +96,12 @@ export function PlayerNode({
 	round = "later",
 	showBio = true,
 	prediction,
-	// Legacy boolean props (used if prediction is not provided)
-	isSelected: legacySelected = false,
-	isCorrect: legacyCorrect = false,
-	isIncorrect: legacyIncorrect = false,
-	isPickable: legacyPickable = false,
-	isUnpicked: legacyUnpicked = false,
 	playerId,
 	gameId,
-	onPick: legacyOnPick,
 }: PlayerNodeProps) {
-	// Derive flags from structured prediction state or use legacy props
-	const derived = prediction ? deriveClassFlags(prediction) : null;
-	const isSelected = derived?.isSelected ?? legacySelected;
-	const isCorrect = derived?.isCorrect ?? legacyCorrect;
-	const isIncorrect = derived?.isIncorrect ?? legacyIncorrect;
-	const isPickable = derived?.isPickable ?? legacyPickable;
-	const isUnpicked = derived?.isUnpicked ?? legacyUnpicked;
-	const onPick = prediction?.onPick ?? legacyOnPick;
+	const { isSelected, isCorrect, isIncorrect, isPickable, isUnpicked } =
+		deriveClassFlags(prediction);
+	const onPick = prediction?.onPick;
 
 	const classNames = [
 		"player-node",
@@ -306,14 +279,8 @@ export const PlayerNodeFlow = memo(function PlayerNodeFlow({
 				round={data.round}
 				showBio={data.showBio}
 				prediction={data.prediction}
-				isSelected={data.isSelected}
-				isCorrect={data.isCorrect}
-				isIncorrect={data.isIncorrect}
-				isPickable={data.isPickable}
-				isUnpicked={data.isUnpicked}
 				playerId={data.playerId}
 				gameId={data.gameId}
-				onPick={data.onPick}
 			/>
 			<Handles round={data.round} />
 		</div>

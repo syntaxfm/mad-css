@@ -144,7 +144,7 @@ function getPredictionOptions(
 	const actualWinner = ctx.tournamentResults[game.id];
 
 	const defaults: PredictionState = {
-		pickState: { status: "none" },
+		pickState: { status: "noPick" },
 		interactionMode: "view",
 	};
 
@@ -187,7 +187,7 @@ function getPredictionOptions(
 	// No result yet - determine pending/none pick state
 	if (userPick) {
 		if (ctx.isLocked && !ctx.showPicks) {
-			return { pickState: { status: "none" }, interactionMode, onPick };
+			return { pickState: { status: "noPick" }, interactionMode, onPick };
 		}
 		const isPickedForThisGame = userPick === player.id;
 		const pickState: PickState = isPickedForThisGame
@@ -196,7 +196,7 @@ function getPredictionOptions(
 		return { pickState, interactionMode, onPick };
 	}
 
-	return { pickState: { status: "none" }, interactionMode, onPick };
+	return { pickState: { status: "noPick" }, interactionMode, onPick };
 }
 
 function isPlayerLoser(

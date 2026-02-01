@@ -1,4 +1,4 @@
-import { createContext, type ReactNode, useContext } from "react";
+import { createContext, type ReactNode, use } from "react";
 import {
 	type UsePredictionsReturn,
 	usePredictions,
@@ -24,5 +24,5 @@ export function PredictionsProvider({
 }
 
 export function usePredictionsContext() {
-	return useContext(PredictionsContext);
+	return use(PredictionsContext);
 }

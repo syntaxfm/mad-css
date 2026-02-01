@@ -123,7 +123,6 @@
 	width: 100%;
 	height: calc(100% + var(--brain-size));
 	object-fit: cover;
-	filter: grayscale(10%);
 	transform: translateY(calc(var(--brain-size) * -1));
 	transform-origin: center bottom;
 	--circle-size: 45px;
