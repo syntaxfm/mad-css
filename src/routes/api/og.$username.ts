@@ -6,12 +6,46 @@ import { bracket, type Player, players } from "@/data/players";
 import { createDb } from "@/db";
 import * as schema from "@/db/schema";
 
+// Generate a basic OG image for cases where user doesn't exist or bracket isn't locked
+function generateBasicOgImage(baseUrl: string): Response {
+	const logoUrl = `${baseUrl}/mad-css-logo.png`;
+	const bgImageUrl = `${baseUrl}/madcss-wide.jpg`;
+
+	const html = `
+	<div style="display: flex; width: 1200px; height: 630px; position: relative; flex-direction: column; align-items: center; justify-content: center;">
+		<!-- Background -->
+		<img src="${bgImageUrl}" width="1200" height="630" style="position: absolute; top: 0; left: 0; width: 1200px; height: 630px; object-fit: cover;" />
+
+		<!-- Dark overlay -->
+		<div style="display: flex; position: absolute; top: 0; left: 0; width: 1200px; height: 630px; background-color: #000; opacity: 0.6;"></div>
+
+		<!-- Logo (top center) -->
+		<img src="${logoUrl}" width="160" height="160" style="position: absolute; top: 80px; left: 520px; width: 160px; height: 160px;" />
+
+		<!-- Main text -->
+		<span style="position: absolute; top: 280px; color: #fff; font-size: 72px; font-weight: 900; font-family: system-ui; text-shadow: 0 4px 16px #000;">March Mad CSS</span>
+
+		<!-- Subtext -->
+		<span style="position: absolute; top: 380px; color: #ffae00; font-size: 42px; font-weight: 700; font-family: system-ui; text-shadow: 0 2px 8px #000;">Fill out your bracket!</span>
+	</div>`;
+
+	const response = new ImageResponse(html, {
+		width: 1200,
+		height: 630,
+	});
+
+	response.headers.set("Cache-Control", "public, max-age=3600, s-maxage=86400");
+
+	return response;
+}
+
 export const Route = createFileRoute("/api/og/$username")({
 	server: {
 		handlers: {
 			GET: async ({ params, request }) => {
 				const { username } = params;
 				const url = new URL(request.url);
+				const baseUrl = `${url.protocol}//${url.host}`;
 				const db = createDb(env.DB);
 
 				// Find user by username
@@ -27,7 +61,7 @@ export const Route = createFileRoute("/api/og/$username")({
 					.limit(1);
 
 				if (users.length === 0 || !users[0].username) {
-					return new Response("User not found", { status: 404 });
+					return generateBasicOgImage(baseUrl);
 				}
 
 				const user = users[0];
@@ -40,7 +74,7 @@ export const Route = createFileRoute("/api/og/$username")({
 					.limit(1);
 
 				if (!bracketStatus[0]?.isLocked) {
-					return new Response("Bracket not locked", { status: 403 });
+					return generateBasicOgImage(baseUrl);
 				}
 
 				// Get ALL predictions
@@ -69,7 +103,6 @@ export const Route = createFileRoute("/api/og/$username")({
 				};
 
 				// Build absolute URLs
-				const baseUrl = `${url.protocol}//${url.host}`;
 				const logoUrl = `${baseUrl}/mad-css-logo.png`;
 				const bgImageUrl = `${baseUrl}/madcss-wide.jpg`;
 				const userAvatarUrl = user.image || "";

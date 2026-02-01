@@ -10,6 +10,7 @@ import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { AdminButton } from "@/components/AdminButton";
 import { Footer } from "@/components/footer/Footer";
 import { Header } from "@/components/Header";
+import { NotFound } from "@/components/NotFound";
 import appCss from "../styles/styles.css?url";
 
 const queryClient = new QueryClient({
@@ -89,15 +90,6 @@ export const Route = createRootRoute({
 	component: RootDocument,
 	notFoundComponent: NotFound,
 });
-
-function NotFound() {
-	return (
-		<div style={{ padding: "2rem", textAlign: "center" }}>
-			<h1>404 - Page Not Found</h1>
-			<p>The page you're looking for doesn't exist.</p>
-		</div>
-	);
-}
 
 function RootDocument() {
 	return (

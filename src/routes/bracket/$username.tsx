@@ -2,6 +2,7 @@ import { createFileRoute, notFound } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { Bracket } from "@/components/bracket/Bracket";
+import { NotFound } from "@/components/NotFound";
 import "@/styles/share-bracket.css";
 
 const usernameInputSchema = z.object({
@@ -81,6 +82,9 @@ export const Route = createFileRoute("/bracket/$username")({
 		}
 		return result;
 	},
+	notFoundComponent: () => (
+		<NotFound message="This bracket doesn't exist. The player you're looking for may have never entered the tournament." />
+	),
 	head: ({ params }) => {
 		const { username } = params;
 		const ogImageUrl = `/api/og/${username}`;
@@ -147,7 +151,7 @@ function BracketPage() {
 					</a>
 				</div>
 			</div>
-			<Bracket isInteractive predictions={predictions} />
+			<Bracket isInteractive predictions={predictions} showPicks />
 		</div>
 	);
 }
