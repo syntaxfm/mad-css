@@ -69,6 +69,10 @@ export function Roster() {
 			name: "Shaundai Person",
 			image: "/cards/Shaundai Person Card.jpg",
 		},
+		{
+			name: "Amy Dutton",
+			image: "/cards/Amy Dutton Card.jpg",
+		},
 	];
 	return (
 		<div className="roster">
