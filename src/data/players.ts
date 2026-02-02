@@ -120,6 +120,13 @@ export const benHong: Player = {
 	byline: "@BenCodeZen | Vue.js Core Team",
 };
 
+export const amyDutton: Player = {
+	id: "amy-dutton",
+	name: "Amy Dutton",
+	photo: "/avatars/amy-dutton.png",
+	byline: "@SelfTeachMe | Maintainer Redwoodjs",
+};
+
 // All players array
 export const players: Player[] = [
 	jasonLengstorf,
@@ -137,6 +144,7 @@ export const players: Player[] = [
 	aniaKubow,
 	adamArgyle,
 	benHong,
+	amyDutton,
 ];
 
 // =============================================================================
@@ -239,12 +247,12 @@ export const bracket: Bracket = {
 
 		// ----- RIGHT SIDE (games 4-7) -----
 
-		// Game 4: Kevin Powell vs TBD
+		// Game 4: Kevin Powell vs Amy Dutton
 		{
 			id: "r1-4",
 			date: "2026-02-01",
 			player1: kevinPowell,
-			// player2: TBD
+			player2: amyDutton,
 		},
 		// Game 5: Josh Comeau vs Cassidy Williams
 		{
