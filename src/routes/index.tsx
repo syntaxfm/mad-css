@@ -16,7 +16,7 @@ function App() {
 					<Roster />
 				</div>
 			</div>
-			<div className="section">
+			<div className="section" style={{ paddingInline: 0 }}>
 				<h2>The Bracket</h2>
 				{/* <ClientOnly fallback={null}>
 					<LoginSection />
