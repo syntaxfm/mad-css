@@ -12,7 +12,7 @@ function App() {
 		<div>
 			<Ticket />
 			<div className="section">
-				<div className="section-content" style={{ "--max-width": "1500px" }}>
+				<div className="section-content" style={{ "--max-width": "1500px", paddingInline: 0 }}>
 					<Roster />
 				</div>
 			</div>

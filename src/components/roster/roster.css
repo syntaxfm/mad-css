@@ -1,23 +1,49 @@
 .cards {
-	display: grid;
-	--card-size: 300px;
-	grid-template-columns: repeat(auto-fill, minmax(var(--card-size), 1fr));
-	@media (max-width: 700px) {
+  display: grid;
+  margin-block: 20px;
+	--card-size: 250px;
+  /* There are 16 cards. Each row always needs to be a clean multiple of 4. Because of this we explicitly set the grid for each breakpoint */
+	/* grid-template-columns: repeat(auto-fill, minmax(var(--card-size), 1fr)); */
+  --column-count: 6;
+	grid-template-columns: repeat(calc(var(--column-count) * 2), auto);
+  .card:nth-child(13) {
+    grid-column: span 4;
+    padding-left: 50%;
+  }
+  @media(max-width: 1200px) {
+    --column-count: 4;
+    /* Unset last breakpoint */
+    .card:nth-child(13) {
+      grid-column: span 2;
+      padding-left: 0;
+    }
+  }
+  @media(max-width: 680px) {
+    --column-count: 4;
+    /* Unset last breakpoint */
+    .card:nth-child(13) {
+      grid-column: span 2;
+      padding-left: 0;
+    }
+  }
+
+
+	/* @media (max-width: 700px) {
 		--card-size: 200px;
 	}
 	@media (max-width: 500px) {
 		--card-size: 150px;
-	}
-	margin-block: 20px;
+	} */
 }
 
 .card {
 	align-content: center;
-	transform: rotate(var(--rotate, 0deg));
+  --scale: 1;
+  grid-column: span 2;
+	transform: rotate(var(--rotate, 0deg)) scale(var(--scale));
 	transition:
 		transform 0.2s ease,
 		filter 0.2s ease;
-	margin-bottom: -20px;
 	/* drop-shadow on parent respects the masked shape inside */
 	filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.7));
 	img {
@@ -27,7 +53,8 @@
 		mask-position: center;
 	}
 	&:hover {
-		transform: rotate(0deg) scale(1.05);
+    --rotate: 0deg !important;
+    --scale: 1.05;
 		filter: drop-shadow(5px 8px 8px rgba(0, 0, 0, 0.6));
 		z-index: 1;
 	}

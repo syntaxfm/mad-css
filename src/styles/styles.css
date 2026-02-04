@@ -110,6 +110,10 @@ p {
 	mask-repeat: repeat-x, repeat-x, no-repeat;
 	mask-composite: exclude;
 	mask-mode: alpha;
+  @media(max-width: 750px) {
+    padding-inline: 10px;
+
+  }
 }
 
 .section-content {
