@@ -1,11 +1,17 @@
 {
 	"$schema": "./node_modules/wrangler/config-schema.json",
 	"name": "mad-css",
-	// account_id is set via CLOUDFLARE_ACCOUNT_ID env var
+	"account_id": "3ebe60b8bb090efeda7702aff60769bb",
 	"compatibility_date": "2026-01-07",
 	"routes": [
-		{ "pattern": "madcss.com/*", "zone_name": "madcss.com" },
-		{ "pattern": "www.madcss.com/*", "zone_name": "madcss.com" }
+		{
+			"pattern": "madcss.com/*",
+			"zone_name": "madcss.com"
+		},
+		{
+			"pattern": "www.madcss.com/*",
+			"zone_name": "madcss.com"
+		}
 	],
 	"preview_urls": true,
 	"compatibility_flags": [
@@ -21,7 +27,14 @@
 			// Create your own D1 database: npx wrangler d1 create mad-css-db
 			"database_name": "mad-css-db",
 			"database_id": "f44ee260-2c14-49fd-9e98-b27d7add0ef2",
+			// Create staging DB: npx wrangler d1 create mad-css-db-staging
+			"preview_database_id": "c61911d8-dd63-425a-aed6-1276334202eb",
 			"migrations_dir": "drizzle"
+		},
+		{
+			"binding": "mad_css_db_staging",
+			"database_name": "mad-css-db-staging",
+			"database_id": "c61911d8-dd63-425a-aed6-1276334202eb"
 		}
 	]
 }

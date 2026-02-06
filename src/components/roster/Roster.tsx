@@ -69,13 +69,16 @@ export function Roster() {
 			name: "Shaundai Person",
 			image: "/cards/Shaundai Person Card.jpg",
 		},
+		{
+			name: "Amy Dutton",
+			image: "/cards/Amy Dutton Card.jpg",
+		},
 	];
 	return (
 		<div className="roster">
 			<h2 className="center font_block uppercase">The Roster</h2>
 			<p className="center">
-				16 players total. Here are the Lucky {players.length} that have been
-				drafted so far.
+				16 of the best CSS players in the world.
 			</p>
 			<div className="cards">
 				{players.map((player, index) => (
@@ -85,6 +88,7 @@ export function Roster() {
 						style={
 							{
 								"--rotate": `${(index % 2 === 0 ? 1 : -1) * seededRandom(index) * 5}deg`,
+
 							} as React.CSSProperties
 						}
 					>

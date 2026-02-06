@@ -5,14 +5,15 @@ dist-ssr
 *.local
 count.txt
 .env
+.dev.vars
 .nitro
 .tanstack
 .wrangler
 .output
 .vinxi
 todos.json
-.pnpm-store.claude/settings.local.json
-
-# AI setup files (in separate PR)
+.pnpm-store
+.claude/settings.local.json
 .agents/
 .claude/skills/
+

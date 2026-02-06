@@ -15,6 +15,7 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate:local": "wrangler d1 migrations apply mad-css-db --local",
     "db:migrate:prod": "wrangler d1 migrations apply mad-css-db --remote",
+    "db:migrate:staging": "wrangler d1 migrations apply mad-css-db-staging --remote",
     "db:studio": "drizzle-kit studio",
     "db:setup": "npm run db:generate && npm run db:migrate:local"
   },
