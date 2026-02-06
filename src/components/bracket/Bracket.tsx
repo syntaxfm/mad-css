@@ -11,8 +11,9 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "@xyflow/react/dist/style.css";
 import { usePredictionsContext } from "@/context/PredictionsContext";
-import { ALL_GAME_IDS, bracket, splitForDisplay } from "@/data/players";
+import { ALL_GAME_IDS, TOTAL_GAMES, bracket, splitForDisplay } from "@/data/players";
 import { getPickablePlayersForGame } from "@/hooks/usePredictions";
+import { authClient } from "@/lib/auth-client";
 import type { NodeContext } from "./bracketTypes";
 import {
 	generateChampionshipNode,
@@ -43,6 +44,12 @@ function BracketToggle({
 	showPicks: boolean;
 	onToggle: () => void;
 }) {
+	const { data: session } = authClient.useSession();
+	const ctx = usePredictionsContext();
+	const userImage = session?.user?.image;
+	const isLocked = ctx?.isLocked ?? false;
+	const pickCount = ctx?.pickCount ?? 0;
+
 	return (
 		<div className="bracket-toggle">
 			<button
@@ -59,8 +66,96 @@ function BracketToggle({
 				onClick={!showPicks ? onToggle : undefined}
 				aria-pressed={showPicks}
 			>
+				{userImage && (
+					<img src={userImage} alt="" className="bracket-toggle-avatar" />
+				)}
 				MY PICKS
+				{session?.user && (
+					isLocked ? (
+						<span className="bracket-toggle-badge locked">Locked In</span>
+					) : (
+						<span className="bracket-toggle-badge">{pickCount}/{TOTAL_GAMES}</span>
+					)
+				)}
 			</button>
+		</div>
+	);
+}
+
+function BracketActions() {
+	const ctx = usePredictionsContext();
+	const { data: session } = authClient.useSession();
+	const [showLockConfirm, setShowLockConfirm] = useState(false);
+
+	if (!session?.user || !ctx) return null;
+
+	const { pickCount, isLocked, isSaving, hasChanges, isDeadlinePassed } = ctx;
+	const canLock = pickCount === TOTAL_GAMES && !isLocked && !isDeadlinePassed;
+
+	if (isLocked || isDeadlinePassed) return null;
+
+	return (
+		<div className="bracket-actions">
+			{showLockConfirm ? (
+				<div className="lock-confirm">
+					<p>Lock your bracket? This cannot be undone.</p>
+					<div className="lock-confirm-buttons">
+						<button
+							type="button"
+							className="btn btn-primary btn-sm"
+							onClick={() => {
+								ctx.lockBracket?.();
+								setShowLockConfirm(false);
+							}}
+							disabled={!canLock || isSaving}
+						>
+							Yes, Lock It
+						</button>
+						<button
+							type="button"
+							className="btn btn-ghost btn-sm"
+							onClick={() => setShowLockConfirm(false)}
+						>
+							Cancel
+						</button>
+					</div>
+				</div>
+			) : (
+				<>
+					<button
+						type="button"
+						className="btn"
+						onClick={ctx.savePredictions}
+						disabled={isSaving || !hasChanges}
+					>
+						{isSaving ? "Saving..." : "Save"}
+					</button>
+					<button
+						type="button"
+						className="btn btn-danger"
+						onClick={() => setShowLockConfirm(true)}
+						disabled={!canLock || isSaving}
+						title={
+							pickCount < TOTAL_GAMES
+								? `Need all ${TOTAL_GAMES} picks to lock`
+								: "Lock your bracket"
+						}
+					>
+						Lock Bracket
+					</button>
+					{pickCount > 0 && (
+						<button
+							type="button"
+							className="btn btn-outline"
+							onClick={ctx.resetPredictions}
+							disabled={isSaving}
+							title="Reset all picks"
+						>
+							Reset
+						</button>
+					)}
+				</>
+			)}
 		</div>
 	);
 }
@@ -708,6 +803,7 @@ function BracketContent({
 			{onToggleShowPicks && (
 				<BracketToggle showPicks={showPicks} onToggle={onToggleShowPicks} />
 			)}
+			<BracketActions />
 			{/* biome-ignore lint/a11y/noStaticElementInteractions: mouse events for scroll/zoom unlock UX */}
 			<div
 				ref={containerRef}
@@ -732,32 +828,32 @@ function BracketContent({
 					fitView
 					fitViewOptions={{ padding: FIT_VIEW_PADDING }}
 					onInit={handleInit}
-				onNodeMouseEnter={
-					isInteractive
-						? (_event, node) => {
-								if (node.type === "emptySlot") {
-									setHoveredNodeId(node.id);
-									setHoveredNodeType("empty");
-									return;
+					onNodeMouseEnter={
+						isInteractive
+							? (_event, node) => {
+									if (node.type === "emptySlot") {
+										setHoveredNodeId(node.id);
+										setHoveredNodeType("empty");
+										return;
+									}
+									const data = node.data as {
+										prediction?: { interactionMode?: string };
+									};
+									if (data.prediction?.interactionMode === "pickable") {
+										setHoveredNodeId(node.id);
+										setHoveredNodeType("player");
+									}
 								}
-								const data = node.data as {
-									prediction?: { interactionMode?: string };
-								};
-								if (data.prediction?.interactionMode === "pickable") {
-									setHoveredNodeId(node.id);
-									setHoveredNodeType("player");
+							: undefined
+					}
+					onNodeMouseLeave={
+						isInteractive
+							? () => {
+									setHoveredNodeId(null);
+									setHoveredNodeType(null);
 								}
-							}
-						: undefined
-				}
-				onNodeMouseLeave={
-					isInteractive
-						? () => {
-								setHoveredNodeId(null);
-								setHoveredNodeType(null);
-							}
-						: undefined
-				}
+							: undefined
+					}
 					onNodeClick={(_event, node) => {
 						const data = node.data as {
 							isPickable?: boolean;

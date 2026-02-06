@@ -78,38 +78,6 @@
 	margin-bottom: 20px;
 }
 
-.btn-github {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	gap: 10px;
-	padding: 14px 28px;
-	background: var(--orange);
-	color: var(--white);
-	font-family: var(--font-block);
-	font-size: 1rem;
-	text-transform: uppercase;
-	letter-spacing: 0.03em;
-	border: 3px solid var(--black);
-	border-radius: 0;
-	cursor: pointer;
-	transition:
-		transform 0.1s,
-		box-shadow 0.1s;
-	box-shadow: 4px 4px 0 var(--black);
-	will-change: transform;
-}
-
-.btn-github:hover {
-	transform: translate(2px, 2px);
-	box-shadow: 2px 2px 0 var(--black);
-}
-
-.btn-github:active {
-	transform: translate(4px, 4px);
-	box-shadow: none;
-}
-
 .github-icon {
 	width: 22px;
 	height: 22px;
@@ -169,22 +137,6 @@
 
 .cta-welcome strong {
 	color: var(--orange);
-}
-
-.btn-signout {
-	background: none;
-	border: none;
-	color: var(--black);
-	opacity: 0.5;
-	font-size: 0.8rem;
-	font-family: var(--font-block);
-	text-transform: uppercase;
-	cursor: pointer;
-	padding: 4px 8px;
-}
-
-.btn-signout:hover {
-	opacity: 1;
 }
 
 /* Progress section */
@@ -445,43 +397,6 @@
 }
 
 /* Toggle button for showing picks vs results */
-.btn-toggle-picks {
-	display: block;
-	width: 100%;
-	padding: 12px 16px;
-	margin-bottom: 16px;
-	font-family: var(--font-block);
-	font-size: 0.8rem;
-	text-transform: uppercase;
-	letter-spacing: 0.04em;
-	background: var(--beige);
-	color: var(--black);
-	border: 3px solid var(--black);
-	border-radius: 0;
-	cursor: pointer;
-	text-align: center;
-	transition:
-		transform 0.1s,
-		box-shadow 0.1s;
-	box-shadow: 4px 4px 0 var(--black);
-}
-
-.btn-toggle-picks:hover {
-	transform: translate(2px, 2px);
-	box-shadow: 2px 2px 0 var(--black);
-}
-
-.btn-toggle-picks:active {
-	transform: translate(4px, 4px);
-	box-shadow: none;
-}
-
-.btn-toggle-picks.active {
-	background: var(--yellow);
-	color: var(--black);
-	border-color: var(--black);
-}
-
 .cta-status.deadline-passed {
 	background: var(--orange);
 	border: 3px solid var(--black);
@@ -507,109 +422,6 @@
 	color: var(--orange);
 }
 
-/* Actions row */
-.cta-actions {
-	display: flex;
-	gap: 10px;
-	flex-wrap: wrap;
-}
-
-/* Button base styles - retro graphic style */
-.btn-save,
-.btn-lock,
-.btn-reset {
-	flex: 1;
-	min-width: 100px;
-	padding: 12px 16px;
-	font-family: var(--font-block);
-	font-size: 0.8rem;
-	text-transform: uppercase;
-	letter-spacing: 0.04em;
-	border-radius: 0;
-	cursor: pointer;
-	text-align: center;
-	transition:
-		transform 0.1s,
-		box-shadow 0.1s;
-}
-
-.btn-save {
-	background: var(--beige);
-	color: var(--black);
-	border: 3px solid var(--black);
-	box-shadow: 4px 4px 0 var(--black);
-}
-
-.btn-save:hover:not(:disabled) {
-	transform: translate(2px, 2px);
-	box-shadow: 2px 2px 0 var(--black);
-}
-
-.btn-save:active:not(:disabled) {
-	transform: translate(4px, 4px);
-	box-shadow: none;
-}
-
-.btn-save:disabled {
-	background: var(--beige);
-	color: rgba(0, 0, 0, 0.3);
-	border-color: rgba(0, 0, 0, 0.2);
-	box-shadow: none;
-	cursor: not-allowed;
-}
-
-.btn-lock {
-	background: var(--orange);
-	color: var(--white);
-	border: 3px solid var(--black);
-	box-shadow: 4px 4px 0 var(--black);
-}
-
-.btn-lock:hover:not(:disabled) {
-	transform: translate(2px, 2px);
-	box-shadow: 2px 2px 0 var(--black);
-}
-
-.btn-lock:active:not(:disabled) {
-	transform: translate(4px, 4px);
-	box-shadow: none;
-}
-
-.btn-lock:disabled {
-	background: rgba(0, 0, 0, 0.1);
-	color: rgba(0, 0, 0, 0.3);
-	border-color: rgba(0, 0, 0, 0.2);
-	box-shadow: none;
-	cursor: not-allowed;
-}
-
-.btn-reset {
-	background: var(--beige);
-	color: var(--orange);
-	border: 3px solid var(--orange);
-	box-shadow: 4px 4px 0 var(--orange);
-	flex: 0 0 auto;
-	min-width: 80px;
-}
-
-.btn-reset:hover:not(:disabled) {
-	transform: translate(2px, 2px);
-	box-shadow: 2px 2px 0 var(--orange);
-}
-
-.btn-reset:active:not(:disabled) {
-	transform: translate(4px, 4px);
-	box-shadow: none;
-}
-
-.btn-reset:disabled {
-	background: var(--beige);
-	color: rgba(0, 0, 0, 0.3);
-	border-color: rgba(0, 0, 0, 0.2);
-	box-shadow: none;
-	cursor: not-allowed;
-}
-
 /* Lock confirmation overlay */
 .lock-confirm {
 	background: rgba(0, 0, 0, 0.08);
@@ -633,66 +445,6 @@
 	display: flex;
 	gap: 10px;
 	justify-content: center;
-}
-
-.btn-lock-confirm {
-	padding: 10px 20px;
-	background: var(--yellow);
-	color: var(--black);
-	font-family: var(--font-block);
-	font-size: 0.8rem;
-	text-transform: uppercase;
-	letter-spacing: 0.03em;
-	border: 3px solid var(--black);
-	border-radius: 0;
-	cursor: pointer;
-	transition:
-		transform 0.1s,
-		box-shadow 0.1s;
-	box-shadow: 4px 4px 0 var(--black);
-}
-
-.btn-lock-confirm:hover:not(:disabled) {
-	transform: translate(2px, 2px);
-	box-shadow: 2px 2px 0 var(--black);
-}
-
-.btn-lock-confirm:active:not(:disabled) {
-	transform: translate(4px, 4px);
-	box-shadow: none;
-}
-
-.btn-lock-confirm:disabled {
-	opacity: 0.4;
-	cursor: not-allowed;
-	box-shadow: none;
-}
-
-.btn-cancel {
-	padding: 10px 20px;
-	background: var(--beige);
-	color: var(--black);
-	font-family: var(--font-block);
-	font-size: 0.8rem;
-	text-transform: uppercase;
-	letter-spacing: 0.03em;
-	border: 3px solid var(--black);
-	border-radius: 0;
-	cursor: pointer;
-	transition:
-		transform 0.1s,
-		box-shadow 0.1s;
-	box-shadow: 4px 4px 0 var(--black);
-}
-
-.btn-cancel:hover {
-	transform: translate(2px, 2px);
-	box-shadow: 2px 2px 0 var(--black);
-}
-
-.btn-cancel:active {
-	transform: translate(4px, 4px);
-	box-shadow: none;
 }
 
 /* Error message */
@@ -743,39 +495,6 @@
 
 .btn-share {
 	flex: 1;
-	padding: 12px 16px;
-	font-family: var(--font-block);
-	font-size: 0.75rem;
-	text-transform: uppercase;
-	letter-spacing: 0.04em;
-	border-radius: 0;
-	cursor: pointer;
-	text-align: center;
-	transition:
-		transform 0.1s,
-		box-shadow 0.1s;
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	gap: 8px;
-	text-decoration: none;
-}
-
-.btn-share--copy {
-	background: var(--beige);
-	color: var(--black);
-	border: 3px solid var(--black);
-	box-shadow: 4px 4px 0 var(--black);
-}
-
-.btn-share--copy:hover {
-	transform: translate(2px, 2px);
-	box-shadow: 2px 2px 0 var(--black);
-}
-
-.btn-share--copy:active {
-	transform: translate(4px, 4px);
-	box-shadow: none;
 }
 
 .btn-share--copy.copied {
@@ -784,30 +503,9 @@
 	border-color: var(--yellow);
 }
 
-.btn-share--twitter {
-	background: var(--black);
-	color: var(--white);
-	border: 3px solid var(--black);
-	box-shadow: 4px 4px 0 var(--black);
-}
-
 .btn-share--bluesky {
 	background: var(--bluesky);
 	color: var(--white);
-	border: 3px solid var(--black);
-	box-shadow: 4px 4px 0 var(--black);
-}
-
-.btn-share--twitter:hover,
-.btn-share--bluesky:hover {
-	transform: translate(2px, 2px);
-	box-shadow: 2px 2px 0 var(--black);
-}
-
-.btn-share--twitter:active,
-.btn-share--bluesky:active {
-	transform: translate(4px, 4px);
-	box-shadow: none;
 }
 
 .share-icon {
@@ -875,17 +573,6 @@
 		margin-left: 12px;
 		margin-right: 12px;
 		padding: 18px;
-	}
-
-	.cta-actions {
-		flex-direction: column;
-	}
-
-	.btn-save,
-	.btn-lock,
-	.btn-reset {
-		flex: none;
-		width: 100%;
 	}
 
 	/* Even smaller scoreboard for very narrow screens */

@@ -1,4 +1,5 @@
 @import "./reset.css";
+@import "./buttons.css";
 
 :root {
 	--orange: #f3370e;
@@ -191,32 +192,6 @@ p {
 	margin-bottom: 1.5rem;
 }
 
-.not-found-btn {
-	display: inline-block;
-	padding: 12px 24px;
-	background: var(--yellow);
-	border: 3px solid var(--black);
-	box-shadow: 4px 4px 0 var(--black);
-	font-family: var(--font-block);
-	font-size: 1rem;
-	text-transform: uppercase;
-	letter-spacing: 0.05em;
-	color: var(--black);
-	text-decoration: none;
-	transition:
-		transform 0.1s,
-		box-shadow 0.1s;
-}
-
-.not-found-btn:hover {
-	transform: translate(2px, 2px);
-	box-shadow: 2px 2px 0 var(--black);
-}
-
-.not-found-btn:active {
-	transform: translate(4px, 4px);
-	box-shadow: none;
-}
 
 .sr-only {
 	position: absolute;

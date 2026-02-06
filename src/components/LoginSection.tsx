@@ -14,38 +14,6 @@ const ROUND_LABELS: Record<string, string> = {
 	final: "Finals",
 };
 
-// Sub-component: Header with avatar, name, and sign out
-function LoginSectionHeader({
-	userImage,
-	userName,
-}: {
-	userImage: string | null | undefined;
-	userName: string | null | undefined;
-}) {
-	return (
-		<div className="cta-header">
-			<img
-				src={userImage || "/default-avatar.png"}
-				alt=""
-				className="user-avatar"
-			/>
-			<p className="cta-welcome">
-				Welcome back, <strong>{userName}</strong>
-			</p>
-			<button
-				type="button"
-				className="btn-signout"
-				onClick={() => {
-					sessionStorage.removeItem("bracket-scrolled");
-					authClient.signOut();
-				}}
-			>
-				Sign out
-			</button>
-		</div>
-	);
-}
-
 // Sub-component: Progress display with pick count and countdown
 function LoginSectionProgress({
 	pickCount,
@@ -73,93 +41,6 @@ function LoginSectionProgress({
 }
 
 // Sub-component: Action buttons (save, lock, reset)
-function LoginSectionActions({
-	canLock,
-	isSaving,
-	hasChanges,
-	pickCount,
-	showLockConfirm,
-	setShowLockConfirm,
-	onSave,
-	onLock,
-	onReset,
-}: {
-	canLock: boolean;
-	isSaving: boolean;
-	hasChanges: boolean;
-	pickCount: number;
-	showLockConfirm: boolean;
-	setShowLockConfirm: (show: boolean) => void;
-	onSave: (() => Promise<void>) | undefined;
-	onLock: (() => Promise<void>) | undefined;
-	onReset: (() => void) | undefined;
-}) {
-	return (
-		<div className="cta-actions">
-			{showLockConfirm ? (
-				<div className="lock-confirm">
-					<p>Lock your bracket? This cannot be undone.</p>
-					<div className="lock-confirm-buttons">
-						<button
-							type="button"
-							className="btn-lock-confirm"
-							onClick={() => {
-								onLock?.();
-								setShowLockConfirm(false);
-							}}
-							disabled={!canLock || isSaving}
-						>
-							Yes, Lock It
-						</button>
-						<button
-							type="button"
-							className="btn-cancel"
-							onClick={() => setShowLockConfirm(false)}
-						>
-							Cancel
-						</button>
-					</div>
-				</div>
-			) : (
-				<>
-					<button
-						type="button"
-						className="btn-save"
-						onClick={onSave}
-						disabled={isSaving || !hasChanges}
-					>
-						{isSaving ? "Saving..." : "Save"}
-					</button>
-					<button
-						type="button"
-						className="btn-lock"
-						onClick={() => setShowLockConfirm(true)}
-						disabled={!canLock || isSaving}
-						title={
-							pickCount < TOTAL_GAMES
-								? `Need all ${TOTAL_GAMES} picks to lock`
-								: "Lock your bracket"
-						}
-					>
-						Lock Bracket
-					</button>
-					{pickCount > 0 && (
-						<button
-							type="button"
-							className="btn-reset"
-							onClick={onReset}
-							disabled={isSaving}
-							title="Reset all picks"
-						>
-							Reset
-						</button>
-					)}
-				</>
-			)}
-		</div>
-	);
-}
-
 // Sub-component: Share buttons (copy link, X, Bluesky)
 function LoginSectionShare({
 	twitterShareUrl,
@@ -195,7 +76,7 @@ function LoginSectionShare({
 			<div className="cta-share-actions">
 				<button
 					type="button"
-					className={`btn-share btn-share--copy${copied ? " copied" : ""}`}
+					className={`btn btn-sm btn-share btn-share--copy${copied ? " copied" : ""}`}
 					onClick={onCopyLink}
 				>
 					<svg
@@ -223,7 +104,7 @@ function LoginSectionShare({
 						href={twitterShareUrl}
 						target="_blank"
 						rel="noopener noreferrer"
-						className="btn-share btn-share--twitter"
+						className="btn btn-dark btn-sm btn-share btn-share--twitter"
 					>
 						<svg
 							className="share-icon"
@@ -241,7 +122,7 @@ function LoginSectionShare({
 						href={blueskyShareUrl}
 						target="_blank"
 						rel="noopener noreferrer"
-						className="btn-share btn-share--bluesky"
+						className="btn btn-sm btn-share btn-share--bluesky"
 					>
 						<svg
 							className="share-icon"
@@ -261,29 +142,17 @@ function LoginSectionShare({
 
 export interface LoginSectionProps {
 	username?: string | null;
-	showPicks?: boolean;
-	onToggleShowPicks?: () => void;
 }
 
-export function LoginSection({
-	username = null,
-	showPicks = false,
-	onToggleShowPicks,
-}: LoginSectionProps) {
+export function LoginSection({ username = null }: LoginSectionProps) {
 	const ctx = usePredictionsContext();
 
 	const pickCount = ctx?.pickCount ?? 0;
 	const isLocked = ctx?.isLocked ?? false;
-	const isSaving = ctx?.isSaving ?? false;
-	const hasChanges = ctx?.hasChanges ?? false;
 	const error = ctx?.error ?? null;
 	const deadline = ctx?.deadline;
 	const isDeadlinePassed = ctx?.isDeadlinePassed ?? false;
-	const onSave = ctx?.savePredictions;
-	const onLock = ctx?.lockBracket;
-	const onReset = ctx?.resetPredictions;
 	const { data: session, isPending } = authClient.useSession();
-	const [showLockConfirm, setShowLockConfirm] = useState(false);
 	const [copied, setCopied] = useState(false);
 	const countdown = useCountdown(deadline);
 	const isUrgent =
@@ -334,22 +203,10 @@ export function LoginSection({
 	}
 
 	if (session?.user) {
-		const canLock = pickCount === TOTAL_GAMES && !isLocked && !isDeadlinePassed;
-
 		return (
 			<div className="bracket-cta logged-in">
-				<LoginSectionHeader
-					userImage={session.user.image}
-					userName={session.user.name}
-				/>
-
-				{/* Status badges for locked/deadline states */}
 				{isLocked && (
 					<>
-						<div className="cta-status locked">
-							✓ Your bracket is locked in!
-						</div>
-
 						{/* Next results countdown */}
 						{nextGame && nextGameCountdown.totalMs > 0 && (
 							<div className="cta-next-results">
@@ -378,26 +235,12 @@ export function LoginSection({
 
 				{/* Progress section - only show when not locked */}
 				{!isLocked && !isDeadlinePassed && (
-					<>
-						<LoginSectionProgress
-							pickCount={pickCount}
-							deadline={deadline}
-							countdown={countdown}
-							isUrgent={isUrgent}
-						/>
-
-						<LoginSectionActions
-							canLock={canLock}
-							isSaving={isSaving}
-							hasChanges={hasChanges}
-							pickCount={pickCount}
-							showLockConfirm={showLockConfirm}
-							setShowLockConfirm={setShowLockConfirm}
-							onSave={onSave}
-							onLock={onLock}
-							onReset={onReset}
-						/>
-					</>
+					<LoginSectionProgress
+						pickCount={pickCount}
+						deadline={deadline}
+						countdown={countdown}
+						isUrgent={isUrgent}
+					/>
 				)}
 
 				{error && <p className="cta-error">{error}</p>}
@@ -410,8 +253,8 @@ export function LoginSection({
 		<div className="bracket-cta">
 			<p className="cta-headline font_block">Think you can call it?</p>
 			<p className="cta-sub">
-				Lock in your predictions before <strong>Round 1</strong> and compete for
-				mass internet clout. Perfect bracket = mass internet clout.
+				Lock in your predictions before <strong>March 6</strong> for a chance to
+				win some amazing prizes!
 			</p>
 			{deadline && countdown.totalMs > 0 ? (
 				<Scoreboard countdown={countdown} isUrgent={isUrgent} />
@@ -428,7 +271,7 @@ export function LoginSection({
 			)}
 			<button
 				type="button"
-				className="btn-github"
+				className="btn btn-danger btn-lg"
 				onClick={() =>
 					authClient.signIn.social({
 						provider: "github",

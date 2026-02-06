@@ -79,8 +79,6 @@ function TestPage() {
 					<h2>The Bracket</h2>
 					<LoginSection
 						username={(session?.user as { username?: string })?.username}
-						showPicks={showPicks}
-						onToggleShowPicks={() => setShowPicks(!showPicks)}
 					/>
 					<Bracket
 						isInteractive

@@ -488,7 +488,49 @@
 		&:not(.active):active {
 			transform: translate(2px, 2px);
 		}
+		&:has(.bracket-toggle-avatar) {
+			display: flex;
+			align-items: center;
+			gap: 2px;
+		}
 	}
+}
+
+.bracket-toggle-avatar {
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	border: 2px solid var(--orange);
+	vertical-align: middle;
+	margin-right: 6px;
+	margin-top: -2px;
+}
+
+.bracket-actions {
+	display: flex;
+	justify-content: center;
+	gap: 10px;
+	flex-wrap: wrap;
+	margin-bottom: 16px;
+	max-width: 500px;
+	margin-inline: auto;
+}
+
+.bracket-toggle-badge {
+	font-size: 0.625rem;
+	padding: 2px 6px;
+	margin-left: 6px;
+	border: 2px solid var(--black);
+	background: var(--white);
+	color: var(--black);
+	vertical-align: middle;
+	letter-spacing: 0.03em;
+}
+
+.bracket-toggle-badge.locked {
+	background: var(--orange);
+	color: var(--white);
+	border-color: var(--orange);
 }
 
 /* React Flow Container */

@@ -12,7 +12,7 @@ export function NotFound({ message }: NotFoundProps) {
 					{message ??
 						"This page doesn't exist. The CSS you're looking for may have been eliminated from the tournament."}
 				</p>
-				<a href="/" className="not-found-btn">
+				<a href="/" className="btn btn-primary btn-lg">
 					Back to Tournament
 				</a>
 			</div>
