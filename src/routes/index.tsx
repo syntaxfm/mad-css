@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Bracket } from "@/components/bracket/Bracket";
+import { Activity } from "@/components/leaderboard/Activity";
 import { Roster } from "@/components/roster/Roster";
 import { Rules } from "@/components/rules/Rules";
 import { Ticket } from "@/components/Ticket";
@@ -15,6 +16,7 @@ function App() {
 					<Roster />
 				</div>
 			</div>
+			<Activity />
 			<div className="section" style={{ paddingInline: 0 }}>
 				<h2>The Bracket</h2>
 				<Bracket />

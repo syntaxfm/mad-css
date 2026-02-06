@@ -1,0 +1,89 @@
+.activity {
+	max-width: 600px;
+	margin: 0 auto;
+	padding: 10px 16px;
+	height: 155px;
+	mask-image: linear-gradient(
+		to bottom,
+		transparent,
+		black 5%,
+		black 95%,
+		transparent
+	);
+}
+
+.activity-list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	overflow: hidden;
+	gap: 4px;
+}
+
+.activity-item {
+	background: var(--black);
+	border-radius: 500px;
+	opacity: 1;
+	transform: translateY(0);
+	max-height: 60px;
+	transition:
+		max-height 0.5s ease,
+		opacity 0.5s ease,
+		transform 0.5s ease;
+
+	@starting-style {
+		max-height: 0;
+		opacity: 0;
+		transform: translateY(-10px);
+	}
+}
+
+.pick-sentence {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 4px;
+	padding: 6px 10px;
+	font-family: var(--font-sans);
+	font-size: 0.825rem;
+	color: white;
+	text-decoration: none;
+	transition: color 0.15s;
+}
+
+a.pick-sentence:hover {
+	color: var(--white);
+}
+
+.pick-avatar {
+	width: 30px;
+	height: 30px;
+	border-radius: 50%;
+	border: 1px solid #555;
+	object-fit: cover;
+	flex-shrink: 0;
+}
+
+.pick-user-name {
+	color: var(--white);
+	font-weight: 600;
+}
+
+.pick-player-name {
+	color: var(--yellow);
+	font-weight: 600;
+}
+
+@media (max-width: 600px) {
+	.pick-sentence {
+		font-size: 0.75rem;
+	}
+
+	.pick-avatar {
+		width: 18px;
+		height: 18px;
+	}
+}

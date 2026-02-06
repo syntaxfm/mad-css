@@ -461,7 +461,7 @@
 		letter-spacing: 0.05em;
 		padding: 10px 24px;
 		border: 3px solid var(--black);
-		background: transparent;
+		background: var(--beige);
 		color: var(--black);
 		cursor: pointer;
 		transition:

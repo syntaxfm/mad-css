@@ -732,24 +732,32 @@ function BracketContent({
 					fitView
 					fitViewOptions={{ padding: FIT_VIEW_PADDING }}
 					onInit={handleInit}
-					onNodeMouseEnter={(_event, node) => {
-						if (node.type === "emptySlot") {
-							setHoveredNodeId(node.id);
-							setHoveredNodeType("empty");
-							return;
-						}
-						const data = node.data as {
-							prediction?: { interactionMode?: string };
-						};
-						if (data.prediction?.interactionMode === "pickable") {
-							setHoveredNodeId(node.id);
-							setHoveredNodeType("player");
-						}
-					}}
-					onNodeMouseLeave={() => {
-						setHoveredNodeId(null);
-						setHoveredNodeType(null);
-					}}
+				onNodeMouseEnter={
+					isInteractive
+						? (_event, node) => {
+								if (node.type === "emptySlot") {
+									setHoveredNodeId(node.id);
+									setHoveredNodeType("empty");
+									return;
+								}
+								const data = node.data as {
+									prediction?: { interactionMode?: string };
+								};
+								if (data.prediction?.interactionMode === "pickable") {
+									setHoveredNodeId(node.id);
+									setHoveredNodeType("player");
+								}
+							}
+						: undefined
+				}
+				onNodeMouseLeave={
+					isInteractive
+						? () => {
+								setHoveredNodeId(null);
+								setHoveredNodeType(null);
+							}
+						: undefined
+				}
 					onNodeClick={(_event, node) => {
 						const data = node.data as {
 							isPickable?: boolean;

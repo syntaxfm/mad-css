@@ -715,6 +715,11 @@
 
 .cta-share {
 	margin-top: 16px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	align-content: center;
+	gap: 10px;
 }
 
 .cta-share-label {
@@ -723,11 +728,11 @@
 	text-transform: uppercase;
 	letter-spacing: 0.05em;
 	color: var(--black);
-	margin-bottom: 12px;
 	display: flex;
 	align-items: center;
-	gap: 8px;
+	gap: 10px;
 	justify-content: center;
+	width: fit-content;
 }
 
 .cta-share-actions {
@@ -738,7 +743,6 @@
 
 .btn-share {
 	flex: 1;
-	min-width: 120px;
 	padding: 12px 16px;
 	font-family: var(--font-block);
 	font-size: 0.75rem;
@@ -783,7 +787,7 @@
 .btn-share--twitter {
 	background: var(--black);
 	color: var(--white);
-	border: 3px solid var(--yellow);
+	border: 3px solid var(--black);
 	box-shadow: 4px 4px 0 var(--black);
 }
 

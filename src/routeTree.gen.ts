@@ -17,6 +17,7 @@ import { Route as ApiPredictionsIndexRouteImport } from './routes/api/prediction
 import { Route as ApiLeaderboardIndexRouteImport } from './routes/api/leaderboard/index'
 import { Route as ApiPredictionsLockRouteImport } from './routes/api/predictions/lock'
 import { Route as ApiOgUsernameRouteImport } from './routes/api/og.$username'
+import { Route as ApiLeaderboardRecentPickersRouteImport } from './routes/api/leaderboard/recent-pickers'
 import { Route as ApiLeaderboardCalculateRouteImport } from './routes/api/leaderboard/calculate'
 import { Route as ApiBracketUsernameRouteImport } from './routes/api/bracket/$username'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
@@ -64,6 +65,12 @@ const ApiOgUsernameRoute = ApiOgUsernameRouteImport.update({
   path: '/api/og/$username',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiLeaderboardRecentPickersRoute =
+  ApiLeaderboardRecentPickersRouteImport.update({
+    id: '/api/leaderboard/recent-pickers',
+    path: '/api/leaderboard/recent-pickers',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiLeaderboardCalculateRoute = ApiLeaderboardCalculateRouteImport.update({
   id: '/api/leaderboard/calculate',
   path: '/api/leaderboard/calculate',
@@ -105,6 +112,7 @@ export interface FileRoutesByFullPath {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/bracket/$username': typeof ApiBracketUsernameRoute
   '/api/leaderboard/calculate': typeof ApiLeaderboardCalculateRoute
+  '/api/leaderboard/recent-pickers': typeof ApiLeaderboardRecentPickersRoute
   '/api/og/$username': typeof ApiOgUsernameRoute
   '/api/predictions/lock': typeof ApiPredictionsLockRoute
   '/api/leaderboard/': typeof ApiLeaderboardIndexRoute
@@ -121,6 +129,7 @@ export interface FileRoutesByTo {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/bracket/$username': typeof ApiBracketUsernameRoute
   '/api/leaderboard/calculate': typeof ApiLeaderboardCalculateRoute
+  '/api/leaderboard/recent-pickers': typeof ApiLeaderboardRecentPickersRoute
   '/api/og/$username': typeof ApiOgUsernameRoute
   '/api/predictions/lock': typeof ApiPredictionsLockRoute
   '/api/leaderboard': typeof ApiLeaderboardIndexRoute
@@ -138,6 +147,7 @@ export interface FileRoutesById {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/bracket/$username': typeof ApiBracketUsernameRoute
   '/api/leaderboard/calculate': typeof ApiLeaderboardCalculateRoute
+  '/api/leaderboard/recent-pickers': typeof ApiLeaderboardRecentPickersRoute
   '/api/og/$username': typeof ApiOgUsernameRoute
   '/api/predictions/lock': typeof ApiPredictionsLockRoute
   '/api/leaderboard/': typeof ApiLeaderboardIndexRoute
@@ -156,6 +166,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/api/bracket/$username'
     | '/api/leaderboard/calculate'
+    | '/api/leaderboard/recent-pickers'
     | '/api/og/$username'
     | '/api/predictions/lock'
     | '/api/leaderboard/'
@@ -172,6 +183,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/api/bracket/$username'
     | '/api/leaderboard/calculate'
+    | '/api/leaderboard/recent-pickers'
     | '/api/og/$username'
     | '/api/predictions/lock'
     | '/api/leaderboard'
@@ -188,6 +200,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/api/bracket/$username'
     | '/api/leaderboard/calculate'
+    | '/api/leaderboard/recent-pickers'
     | '/api/og/$username'
     | '/api/predictions/lock'
     | '/api/leaderboard/'
@@ -205,6 +218,7 @@ export interface RootRouteChildren {
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiBracketUsernameRoute: typeof ApiBracketUsernameRoute
   ApiLeaderboardCalculateRoute: typeof ApiLeaderboardCalculateRoute
+  ApiLeaderboardRecentPickersRoute: typeof ApiLeaderboardRecentPickersRoute
   ApiOgUsernameRoute: typeof ApiOgUsernameRoute
   ApiPredictionsLockRoute: typeof ApiPredictionsLockRoute
   ApiLeaderboardIndexRoute: typeof ApiLeaderboardIndexRoute
@@ -270,6 +284,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiOgUsernameRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/leaderboard/recent-pickers': {
+      id: '/api/leaderboard/recent-pickers'
+      path: '/api/leaderboard/recent-pickers'
+      fullPath: '/api/leaderboard/recent-pickers'
+      preLoaderRoute: typeof ApiLeaderboardRecentPickersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/leaderboard/calculate': {
       id: '/api/leaderboard/calculate'
       path: '/api/leaderboard/calculate'
@@ -325,6 +346,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiBracketUsernameRoute: ApiBracketUsernameRoute,
   ApiLeaderboardCalculateRoute: ApiLeaderboardCalculateRoute,
+  ApiLeaderboardRecentPickersRoute: ApiLeaderboardRecentPickersRoute,
   ApiOgUsernameRoute: ApiOgUsernameRoute,
   ApiPredictionsLockRoute: ApiPredictionsLockRoute,
   ApiLeaderboardIndexRoute: ApiLeaderboardIndexRoute,

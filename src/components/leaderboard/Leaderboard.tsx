@@ -11,7 +11,7 @@ export function Leaderboard() {
 		fetch("/api/leaderboard/")
 			.then((res) => {
 				if (!res.ok) throw new Error(`HTTP ${res.status}`);
-				return res.json();
+				return res.json() as Promise<{ leaderboard?: LeaderboardEntry[] }>;
 			})
 			.then((data) => {
 				setEntries(data.leaderboard || []);
@@ -39,7 +39,7 @@ export function Leaderboard() {
 							<div className="leaderboard-empty">Loading...</div>
 						) : entries.length === 0 ? (
 							<div className="leaderboard-empty">
-								No scores yet. Lock your bracket and check back after Round 1!
+								<p>No scores yet. Lock your bracket and check back after Round 1!</p>
 							</div>
 						) : (
 							<table className="leaderboard-table">

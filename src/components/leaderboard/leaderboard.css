@@ -232,6 +232,10 @@
 	padding: 40px 20px;
 	color: #666;
 	font-style: italic;
+
+	p {
+		margin: 0;
+	}
 }
 
 /* Mobile responsiveness */

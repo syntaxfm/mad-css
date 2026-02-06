@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Bracket } from "@/components/bracket/Bracket";
 import { LoginSection } from "@/components/LoginSection";
+import { Activity } from "@/components/leaderboard/Activity";
 import { Leaderboard } from "@/components/leaderboard/Leaderboard";
 import { Roster } from "@/components/roster/Roster";
 import { Rules } from "@/components/rules/Rules";
@@ -72,6 +73,7 @@ function TestPage() {
 					<Roster />
 				</div>
 			</div>
+			<Activity />
 			<PredictionsProvider isAuthenticated={isAuthenticated} userId={userId}>
 				<div id="bracket" className="section">
 					<h2>The Bracket</h2>
