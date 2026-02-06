@@ -86,63 +86,15 @@ function BracketEdge({
 	const edgeState = (data?.state as EdgeState) ?? "default";
 	const hoverState = (data?.hoverState as EdgeHoverState) ?? "none";
 
-	let stroke = "#FFFFFF";
-	let strokeOpacity = 1;
-	let strokeDasharray: string | undefined;
-	let className = "";
+	const STROKE_WIDTH = 3;
 
+	let state: string = edgeState;
 	if (hoverState === "hovered-pick") {
-		stroke = "#22c55e";
-		strokeDasharray = "18 6";
-		className = "bracket-edge--hover-pick";
+		state = "hover-pick";
 	} else if (hoverState === "hovered-competitor") {
-		stroke = "#ef4444";
-		strokeDasharray = "18 6";
-		className = "bracket-edge--hover-competitor";
+		state = "hover-competitor";
 	} else if (hoverState === "hovered-incoming") {
-		stroke = "#FFFFFF";
-		strokeDasharray = "8 6";
-		className = "bracket-edge--pickable";
-	} else {
-		switch (edgeState) {
-			case "winner":
-				stroke = "#FFFFFF";
-				strokeOpacity = 1;
-				break;
-			case "loser":
-				stroke = "#FFFFFF";
-				strokeOpacity = 0.5;
-				break;
-			case "pending":
-				stroke = "#FFFFFF";
-				strokeDasharray = "8 6";
-				className = "bracket-edge--pending";
-				break;
-			case "pickable":
-				stroke = "#FFFFFF";
-				strokeDasharray = "8 6";
-				className = "bracket-edge--pickable";
-				break;
-			default:
-				break;
-		}
-	}
-
-	if (target === "championship") {
-		const horizontalY = sourceY + 30;
-		const edgePath = `M ${sourceX} ${sourceY} L ${sourceX} ${horizontalY} L ${targetX} ${horizontalY} L ${targetX} ${targetY - 35}`;
-		return (
-			<path
-				className={className}
-				d={edgePath}
-				fill="none"
-				stroke={stroke}
-				strokeWidth={10}
-				strokeOpacity={strokeOpacity}
-				strokeDasharray={strokeDasharray}
-				style={{ filter: "none" }}
-			/>
-		);
+		state = "pickable";
 	}
 
 	const [edgePath] = getSmoothStepPath({
@@ -154,16 +106,26 @@ function BracketEdge({
 		targetPosition,
 		borderRadius: 0,
 	});
+
 	return (
-		<path
-			className={className}
-			d={edgePath}
-			fill="none"
-			stroke={stroke}
-			strokeWidth={10}
-			strokeOpacity={strokeOpacity}
-			strokeDasharray={strokeDasharray}
-		/>
+		<>
+			<path
+				className="bracket-edge track"
+				data-state={state}
+				d={edgePath}
+				fill="none"
+				strokeWidth={STROKE_WIDTH * 3}
+				strokeLinecap="round"
+			/>
+			<path
+				className="bracket-edge path"
+				data-state={state}
+				d={edgePath}
+				fill="none"
+				strokeWidth={STROKE_WIDTH}
+				strokeLinecap="round"
+			/>
+		</>
 	);
 }
 
@@ -222,12 +184,6 @@ function generateNodes(
 		generateChampionshipNode(ctx),
 	];
 }
-
-const edgeStyle: React.CSSProperties = {
-	stroke: "#ffffff",
-	strokeWidth: 3,
-	filter: "drop-shadow(0px 0px 7px black)",
-};
 
 const EDGE_SOURCE_MAP: Map<string, string[]> = (() => {
 	const map = new Map<string, string[]>();
@@ -292,15 +248,18 @@ function computeEdgeState(
 	sourceNodeId: string,
 	targetNodeId: string,
 	tournamentResults: Record<string, string>,
+	predictions: Record<string, string>,
+	showPicks: boolean,
 	nodes: Node[],
 	allEdges: Edge[],
 ): EdgeState {
 	const { gameId } = parseSourceNodeId(sourceNodeId);
 	const playerId = getSourcePlayerId(sourceNodeId, nodes);
+	const results = showPicks ? predictions : tournamentResults;
 
 	// Finalist-to-championship edges: check if the final game is decided
 	if (sourceNodeId === "left-finalist" || sourceNodeId === "right-finalist") {
-		const finalWinner = tournamentResults.final;
+		const finalWinner = results.final;
 		if (finalWinner && playerId) {
 			return finalWinner === playerId ? "winner" : "loser";
 		}
@@ -320,7 +279,7 @@ function computeEdgeState(
 		return "default";
 	}
 
-	const winner = tournamentResults[gameId];
+	const winner = results[gameId];
 
 	if (winner && playerId) {
 		return winner === playerId ? "winner" : "loser";
@@ -380,6 +339,8 @@ function computeEdgeHoverState(
 
 interface EdgeGeneratorContext {
 	tournamentResults: Record<string, string>;
+	predictions: Record<string, string>;
+	showPicks: boolean;
 	nodes: Node[];
 	hoveredNodeId: string | null;
 	hoveredNodeType: "player" | "empty" | null;
@@ -410,7 +371,6 @@ function generateEdges(ctx: EdgeGeneratorContext): Edge[] {
 			source: `${game.id}-p1`,
 			target: `${quarterGame.id}-p${(gameIndex % 2) + 1}`,
 			type: "bracket",
-			style: edgeStyle,
 			sourceHandle: "out-right",
 			targetHandle: "in-top",
 		});
@@ -420,7 +380,6 @@ function generateEdges(ctx: EdgeGeneratorContext): Edge[] {
 			source: `${game.id}-p2`,
 			target: `${quarterGame.id}-p${(gameIndex % 2) + 1}`,
 			type: "bracket",
-			style: edgeStyle,
 			targetHandle: "in-bottom",
 		});
 	});
@@ -433,7 +392,6 @@ function generateEdges(ctx: EdgeGeneratorContext): Edge[] {
 			source: `${game.id}-p1`,
 			target: `${semiGame.id}-p${gameIndex + 1}`,
 			type: "bracket",
-			style: edgeStyle,
 			sourceHandle: "out-right",
 			targetHandle: "in-top",
 		});
@@ -443,7 +401,6 @@ function generateEdges(ctx: EdgeGeneratorContext): Edge[] {
 			source: `${game.id}-p2`,
 			target: `${semiGame.id}-p${gameIndex + 1}`,
 			type: "bracket",
-			style: edgeStyle,
 			sourceHandle: "out-right",
 			targetHandle: "in-bottom",
 		});
@@ -455,7 +412,6 @@ function generateEdges(ctx: EdgeGeneratorContext): Edge[] {
 			source: `${game.id}-p1`,
 			target: `left-finalist`,
 			type: "bracket",
-			style: edgeStyle,
 			sourceHandle: "out-right",
 			targetHandle: "in-top",
 		});
@@ -465,7 +421,6 @@ function generateEdges(ctx: EdgeGeneratorContext): Edge[] {
 			source: `${game.id}-p2`,
 			target: `left-finalist`,
 			type: "bracket",
-			style: edgeStyle,
 			sourceHandle: "out-right",
 			targetHandle: "in-bottom",
 		});
@@ -476,7 +431,6 @@ function generateEdges(ctx: EdgeGeneratorContext): Edge[] {
 		source: `left-finalist`,
 		target: "championship",
 		type: "bracket",
-		style: edgeStyle,
 		sourceHandle: "out-right",
 		targetHandle: "in-bottom",
 	});
@@ -490,7 +444,6 @@ function generateEdges(ctx: EdgeGeneratorContext): Edge[] {
 			source: `${game.id}-p1`,
 			target: `${quarterGame.id}-p${(gameIndex % 2) + 1}`,
 			type: "bracket",
-			style: edgeStyle,
 			sourceHandle: "out-left",
 			targetHandle: "in-top",
 		});
@@ -500,7 +453,6 @@ function generateEdges(ctx: EdgeGeneratorContext): Edge[] {
 			source: `${game.id}-p2`,
 			target: `${quarterGame.id}-p${(gameIndex % 2) + 1}`,
 			type: "bracket",
-			style: edgeStyle,
 			sourceHandle: "out-left",
 			targetHandle: "in-bottom",
 		});
@@ -514,7 +466,6 @@ function generateEdges(ctx: EdgeGeneratorContext): Edge[] {
 			source: `${game.id}-p1`,
 			target: `${semiGame.id}-p${gameIndex + 1}`,
 			type: "bracket",
-			style: edgeStyle,
 			sourceHandle: "out-left",
 			targetHandle: "in-top",
 		});
@@ -524,7 +475,6 @@ function generateEdges(ctx: EdgeGeneratorContext): Edge[] {
 			source: `${game.id}-p2`,
 			target: `${semiGame.id}-p${gameIndex + 1}`,
 			type: "bracket",
-			style: edgeStyle,
 			sourceHandle: "out-left",
 			targetHandle: "in-bottom",
 		});
@@ -536,7 +486,6 @@ function generateEdges(ctx: EdgeGeneratorContext): Edge[] {
 			source: `${game.id}-p1`,
 			target: `right-finalist`,
 			type: "bracket",
-			style: edgeStyle,
 			sourceHandle: "out-left",
 			targetHandle: "in-top",
 		});
@@ -546,7 +495,6 @@ function generateEdges(ctx: EdgeGeneratorContext): Edge[] {
 			source: `${game.id}-p2`,
 			target: `right-finalist`,
 			type: "bracket",
-			style: edgeStyle,
 			sourceHandle: "out-left",
 			targetHandle: "in-bottom",
 		});
@@ -557,7 +505,6 @@ function generateEdges(ctx: EdgeGeneratorContext): Edge[] {
 		source: `right-finalist`,
 		target: "championship",
 		type: "bracket",
-		style: edgeStyle,
 		sourceHandle: "out-left",
 		targetHandle: "in-bottom",
 	});
@@ -568,6 +515,8 @@ function generateEdges(ctx: EdgeGeneratorContext): Edge[] {
 			edge.source,
 			edge.target,
 			ctx.tournamentResults,
+			ctx.predictions,
+			ctx.showPicks,
 			ctx.nodes,
 			edges,
 		);
@@ -591,7 +540,6 @@ function generateEdges(ctx: EdgeGeneratorContext): Edge[] {
 
 const defaultEdgeOptions = {
 	type: "bracket",
-	style: edgeStyle,
 };
 
 const FIT_VIEW_PADDING = 0.05;
@@ -646,11 +594,20 @@ function BracketContent({
 		() =>
 			generateEdges({
 				tournamentResults,
+				predictions,
+				showPicks,
 				nodes,
 				hoveredNodeId,
 				hoveredNodeType,
 			}),
-		[tournamentResults, nodes, hoveredNodeId, hoveredNodeType],
+		[
+			tournamentResults,
+			predictions,
+			showPicks,
+			nodes,
+			hoveredNodeId,
+			hoveredNodeType,
+		],
 	);
 
 	const styledNodes = useMemo(() => {

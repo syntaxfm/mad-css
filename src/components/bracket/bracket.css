@@ -24,15 +24,16 @@
 		flex-direction: column !important;
 		justify-content: center;
 		align-items: center;
-		width: auto;
+		width: 176px;
 		.player-name {
-			/* padding-top: 20px; */
+			white-space: nowrap;
 		}
 		.player-info {
 			text-align: center;
 			margin-left: 0;
 			margin-right: 0;
 			padding: 30px 16px 10px 16px;
+			flex-direction: column;
 		}
 		.player-photo-ring {
 			margin-left: 0;
@@ -181,6 +182,7 @@
 	&:has(a.player-youtube-link) {
 		display: flex;
 		align-items: center;
+		justify-content: space-between;
 		gap: 5px;
 	}
 }
@@ -365,41 +367,80 @@
 	color: var(--white);
 }
 
-/* Edge State Animations */
 @keyframes marching-ants {
 	0% {
 		stroke-dashoffset: 0;
 	}
 	100% {
-		stroke-dashoffset: -28;
+		stroke-dashoffset: -100%;
 	}
 }
 
-.bracket-edge--pickable {
-	animation: marching-ants 0.6s linear infinite;
-}
+.bracket-edge {
+	stroke: #fff;
 
-.bracket-edge--hover-pick {
-	animation: marching-ants 0.4s linear infinite;
-}
+	&.track {
+		stroke-opacity: 0.2;
+		filter: none;
+	}
 
-.bracket-edge--hover-competitor {
-	animation: marching-ants 0.4s linear infinite;
-}
+	&.path {
+		stroke-opacity: 1;
+	}
 
-.bracket-edge--pending {
-	filter: brightness(0.5) !important;
-}
+	/* Animated states: marching ants */
+	&[data-state="hover-pick"],
+	&[data-state="pickable"],
+	&[data-state="hover-competitor"] {
+		animation: marching-ants 4s linear infinite;
+	}
 
-/* Standings mode: disable animations and brightness filters */
-.bracket-container--standings .bracket-edge--pickable,
-.bracket-container--standings .bracket-edge--hover-pick,
-.bracket-container--standings .bracket-edge--hover-competitor {
-	animation: none;
-}
+	/* Dashed stroke */
+	&[data-state="hover-pick"].path,
+	&[data-state="pickable"].path,
+	&[data-state="pending"].path {
+		stroke-dasharray: 6 9;
+	}
 
-.bracket-container--standings .bracket-edge--pending {
-	filter: none !important;
+	&[data-state="hover-competitor"].path {
+		stroke-opacity: 0.2;
+	}
+
+	&[data-state="loser"].path {
+		stroke-opacity: 0.5;
+	}
+
+	&[data-state="pending"] {
+		filter: brightness(0.5) !important;
+	}
+
+	&[data-state="winner"].track {
+		stroke: var(--orange);
+		stroke-opacity: 0.8;
+	}
+
+	&[data-state="hover-pick"] {
+		&.path {
+			stroke: var(--white);
+		}
+		&.track {
+			stroke: var(--orange);
+			stroke-opacity: 0.8;
+		}
+	}
+
+	/* Standings mode overrides */
+	.bracket-container--standings & {
+		&[data-state="pickable"],
+		&[data-state="hover-pick"],
+		&[data-state="hover-competitor"] {
+			animation: none;
+		}
+
+		&[data-state="pending"] {
+			filter: none !important;
+		}
+	}
 }
 
 .bracket-container--standings .react-flow__node {
@@ -473,9 +514,9 @@
 	z-index: 10;
 }
 
-.bracket-container path:not(a path) {
+/* .bracket-container path:not(a path) {
 	filter: drop-shadow(0px 0px 7px black);
-}
+} */
 
 .bracket-handle {
 	opacity: 0; /* Handles. Hidden, only used for debugging. */
@@ -484,6 +525,7 @@
 	background: red;
 	border: 2px solid black;
 	border-radius: 50%;
+	z-index: 100;
 }
 
 /* Custom bracket controls styling */

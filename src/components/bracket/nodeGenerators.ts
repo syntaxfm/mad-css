@@ -27,11 +27,9 @@ function getRingColor(side: "left" | "right"): string {
 	return side === "left" ? LEFT_RING_COLOR : RIGHT_RING_COLOR;
 }
 
-function getPhotoPath(player: Player, isEliminated: boolean): string {
+function getPhotoPath(player: Player): string {
 	const filename = player.photo.replace("/avatars/", "");
-	return isEliminated
-		? `/avatars/bw/${filename}`
-		: `/avatars/color/${filename}`;
+	return `/avatars/color/${filename}`;
 }
 
 function playerToNodeData(
@@ -77,7 +75,7 @@ function playerToNodeData(
 	}
 
 	return {
-		photo: getPhotoPath(player, isEliminated),
+		photo: getPhotoPath(player),
 		name: player.name,
 		byline: player.byline,
 		ringColor,
