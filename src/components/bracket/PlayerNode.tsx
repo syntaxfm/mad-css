@@ -65,6 +65,7 @@ export interface PlayerData {
 	prediction?: PredictionState;
 	playerId?: string;
 	gameId?: string;
+	youtubeUrl?: string;
 	[key: string]: unknown;
 }
 
@@ -82,6 +83,7 @@ interface PlayerNodeProps {
 	prediction?: PredictionState;
 	playerId?: string;
 	gameId?: string;
+	youtubeUrl?: string;
 }
 
 export function PlayerNode({
@@ -98,6 +100,7 @@ export function PlayerNode({
 	prediction,
 	playerId,
 	gameId,
+	youtubeUrl,
 }: PlayerNodeProps) {
 	const { isSelected, isCorrect, isIncorrect, isPickable, isUnpicked } =
 		deriveClassFlags(prediction);
@@ -216,6 +219,17 @@ export function PlayerNode({
 			<div className="player-info">
 				<h3 className="player-name">{name}</h3>
 				{showBio && byline && <p className="player-byline">{byline}</p>}
+				{youtubeUrl && (
+					<a
+						href={youtubeUrl}
+						target="_blank"
+						rel="noopener noreferrer"
+						className="player-youtube-link"
+						onClick={(e) => e.stopPropagation()}
+					>
+						<YouTubeIcon /> WATCH
+					</a>
+				)}
 			</div>
 		</div>
 	);
@@ -281,11 +295,35 @@ export const PlayerNodeFlow = memo(function PlayerNodeFlow({
 				prediction={data.prediction}
 				playerId={data.playerId}
 				gameId={data.gameId}
+				youtubeUrl={data.youtubeUrl}
 			/>
 			<Handles round={data.round} />
 		</div>
 	);
 });
+
+function formatAirDate(isoDate: string): string {
+	const d = new Date(isoDate);
+	return d.toLocaleDateString("en-US", {
+		month: "long",
+		day: "numeric",
+	});
+}
+
+function YouTubeIcon() {
+	return (
+		<svg
+			xmlns="http://www.w3.org/2000/svg"
+			viewBox="0 0 24 24"
+			fill="currentColor"
+			width="14"
+			height="14"
+			aria-hidden="true"
+		>
+			<path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+		</svg>
+	);
+}
 
 // Empty slot for matches not yet played
 export function EmptySlot({
@@ -293,11 +331,15 @@ export function EmptySlot({
 	side = "left",
 	ringColor,
 	round = "later",
+	airDate,
+	youtubeUrl,
 }: {
 	text?: string;
 	side?: "left" | "right";
 	ringColor?: string;
 	round?: "round1" | "later";
+	airDate?: string;
+	youtubeUrl?: string;
 }) {
 	const classNames = [
 		"player-node",
@@ -322,6 +364,16 @@ export function EmptySlot({
 			</div>
 			<div className="player-info">
 				<h3 className="player-name">{text || "TBD"}</h3>
+				{airDate && (
+					<a
+						href={youtubeUrl}
+						target="_blank"
+						rel="noopener noreferrer"
+						className="player-youtube-link"
+					>
+						<YouTubeIcon /> {formatAirDate(airDate)}
+					</a>
+				)}
 			</div>
 		</div>
 	);
@@ -336,6 +388,8 @@ export const EmptySlotFlow = memo(function EmptySlotFlow({
 		side?: "left" | "right";
 		ringColor?: string;
 		round?: "round1" | "later";
+		airDate?: string;
+		youtubeUrl?: string;
 	};
 }) {
 	return (
@@ -345,6 +399,8 @@ export const EmptySlotFlow = memo(function EmptySlotFlow({
 				side={data?.side}
 				ringColor={data?.ringColor}
 				round={data?.round}
+				airDate={data?.airDate}
+				youtubeUrl={data?.youtubeUrl}
 			/>
 			<Handles round={data?.round} />
 		</div>

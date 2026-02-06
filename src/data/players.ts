@@ -8,12 +8,35 @@ export const BRACKET_DEADLINE = "2026-02-28T00:00:00Z";
 
 // Game schedule - when results will be announced for each round
 export const GAME_SCHEDULE = {
-	"left-r1": "2026-03-02T18:00:00Z",
-	"right-r1": "2026-03-09T18:00:00Z",
-	qf: "2026-03-16T18:00:00Z",
-	sf: "2026-03-23T18:00:00Z",
-	final: "2026-03-30T18:00:00Z",
+	"left-r1": "2026-03-06T13:00:00Z",
+	"right-r1": "2026-03-13T12:00:00Z",
+	qf: "2026-03-20T12:00:00Z",
+	sf: "2026-03-27T12:00:00Z",
+	final: "2026-04-03T12:00:00Z",
 } as const;
+
+export type ScheduleKey = keyof typeof GAME_SCHEDULE;
+
+export function getScheduleKeyForGame(gameId: string): ScheduleKey {
+	if (gameId.startsWith("r1-")) {
+		const idx = Number.parseInt(gameId.split("-")[1], 10);
+		return idx < 4 ? "left-r1" : "right-r1";
+	}
+	if (gameId.startsWith("qf-")) return "qf";
+	if (gameId.startsWith("sf-")) return "sf";
+	return "final";
+}
+
+export function getAirDateForGame(gameId: string): string {
+	return GAME_SCHEDULE[getScheduleKeyForGame(gameId)];
+}
+
+export const GAME_LINKS: Record<string, string> = {
+	// YouTube video IDs keyed by game ID
+	// "r1-0": "dQw4w9WgXcQ",
+};
+
+export const YOUTUBE_CHANNEL = "https://www.youtube.com/@syntaxfm";
 
 // Get the next upcoming game time (or null if all games are done)
 export function getNextGameTime(): { round: string; time: string } | null {
@@ -279,28 +302,28 @@ export const bracket: Bracket = {
 		// Game 0: Jason Lengstorf vs Kyle Cook (Web Dev Simplified)
 		{
 			id: "r1-0",
-			date: "2026-02-01",
+			date: GAME_SCHEDULE["left-r1"],
 			player1: jasonLengstorf,
 			player2: kyleCook,
 		},
 		// Game 1: Adam Wathan vs Julia Miocene
 		{
 			id: "r1-1",
-			date: "2026-02-01",
+			date: GAME_SCHEDULE["left-r1"],
 			player1: adamWathan,
 			player2: juliaMiocene,
 		},
 		// Game 2: Chris Coyier vs Bree Hall
 		{
 			id: "r1-2",
-			date: "2026-02-02",
+			date: GAME_SCHEDULE["left-r1"],
 			player1: chrisCoyier,
 			player2: breeHall,
 		},
 		// Game 3: Scott Tolinski vs Shaundai Person
 		{
 			id: "r1-3",
-			date: "2026-02-02",
+			date: GAME_SCHEDULE["left-r1"],
 			player1: scottTolinski,
 			player2: shaundaiPerson,
 		},
@@ -310,28 +333,28 @@ export const bracket: Bracket = {
 		// Game 4: Kevin Powell vs Amy Dutton
 		{
 			id: "r1-4",
-			date: "2026-02-01",
+			date: GAME_SCHEDULE["right-r1"],
 			player1: kevinPowell,
 			player2: amyDutton,
 		},
 		// Game 5: Josh Comeau vs Cassidy Williams
 		{
 			id: "r1-5",
-			date: "2026-02-01",
+			date: GAME_SCHEDULE["right-r1"],
 			player1: joshComeau,
 			player2: cassidyWilliams,
 		},
 		// Game 6: Wes Bos vs TBD
 		{
 			id: "r1-6",
-			date: "2026-02-02",
+			date: GAME_SCHEDULE["right-r1"],
 			player1: wesBos,
 			player2: benHong,
 		},
 		// Game 7: Ania Kubow vs Adam Argyle
 		{
 			id: "r1-7",
-			date: "2026-02-02",
+			date: GAME_SCHEDULE["right-r1"],
 			player1: aniaKubow,
 			player2: adamArgyle,
 		},
@@ -343,10 +366,10 @@ export const bracket: Bracket = {
 	// Games 0-1: LEFT side | Games 2-3: RIGHT side
 
 	quarters: [
-		{ id: "qf-0", date: "" },
-		{ id: "qf-1", date: "" },
-		{ id: "qf-2", date: "" },
-		{ id: "qf-3", date: "" },
+		{ id: "qf-0", date: GAME_SCHEDULE.qf },
+		{ id: "qf-1", date: GAME_SCHEDULE.qf },
+		{ id: "qf-2", date: GAME_SCHEDULE.qf },
+		{ id: "qf-3", date: GAME_SCHEDULE.qf },
 	],
 
 	// ===========================================================================
@@ -355,15 +378,15 @@ export const bracket: Bracket = {
 	// Game 0: LEFT side | Game 1: RIGHT side
 
 	semis: [
-		{ id: "sf-0", date: "" },
-		{ id: "sf-1", date: "" },
+		{ id: "sf-0", date: GAME_SCHEDULE.sf },
+		{ id: "sf-1", date: GAME_SCHEDULE.sf },
 	],
 
 	// ===========================================================================
 	// FINALS - 1 game, 2 players (CHAMPIONSHIP)
 	// ===========================================================================
 
-	finals: [{ id: "final", date: "" }],
+	finals: [{ id: "final", date: GAME_SCHEDULE.final }],
 };
 
 export const emptyBracket: Bracket = {

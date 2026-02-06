@@ -47,7 +47,7 @@ function BracketToggle({
 		<div className="bracket-toggle">
 			<button
 				type="button"
-				className={`bracket-toggle__btn${!showPicks ? " bracket-toggle__btn--active" : ""}`}
+				className={!showPicks ? "active" : undefined}
 				onClick={showPicks ? onToggle : undefined}
 				aria-pressed={!showPicks}
 			>
@@ -55,7 +55,7 @@ function BracketToggle({
 			</button>
 			<button
 				type="button"
-				className={`bracket-toggle__btn${showPicks ? " bracket-toggle__btn--active" : ""}`}
+				className={showPicks ? "active" : undefined}
 				onClick={!showPicks ? onToggle : undefined}
 				aria-pressed={showPicks}
 			>

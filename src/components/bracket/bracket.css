@@ -26,13 +26,13 @@
 		align-items: center;
 		width: auto;
 		.player-name {
-			padding-top: 20px;
+			/* padding-top: 20px; */
 		}
 		.player-info {
 			text-align: center;
 			margin-left: 0;
 			margin-right: 0;
-			padding: 10px 16px;
+			padding: 30px 16px 10px 16px;
 		}
 		.player-photo-ring {
 			margin-left: 0;
@@ -178,6 +178,11 @@
 	flex: 1;
 	min-width: 200px;
 	border: 2px solid var(--black);
+	&:has(a.player-youtube-link) {
+		display: flex;
+		align-items: center;
+		gap: 5px;
+	}
 }
 
 .player-name {
@@ -186,9 +191,9 @@
 	color: var(--black);
 	margin: 0;
 	font-weight: 800;
-	line-height: 1.1;
 	text-transform: uppercase;
 	letter-spacing: 0.02em;
+	text-box: trim-both cap alphabetic;
 }
 
 .player-byline {
@@ -197,6 +202,21 @@
 	margin: 4px 0 0;
 	opacity: 0.7;
 	white-space: nowrap;
+}
+
+/* YouTube / air date links */
+.player-youtube-link {
+	display: inline-flex;
+	align-items: center;
+	gap: 3px;
+	color: black;
+	text-decoration: none;
+	font-family: var(--font-sans), sans-serif;
+	font-size: 12px;
+	transition: opacity 0.15s;
+	path {
+		color: red;
+	}
 }
 
 /* Winner State */
@@ -392,42 +412,42 @@
 	justify-content: center;
 	gap: 0;
 	margin-bottom: 16px;
-}
 
-.bracket-toggle__btn {
-	font-family: var(--font-block);
-	font-size: 0.875rem;
-	text-transform: uppercase;
-	letter-spacing: 0.05em;
-	padding: 10px 24px;
-	border: 3px solid var(--black);
-	background: transparent;
-	color: var(--black);
-	cursor: pointer;
-	transition:
-		background 0.15s,
-		color 0.15s,
-		box-shadow 0.15s,
-		transform 0.1s;
-}
+	button {
+		font-family: var(--font-block);
+		font-size: 0.875rem;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		padding: 10px 24px;
+		border: 3px solid var(--black);
+		background: transparent;
+		color: var(--black);
+		cursor: pointer;
+		transition:
+			background 0.15s,
+			color 0.15s,
+			box-shadow 0.15s,
+			transform 0.1s;
 
-.bracket-toggle__btn:first-child {
-	border-right: none;
-}
+		&:first-child {
+			border-right: none;
+		}
 
-.bracket-toggle__btn--active {
-	background: var(--yellow);
-	color: var(--black);
-	box-shadow: 4px 4px 0 var(--black);
-	cursor: default;
-}
+		&.active {
+			background: var(--yellow);
+			color: var(--black);
+			box-shadow: 4px 4px 0 var(--black);
+			cursor: default;
+		}
 
-.bracket-toggle__btn:not(.bracket-toggle__btn--active):hover {
-	background: var(--beige);
-}
+		&:not(.active):hover {
+			background: var(--beige);
+		}
 
-.bracket-toggle__btn:not(.bracket-toggle__btn--active):active {
-	transform: translate(2px, 2px);
+		&:not(.active):active {
+			transform: translate(2px, 2px);
+		}
+	}
 }
 
 /* React Flow Container */
@@ -453,7 +473,7 @@
 	z-index: 10;
 }
 
-.bracket-container path {
+.bracket-container path:not(a path) {
 	filter: drop-shadow(0px 0px 7px black);
 }
 

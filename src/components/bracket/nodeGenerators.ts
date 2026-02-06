@@ -1,12 +1,16 @@
 import type { Node } from "@xyflow/react";
 import {
 	bracket,
+	FEEDER_GAMES,
+	GAME_LINKS,
 	type Game,
+	getAirDateForGame,
 	isLoser,
 	isWinner,
 	type Player,
 	players,
 	splitForDisplay,
+	YOUTUBE_CHANNEL,
 } from "@/data/players";
 import { getPlayerById, getPlayersForGame } from "@/lib/simulation";
 import type { NodeContext, RoundGeneratorOptions } from "./bracketTypes";
@@ -40,6 +44,7 @@ function playerToNodeData(
 		prediction?: PredictionState;
 		isLoser?: boolean;
 		showBio?: boolean;
+		tournamentResults?: Record<string, string>;
 	},
 ): {
 	photo: string;
@@ -55,15 +60,28 @@ function playerToNodeData(
 	prediction?: PredictionState;
 	playerId?: string;
 	gameId?: string;
+	youtubeUrl?: string;
 } {
 	const isEliminated =
 		options?.isLoser !== undefined ? options.isLoser : isLoser(game, player);
+	const results = options?.tournamentResults ?? {};
+	const playerIsWinner =
+		isWinner(game, player) || results[game.id] === player.id;
+
+	let youtubeUrl: string | undefined;
+	if (!game.id.startsWith("r1-")) {
+		const feederGameId = getFeederGameForPlayer(game.id, player.id, results);
+		if (feederGameId) {
+			youtubeUrl = getYoutubeUrl(feederGameId);
+		}
+	}
+
 	return {
 		photo: getPhotoPath(player, isEliminated),
 		name: player.name,
 		byline: player.byline,
 		ringColor,
-		isWinner: isWinner(game, player),
+		isWinner: playerIsWinner,
 		isEliminated,
 		isLoser: isEliminated,
 		showBio: options?.showBio ?? true,
@@ -72,7 +90,24 @@ function playerToNodeData(
 		prediction: options?.prediction,
 		playerId: player.id,
 		gameId: game.id,
+		youtubeUrl,
 	};
+}
+
+function getYoutubeUrl(gameId: string): string {
+	const videoId = GAME_LINKS[gameId];
+	if (videoId) return `https://www.youtube.com/watch?v=${videoId}`;
+	return YOUTUBE_CHANNEL;
+}
+
+function getFeederGameForPlayer(
+	gameId: string,
+	playerId: string,
+	tournamentResults: Record<string, string>,
+): string | undefined {
+	const feeders = FEEDER_GAMES[gameId];
+	if (!feeders) return undefined;
+	return feeders.find((fId) => tournamentResults[fId] === playerId);
 }
 
 function createNode(
@@ -89,20 +124,32 @@ function createNode(
 		isLoser?: boolean;
 		showBio?: boolean;
 	},
+	tournamentResults?: Record<string, string>,
 ): Node {
 	if (player) {
 		return {
 			id,
 			type: "playerNode",
 			position,
-			data: playerToNodeData(player, game, ringColor, side, round, nodeOptions),
+			data: playerToNodeData(player, game, ringColor, side, round, {
+				...nodeOptions,
+				tournamentResults,
+			}),
 		};
 	}
+	const airDate = getAirDateForGame(game.id);
 	return {
 		id,
 		type: "emptySlot",
 		position,
-		data: { text: emptyText, side, ringColor, round },
+		data: {
+			text: emptyText,
+			side,
+			ringColor,
+			round,
+			airDate,
+			youtubeUrl: getYoutubeUrl(game.id),
+		},
 	};
 }
 
@@ -214,6 +261,7 @@ export function generateRound1Nodes({
 				"round1",
 				undefined,
 				{ prediction: p1Options, showBio: true, isLoser: p1Loser },
+				ctx.tournamentResults,
 			),
 		);
 
@@ -230,6 +278,7 @@ export function generateRound1Nodes({
 				"round1",
 				undefined,
 				{ prediction: p2Options, showBio: true, isLoser: p2Loser },
+				ctx.tournamentResults,
 			),
 		);
 	});
@@ -281,8 +330,9 @@ export function generateQuarterNodes({
 				{ x: xPos, y: baseY },
 				side,
 				"later",
-				"TBD",
+				"Quarter Finalist",
 				{ prediction: p1Options, showBio: false, isLoser: p1Loser },
+				ctx.tournamentResults,
 			),
 		);
 
@@ -297,8 +347,9 @@ export function generateQuarterNodes({
 				{ x: xPos, y: baseY + 2 * MATCH_GAP },
 				side,
 				"later",
-				"TBD",
+				"Quarter Finalist",
 				{ prediction: p2Options, showBio: false, isLoser: p2Loser },
+				ctx.tournamentResults,
 			),
 		);
 	});
@@ -349,8 +400,9 @@ export function generateSemiNodes({
 				{ x: xPos, y: baseY },
 				side,
 				"later",
-				"TBD",
+				"Semi Finalist",
 				{ prediction: p1Options, showBio: false, isLoser: p1Loser },
+				ctx.tournamentResults,
 			),
 		);
 
@@ -365,8 +417,9 @@ export function generateSemiNodes({
 				{ x: xPos, y: baseY + 4 * MATCH_GAP },
 				side,
 				"later",
-				"TBD",
+				"Semi Finalist",
 				{ prediction: p2Options, showBio: false, isLoser: p2Loser },
+				ctx.tournamentResults,
 			),
 		);
 	});
@@ -419,8 +472,9 @@ export function generateFinalistNode({
 		{ x: xPos, y: 3.5 * MATCH_GAP },
 		side,
 		"later",
-		"Finalist TBD",
+		"Finalist",
 		{ prediction: finalistOptions, showBio: false, isLoser: finalistLoser },
+		ctx.tournamentResults,
 	);
 }
 
@@ -447,10 +501,20 @@ export function generateChampionshipNode(ctx: NodeContext): Node {
 			y: 0,
 		},
 		data: champion
-			? playerToNodeData(champion, finalGame, "#FFD700", "left", "later", {
-					isLoser: false,
-					showBio: false,
-				})
-			: { text: "CHAMPION", side: "left", ringColor: "#FFD700" },
+			? {
+					...playerToNodeData(champion, finalGame, "#FFD700", "left", "later", {
+						isLoser: false,
+						showBio: false,
+						tournamentResults: ctx.tournamentResults,
+					}),
+					youtubeUrl: getYoutubeUrl("final"),
+				}
+			: {
+					text: "CHAMPION",
+					side: "left",
+					ringColor: "#FFD700",
+					airDate: getAirDateForGame("final"),
+					youtubeUrl: getYoutubeUrl("final"),
+				},
 	};
 }
