@@ -13,3 +13,7 @@ count.txt
 .vinxi
 todos.json
 .pnpm-store
+.claude/settings.local.json
+.agents/
+.claude/skills/
+

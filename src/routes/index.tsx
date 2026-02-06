@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Bracket } from "@/components/bracket/Bracket";
-// import { LoginSection } from "@/components/LoginSection";
+import { Activity } from "@/components/leaderboard/Activity";
 import { Roster } from "@/components/roster/Roster";
 import { Rules } from "@/components/rules/Rules";
 import { Ticket } from "@/components/Ticket";
@@ -12,20 +12,19 @@ function App() {
 		<div>
 			<Ticket />
 			<div className="section">
-				<div className="section-content" style={{ "--max-width": "1500px", paddingInline: 0 }}>
+				<div
+					className="section-content"
+					style={{ "--max-width": "1500px", paddingInline: 0 }}
+				>
 					<Roster />
 				</div>
 			</div>
+			{/* <Activity /> */}
 			<div className="section" style={{ paddingInline: 0 }}>
 				<h2>The Bracket</h2>
-				{/* <ClientOnly fallback={null}>
-					<LoginSection />
-				</ClientOnly> */}
 				<Bracket />
 			</div>
 			<Rules />
-			{/* <Bracket /> */}
-			{/* <SimpleBracket /> */}
 		</div>
 	);
 }

@@ -1,0 +1,531 @@
+/* ============================================
+   Admin Dashboard - Retro Tournament Style
+   ============================================ */
+
+@font-face {
+	font-family: "DSEG7Classic";
+	src: url("/fonts/DSEG7Classic-Bold.woff2") format("woff2");
+	font-weight: bold;
+	font-style: normal;
+	font-display: swap;
+}
+
+.admin-page {
+	padding: 3rem 2rem;
+	background: var(--beige);
+	mask-image:
+		url("./assets/paper/repeating-paper-top.png"),
+		url("./assets/paper/repeating-paper-bottom.png"),
+		linear-gradient(black, black);
+	mask-size:
+		auto 23px,
+		auto 40px,
+		100% 100%;
+	mask-position:
+		center 0px,
+		center calc(100% + 15px),
+		center;
+	mask-repeat: repeat-x, repeat-x, no-repeat;
+	mask-composite: exclude;
+	mask-mode: alpha;
+}
+
+/* ============================================
+   Header
+   ============================================ */
+
+.admin-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 2rem;
+	padding-bottom: 1.5rem;
+	border-bottom: 4px solid var(--black);
+	flex-wrap: wrap;
+	gap: 1rem;
+}
+
+.admin-header h1 {
+	font-family: var(--font-block);
+	font-size: 2rem;
+	color: var(--orange);
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	margin: 0;
+}
+
+/* ============================================
+   Stats Cards - Retro Scoreboard Style
+   ============================================ */
+
+.admin-stats {
+	display: flex;
+	gap: 1rem;
+	margin-bottom: 2rem;
+	flex-wrap: wrap;
+}
+
+.stat-card {
+	flex: 1;
+	min-width: 140px;
+	padding: 1.25rem;
+	background: var(--yellow);
+	border: 4px solid var(--black);
+	text-align: center;
+	position: relative;
+}
+
+.stat-card h3 {
+	font-family: var(--font-block);
+	font-size: 0.7rem;
+	color: var(--black);
+	margin: 0 0 1rem;
+	text-transform: uppercase;
+	letter-spacing: 0.1em;
+}
+
+.stat-digits {
+	display: flex;
+	justify-content: center;
+	gap: 4px;
+}
+
+.stat-digit {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 36px;
+	height: 52px;
+	background: #0a0a0a;
+	border: 2px solid var(--black);
+	box-shadow:
+		inset 0 2px 6px rgba(0, 0, 0, 0.9),
+		inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+	font-family: "DSEG7Classic", monospace;
+	font-size: 2.2rem;
+	font-weight: bold;
+	color: var(--orange);
+	text-shadow:
+		0 0 10px rgba(243, 55, 14, 0.7),
+		0 0 20px rgba(243, 55, 14, 0.4),
+		0 0 30px rgba(243, 55, 14, 0.2);
+	line-height: 1;
+}
+
+.stat-digit::before {
+	content: "8";
+	position: absolute;
+	color: rgba(243, 55, 14, 0.1);
+	text-shadow: none;
+}
+
+/* ============================================
+   Actions & Search
+   ============================================ */
+
+.admin-actions {
+	display: flex;
+	gap: 1rem;
+	margin-bottom: 1.5rem;
+	flex-wrap: wrap;
+}
+
+.admin-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 12px 20px;
+	background: var(--beige);
+	border: 3px solid var(--black);
+	box-shadow: 4px 4px 0 var(--black);
+	color: var(--black);
+	font-family: var(--font-block);
+	font-size: 0.8rem;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	text-decoration: none;
+	cursor: pointer;
+	transition:
+		transform 0.1s,
+		box-shadow 0.1s;
+}
+
+.admin-btn:hover:not(:disabled) {
+	transform: translate(2px, 2px);
+	box-shadow: 2px 2px 0 var(--black);
+}
+
+.admin-btn:active:not(:disabled) {
+	transform: translate(4px, 4px);
+	box-shadow: none;
+}
+
+.admin-btn:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+	box-shadow: none;
+}
+
+.admin-btn.primary {
+	background: var(--orange);
+	color: var(--white);
+}
+
+.admin-search {
+	margin-bottom: 1.5rem;
+}
+
+.admin-search-input {
+	width: 100%;
+	max-width: 400px;
+	padding: 12px 16px;
+	font-family: var(--font-block);
+	font-size: 0.85rem;
+	background: var(--white);
+	border: 3px solid var(--black);
+	color: var(--black);
+	outline: none;
+}
+
+.admin-search-input::placeholder {
+	color: #888;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+
+.admin-search-input:focus {
+	border-color: var(--orange);
+}
+
+/* ============================================
+   Table Container
+   ============================================ */
+
+.admin-table-container {
+	background: var(--white);
+	border: 4px solid var(--black);
+	overflow: hidden;
+	margin-bottom: 1.5rem;
+}
+
+.admin-table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.admin-table th,
+.admin-table td {
+	padding: 1rem;
+	text-align: left;
+	border-bottom: 2px solid var(--black);
+	vertical-align: middle;
+	color: var(--black);
+}
+
+.admin-table th {
+	background: var(--black);
+	font-family: var(--font-block);
+	font-size: 0.7rem;
+	text-transform: uppercase;
+	letter-spacing: 0.1em;
+	color: var(--yellow);
+}
+
+.admin-table tr:hover {
+	background: rgba(255, 174, 0, 0.1);
+}
+
+.admin-table tr:last-child td {
+	border-bottom: none;
+}
+
+/* Numeric columns - 7-segment style */
+.admin-table .numeric {
+	font-family: "DSEG7Classic", monospace;
+	font-size: 1rem;
+	color: var(--orange);
+}
+
+/* ============================================
+   User Cell
+   ============================================ */
+
+.user-cell {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+}
+
+.user-avatar {
+	width: 2.5rem;
+	height: 2.5rem;
+	border-radius: 50%;
+	object-fit: cover;
+	border: 3px solid var(--orange);
+	background: var(--beige);
+	flex-shrink: 0;
+}
+
+.user-info {
+	display: flex;
+	flex-direction: column;
+}
+
+.user-name {
+	font-weight: 600;
+	color: var(--black);
+}
+
+.user-username {
+	font-size: 0.85rem;
+	color: #666;
+}
+
+/* ============================================
+   Status Badges
+   ============================================ */
+
+.status-badge {
+	display: inline-flex;
+	padding: 6px 12px;
+	font-family: var(--font-block);
+	font-size: 0.65rem;
+	font-weight: 500;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+
+.status-badge.locked {
+	background: var(--yellow);
+	color: var(--black);
+	border: 2px solid var(--black);
+}
+
+.status-badge.unlocked {
+	background: transparent;
+	border: 2px solid var(--orange);
+	color: var(--orange);
+}
+
+/* ============================================
+   Action Buttons
+   ============================================ */
+
+.actions-cell {
+	vertical-align: middle;
+}
+
+.actions-cell > * {
+	display: inline-flex;
+	vertical-align: middle;
+	margin-right: 0.75rem;
+}
+
+.actions-cell > *:last-child {
+	margin-right: 0;
+}
+
+.view-bracket-link {
+	color: var(--black);
+	text-decoration: none;
+	font-family: var(--font-block);
+	font-size: 0.7rem;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	padding: 6px 12px;
+	background: var(--beige);
+	border: 2px solid var(--black);
+	transition:
+		transform 0.1s,
+		box-shadow 0.1s;
+	box-shadow: 2px 2px 0 var(--black);
+}
+
+.view-bracket-link:hover {
+	transform: translate(1px, 1px);
+	box-shadow: 1px 1px 0 var(--black);
+}
+
+.unlock-btn {
+	padding: 6px 12px;
+	background: transparent;
+	border: 2px solid var(--orange);
+	color: var(--orange);
+	font-family: var(--font-block);
+	font-size: 0.65rem;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	cursor: pointer;
+	transition:
+		background 0.2s,
+		color 0.2s;
+}
+
+.unlock-btn:hover:not(:disabled) {
+	background: var(--orange);
+	color: var(--white);
+}
+
+.unlock-btn:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+/* ============================================
+   Messages
+   ============================================ */
+
+.admin-message {
+	padding: 1rem 1.25rem;
+	margin-bottom: 1.5rem;
+	font-family: var(--font-block);
+	font-size: 0.85rem;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+
+.admin-message.success {
+	background: var(--yellow);
+	color: var(--black);
+	border: 3px solid var(--black);
+}
+
+.admin-message.error {
+	background: var(--orange);
+	color: var(--white);
+	border: 3px solid var(--black);
+}
+
+/* ============================================
+   Loading & Empty States
+   ============================================ */
+
+.loading-spinner {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 4rem;
+	font-family: var(--font-block);
+	color: var(--black);
+	text-transform: uppercase;
+	letter-spacing: 0.1em;
+}
+
+.admin-table.loading {
+	opacity: 0.6;
+	pointer-events: none;
+}
+
+.no-results {
+	text-align: center;
+	padding: 2rem;
+	font-family: var(--font-block);
+	color: #888;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+
+/* ============================================
+   Pagination
+   ============================================ */
+
+.admin-pagination {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 1rem;
+}
+
+.pagination-btn {
+	padding: 10px 16px;
+	background: var(--beige);
+	border: 3px solid var(--black);
+	box-shadow: 3px 3px 0 var(--black);
+	color: var(--black);
+	font-family: var(--font-block);
+	font-size: 0.75rem;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	cursor: pointer;
+	transition:
+		transform 0.1s,
+		box-shadow 0.1s;
+}
+
+.pagination-btn:hover:not(:disabled) {
+	transform: translate(1px, 1px);
+	box-shadow: 2px 2px 0 var(--black);
+}
+
+.pagination-btn:active:not(:disabled) {
+	transform: translate(3px, 3px);
+	box-shadow: none;
+}
+
+.pagination-btn:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+	box-shadow: none;
+}
+
+.pagination-info {
+	font-family: var(--font-block);
+	font-size: 0.75rem;
+	color: var(--black);
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+
+/* ============================================
+   Responsive
+   ============================================ */
+
+@media (max-width: 768px) {
+	.admin-page {
+		padding: 1rem;
+	}
+
+	.admin-container {
+		padding: 24px 16px 32px;
+	}
+
+	.admin-header h1 {
+		font-size: 1.5rem;
+	}
+
+	.stat-card .stat-value {
+		font-size: 2rem;
+	}
+
+	.admin-table th,
+	.admin-table td {
+		padding: 0.75rem 0.5rem;
+		font-size: 0.85rem;
+	}
+
+	/* Hide some columns on mobile */
+	.admin-table th:nth-child(5),
+	.admin-table td:nth-child(5) {
+		display: none;
+	}
+}
+
+@media (max-width: 480px) {
+	.admin-stats {
+		flex-direction: column;
+	}
+
+	.stat-card {
+		min-width: 100%;
+	}
+
+	.admin-search-input {
+		max-width: 100%;
+	}
+
+	.pagination-btn {
+		padding: 8px 12px;
+		font-size: 0.7rem;
+	}
+}

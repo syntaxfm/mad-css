@@ -1,0 +1,117 @@
+.admin-button-container {
+	position: fixed;
+	bottom: 1rem;
+	left: 1rem;
+	z-index: 1000;
+}
+
+.admin-button {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.5rem 1rem;
+	background: var(--yellow);
+	border: 3px solid var(--black);
+	box-shadow: 4px 4px 0 var(--black);
+	color: var(--black);
+	font-family: var(--font-block);
+	font-size: 0.875rem;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	text-decoration: none;
+	cursor: pointer;
+	transition:
+		transform 0.1s,
+		box-shadow 0.1s;
+}
+
+.admin-button:hover {
+	transform: translate(2px, 2px);
+	box-shadow: 2px 2px 0 var(--black);
+}
+
+.admin-button:active {
+	transform: translate(4px, 4px);
+	box-shadow: none;
+}
+
+.admin-button svg {
+	width: 1rem;
+	height: 1rem;
+}
+
+.admin-popover {
+	position: absolute;
+	bottom: 100%;
+	left: 0;
+	margin-bottom: 0.5rem;
+	min-width: 200px;
+	background: var(--beige);
+	border: 3px solid var(--black);
+	box-shadow: 4px 4px 0 var(--black);
+	padding: 0.75rem;
+}
+
+.admin-popover-link {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.5rem 0.75rem;
+	background: var(--yellow);
+	border: 2px solid var(--black);
+	color: var(--black);
+	font-family: var(--font-block);
+	font-size: 0.75rem;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	text-decoration: none;
+	transition:
+		transform 0.1s,
+		box-shadow 0.1s;
+	box-shadow: 2px 2px 0 var(--black);
+}
+
+.admin-popover-link:hover {
+	transform: translate(1px, 1px);
+	box-shadow: 1px 1px 0 var(--black);
+}
+
+.admin-popover-link svg {
+	width: 0.875rem;
+	height: 0.875rem;
+}
+
+.admin-popover-divider {
+	height: 2px;
+	background: var(--black);
+	margin: 0.75rem 0;
+}
+
+.admin-popover-section {
+	display: flex;
+	flex-direction: column;
+	gap: 0.375rem;
+}
+
+.admin-popover-label {
+	font-family: var(--font-block);
+	font-size: 0.625rem;
+	text-transform: uppercase;
+	letter-spacing: 0.1em;
+	color: var(--black);
+}
+
+.admin-popover-select {
+	padding: 0.5rem;
+	background: var(--white);
+	border: 2px solid var(--black);
+	font-family: var(--font-sans);
+	font-size: 0.75rem;
+	color: var(--black);
+	cursor: pointer;
+}
+
+.admin-popover-select:focus {
+	outline: 2px solid var(--orange);
+	outline-offset: 1px;
+}

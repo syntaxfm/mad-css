@@ -1,93 +1,619 @@
-.bracket-cta {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	gap: 20px;
-	padding: 20px 30px;
-	margin: 0 auto 20px;
-	max-width: 700px;
-	background: rgba(0, 0, 0, 0.4);
-	border: 2px solid var(--yellow);
-	border-radius: 8px;
-}
+/* ============================================
+   BRACKET CTA - Tournament Control Panel
+   ============================================ */
 
-.bracket-cta.logged-in {
-	background: rgba(0, 0, 0, 0.3);
-	border-color: rgba(255, 255, 255, 0.2);
+.bracket-cta {
+	max-width: 600px;
+	margin: 0 auto 24px;
+	padding: 40px 30px 50px;
+	background: linear-gradient(
+		135deg,
+		rgba(0, 0, 0, 0.85) 0%,
+		rgba(20, 20, 20, 0.9) 100%
+	);
+	border: 3px solid var(--yellow);
+	border-radius: 4px;
+	box-shadow:
+		0 0 0 1px rgba(0, 0, 0, 0.5),
+		0 8px 32px rgba(0, 0, 0, 0.4),
+		inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 .login-loading {
-	opacity: 0.5;
+	text-align: center;
+	opacity: 0.6;
+	padding: 20px;
 }
 
-.cta-text {
-	flex: 1;
+/* ============================================
+   Logged Out State - Sign In CTA (Rules card style)
+   ============================================ */
+
+.bracket-cta:not(.logged-in) {
+	text-align: center;
+	background: var(--beige);
+	border: none;
+	border-radius: 15px;
+	box-shadow: none;
+	mask-image:
+		url("./assets/paper/repeating-paper-top.png"),
+		url("./assets/paper/repeating-paper-bottom.png"),
+		linear-gradient(black, black);
+	mask-size:
+		auto 23px,
+		auto 40px,
+		100% 100%;
+	mask-position:
+		center 0px,
+		center calc(100% + 15px),
+		center;
+	mask-repeat: repeat-x, repeat-x, no-repeat;
+	mask-composite: exclude;
+	mask-mode: alpha;
 }
 
 .cta-headline {
-	font-size: 1.4rem;
-	text-transform: uppercase;
-	color: var(--yellow);
-	margin-bottom: 4px;
+	font-family: var(--font-serif);
+	font-size: 2rem;
+	text-transform: none;
+	color: var(--orange);
+	margin-bottom: 8px;
+	letter-spacing: 0;
+	font-style: italic;
 }
 
 .cta-sub {
-	font-size: 0.9rem;
-	opacity: 0.9;
-	line-height: 1.4;
-}
-
-.cta-welcome {
-	font-size: 1rem;
-	margin-bottom: 2px;
-}
-
-.btn-github {
-	display: inline-flex;
-	align-items: center;
-	gap: 8px;
-	padding: 12px 20px;
-	background: var(--yellow);
+	font-size: 0.95rem;
+	line-height: 1.5;
 	color: var(--black);
-	font-family: var(--font-block);
-	font-size: 0.9rem;
-	text-transform: uppercase;
-	border: none;
-	border-radius: 5px;
-	cursor: pointer;
-	transition:
-		transform 0.15s ease,
-		background 0.15s ease;
-	white-space: nowrap;
+	margin-bottom: 20px;
 }
 
-.btn-github:hover {
-	background: #ffbe2e;
-	transform: translateY(-1px);
+.cta-sub strong {
+	color: var(--orange);
+}
+
+/* Scoreboard in logged-out state - centered */
+.bracket-cta:not(.logged-in) .scoreboard {
+	margin-bottom: 20px;
 }
 
 .github-icon {
-	width: 20px;
-	height: 20px;
+	width: 22px;
+	height: 22px;
 }
 
-.btn-link {
-	background: none;
+/* ============================================
+   Logged In State - Control Panel (Same card style)
+   ============================================ */
+
+.bracket-cta.logged-in {
+	background: var(--beige);
 	border: none;
-	color: var(--white);
-	text-decoration: underline;
-	cursor: pointer;
-	font-size: 0.85rem;
-	opacity: 0.7;
+	border-radius: 15px;
+	box-shadow: none;
+	mask-image:
+		url("./assets/paper/repeating-paper-top.png"),
+		url("./assets/paper/repeating-paper-bottom.png"),
+		linear-gradient(black, black);
+	mask-size:
+		auto 23px,
+		auto 40px,
+		100% 100%;
+	mask-position:
+		center 0px,
+		center calc(100% + 15px),
+		center;
+	mask-repeat: repeat-x, repeat-x, no-repeat;
+	mask-composite: exclude;
+	mask-mode: alpha;
 }
 
-.btn-link:hover {
-	opacity: 1;
+/* Header row: avatar + name + sign out */
+.cta-header {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin-bottom: 20px;
+	padding-bottom: 16px;
+	border-bottom: 2px solid var(--black);
 }
 
 .user-avatar {
-	width: 40px;
-	height: 40px;
+	width: 44px;
+	height: 44px;
 	border-radius: 50%;
-	border: 2px solid var(--yellow);
+	border: 3px solid var(--orange);
+	flex-shrink: 0;
+}
+
+.cta-welcome {
+	flex: 1;
+	font-size: 1.1rem;
+	font-weight: 500;
+	margin: 0;
+	color: var(--black);
+}
+
+.cta-welcome strong {
+	color: var(--orange);
+}
+
+/* Progress section */
+.cta-progress {
+	background: rgba(0, 0, 0, 0.08);
+	border-radius: 0;
+	padding: 16px;
+	margin-bottom: 16px;
+	border: 2px solid var(--black);
+}
+
+.progress-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.progress-count {
+	font-family: var(--font-block);
+	font-size: 1.3rem;
+	color: var(--orange);
+	letter-spacing: 0.05em;
+}
+
+.progress-count span {
+	color: var(--black);
+	opacity: 0.6;
+	font-size: 0.9rem;
+}
+
+/* ============================================
+   Retro Basketball Scoreboard
+   ============================================ */
+
+@font-face {
+	font-family: "DSEG7Classic";
+	src: url("/fonts/DSEG7Classic-Bold.woff2") format("woff2");
+	font-weight: bold;
+	font-style: normal;
+	font-display: swap;
+}
+
+.scoreboard {
+	--scoreboard-board: var(--yellow);
+	--scoreboard-digit-bg: #0a0a0a;
+	--scoreboard-digit-color: var(--orange);
+}
+
+.scoreboard-frame {
+	position: relative;
+	background: var(--scoreboard-board);
+	border: 4px solid var(--black);
+	padding: 20px 24px 16px;
+}
+
+/* Corner bolts */
+.scoreboard-rivet {
+	position: absolute;
+	width: 12px;
+	height: 12px;
+	background: radial-gradient(circle at 30% 30%, #666 0%, #333 50%, #111 100%);
+	border: 2px solid #000;
+	border-radius: 50%;
+	box-shadow:
+		inset 0 1px 2px rgba(255, 255, 255, 0.4),
+		0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Bolt cross/slot detail */
+.scoreboard-rivet::after {
+	content: "";
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 8px;
+	height: 2px;
+	background: #111;
+	transform: translate(-50%, -50%);
+	box-shadow: 0 0 0 0.5px rgba(255, 255, 255, 0.1);
+}
+
+.scoreboard-rivet--tl {
+	top: 8px;
+	left: 8px;
+}
+
+.scoreboard-rivet--tr {
+	top: 8px;
+	right: 8px;
+}
+
+.scoreboard-rivet--bl {
+	bottom: 8px;
+	left: 8px;
+}
+
+.scoreboard-rivet--br {
+	bottom: 8px;
+	right: 8px;
+}
+
+.scoreboard-display {
+	display: flex;
+	align-items: flex-start;
+	justify-content: center;
+	gap: 4px;
+}
+
+.scoreboard-unit {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 4px;
+}
+
+.scoreboard-digits {
+	display: flex;
+	gap: 3px;
+}
+
+.scoreboard-digit {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 30px;
+	height: 44px;
+	background: var(--scoreboard-digit-bg);
+	border: 2px solid var(--black);
+	box-shadow:
+		inset 0 2px 6px rgba(0, 0, 0, 0.9),
+		inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+	font-family: "DSEG7Classic", monospace;
+	font-size: 1.9rem;
+	font-weight: bold;
+	color: var(--scoreboard-digit-color);
+	text-shadow:
+		0 0 10px rgba(243, 55, 14, 0.7),
+		0 0 20px rgba(243, 55, 14, 0.4),
+		0 0 30px rgba(243, 55, 14, 0.2);
+	line-height: 1;
+}
+
+/* Inactive segments - shows "8" outline */
+.scoreboard-digit::before {
+	content: "8";
+	position: absolute;
+	color: rgba(243, 55, 14, 0.1);
+	text-shadow: none;
+}
+
+.scoreboard-label {
+	font-family: var(--font-block);
+	font-size: 0.6rem;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	color: var(--black);
+}
+
+/* Separator dots */
+.scoreboard-separator {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	height: 44px;
+	padding: 0 6px;
+}
+
+.separator-dot {
+	width: 6px;
+	height: 6px;
+	background: var(--black);
+	border-radius: 50%;
+}
+
+/* Scanlines - hidden for paper style */
+.scoreboard-scanlines {
+	display: none;
+}
+
+/* Urgent state (< 24 hours) */
+.scoreboard--urgent .scoreboard-digit {
+	animation: urgent-pulse 1s ease-in-out infinite;
+}
+
+@keyframes urgent-pulse {
+	0%,
+	100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.6;
+	}
+}
+
+/* Logged-in state: smaller scoreboard in progress header */
+.cta-progress .scoreboard {
+	transform: scale(0.75);
+	transform-origin: right center;
+	margin: -8px -8px -8px 0;
+}
+
+.cta-progress .scoreboard-frame {
+	padding: 12px 16px 8px;
+}
+
+.progress-bar {
+	height: 8px;
+	background: rgba(255, 255, 255, 0.1);
+	border-radius: 4px;
+	overflow: hidden;
+}
+
+.progress-bar-fill {
+	height: 100%;
+	background: linear-gradient(90deg, var(--orange) 0%, var(--yellow) 100%);
+	border-radius: 4px;
+	transition: width 0.4s ease;
+}
+
+/* Status badges */
+.cta-status {
+	text-align: center;
+	padding: 12px;
+	border-radius: 0;
+	margin-bottom: 16px;
+	font-family: var(--font-block);
+	font-size: 0.9rem;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+
+.cta-status.locked {
+	background: transparent;
+	border: none;
+	color: var(--orange);
+	font-size: 1rem;
+}
+
+/* Next results countdown */
+.cta-next-results {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 16px;
+	padding: 12px;
+}
+
+.next-results-label {
+	font-family: var(--font-block);
+	font-size: 0.85rem;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	color: var(--black);
+}
+
+/* Toggle button for showing picks vs results */
+.cta-status.deadline-passed {
+	background: var(--orange);
+	border: 3px solid var(--black);
+	color: var(--white);
+}
+
+/* Instructions */
+.cta-instructions {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 12px 14px;
+	background: rgba(0, 0, 0, 0.05);
+	border: 2px solid var(--black);
+	border-radius: 0;
+	margin-bottom: 20px;
+	font-size: 0.85rem;
+	color: var(--black);
+}
+
+.cta-instructions svg {
+	flex-shrink: 0;
+	color: var(--orange);
+}
+
+/* Lock confirmation modal */
+.lock-modal {
+	border: 4px solid var(--black);
+	box-shadow: 8px 8px 0 var(--black);
+	background: var(--beige);
+	padding: 0;
+	max-width: 400px;
+	width: calc(100% - 40px);
+	text-align: center;
+
+	&::backdrop {
+		background: rgba(0, 0, 0, 0.6);
+	}
+
+	&[open] {
+		display: flex;
+	}
+}
+
+.lock-modal-content {
+	padding: 32px 28px;
+	width: 100%;
+
+	p {
+		font-family: var(--font-block);
+		font-size: 1.1rem;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		color: var(--black);
+		margin: 0;
+	}
+}
+
+.lock-modal-sub {
+	font-size: 0.85rem !important;
+	opacity: 0.6;
+	margin-top: 6px !important;
+}
+
+.lock-modal-buttons {
+	display: flex;
+	gap: 10px;
+	justify-content: center;
+	margin-top: 24px;
+}
+
+/* Error message */
+.cta-error {
+	margin-top: 12px;
+	padding: 10px 14px;
+	background: var(--orange);
+	border: 3px solid var(--black);
+	border-radius: 0;
+	color: var(--white);
+	font-size: 0.85rem;
+	text-align: center;
+	font-family: var(--font-block);
+	text-transform: uppercase;
+}
+
+/* ============================================
+   Share Section (when bracket is locked)
+   ============================================ */
+
+.cta-share {
+	margin-top: 16px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	align-content: center;
+	gap: 10px;
+}
+
+.cta-share-label {
+	font-family: var(--font-block);
+	font-size: 0.85rem;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	color: var(--white);
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	justify-content: center;
+	width: fit-content;
+}
+
+.cta-share-actions {
+	display: flex;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
+.btn-share {
+	flex: 1;
+}
+
+.btn-share--copy.copied {
+	background: var(--black);
+	color: var(--yellow);
+	border-color: var(--yellow);
+}
+
+.btn-share--bluesky {
+	background: var(--bluesky);
+	color: var(--white);
+}
+
+.share-icon {
+	width: 16px;
+	height: 16px;
+	flex-shrink: 0;
+}
+
+/* ============================================
+   Responsive
+   ============================================ */
+
+@media (max-width: 600px) {
+	/* Scoreboard responsive - scale down */
+	.scoreboard-digit {
+		width: 24px;
+		height: 36px;
+		font-size: 1.5rem;
+	}
+
+	.scoreboard-separator {
+		height: 36px;
+		gap: 8px;
+		padding: 0 4px;
+	}
+
+	.separator-dot {
+		width: 5px;
+		height: 5px;
+	}
+
+	.scoreboard-frame {
+		padding: 16px 18px 12px;
+	}
+
+	.scoreboard-label {
+		font-size: 0.5rem;
+	}
+
+	.scoreboard-rivet {
+		width: 10px;
+		height: 10px;
+	}
+
+	/* Progress header layout stacks on mobile */
+	.progress-header {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 12px;
+	}
+
+	.cta-progress .scoreboard {
+		transform: none;
+		margin: 0;
+		width: 100%;
+	}
+
+	.cta-progress .scoreboard-display {
+		justify-content: space-between;
+	}
+}
+
+@media (max-width: 480px) {
+	.bracket-cta {
+		margin-left: 12px;
+		margin-right: 12px;
+		padding: 18px;
+	}
+
+	/* Even smaller scoreboard for very narrow screens */
+	.scoreboard-digit {
+		width: 18px;
+		height: 28px;
+		font-size: 1.1rem;
+	}
+
+	.scoreboard-separator {
+		height: 28px;
+		gap: 4px;
+	}
+
+	.separator-dot {
+		width: 4px;
+		height: 4px;
+	}
+
+	.scoreboard-frame {
+		padding: 10px 12px 8px;
+	}
 }
