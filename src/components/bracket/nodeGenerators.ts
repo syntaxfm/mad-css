@@ -253,7 +253,7 @@ export function generateQuarterNodes({
 
 		let player1: Player | undefined;
 		let player2: Player | undefined;
-		if (ctx.showPicks || (ctx.isInteractive && !ctx.isLocked)) {
+		if (ctx.showPicks) {
 			const pickablePlayers = ctx.pickablePlayersCache[game.id];
 			player1 = pickablePlayers[0]
 				? players.find((p) => p.id === pickablePlayers[0])
@@ -321,7 +321,7 @@ export function generateSemiNodes({
 
 		let player1: Player | undefined;
 		let player2: Player | undefined;
-		if (ctx.showPicks || (ctx.isInteractive && !ctx.isLocked)) {
+		if (ctx.showPicks) {
 			const pickablePlayers = ctx.pickablePlayersCache[game.id];
 			player1 = pickablePlayers[0]
 				? players.find((p) => p.id === pickablePlayers[0])
@@ -384,7 +384,7 @@ export function generateFinalistNode({
 	let finalist: Player | undefined;
 	const sfGameId = side === "left" ? "sf-0" : "sf-1";
 
-	if (ctx.showPicks || (ctx.isInteractive && !ctx.isLocked)) {
+	if (ctx.showPicks) {
 		const finalistId = ctx.predictions[sfGameId];
 		finalist = finalistId
 			? players.find((p) => p.id === finalistId)
@@ -428,7 +428,7 @@ export function generateChampionshipNode(ctx: NodeContext): Node {
 	const finalGame = bracket.finals[0];
 
 	let champion: Player | undefined;
-	if (ctx.showPicks || (ctx.isInteractive && !ctx.isLocked)) {
+	if (ctx.showPicks) {
 		const championId = ctx.predictions.final;
 		champion = championId
 			? players.find((p) => p.id === championId)

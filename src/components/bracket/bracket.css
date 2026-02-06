@@ -368,7 +368,66 @@
 }
 
 .bracket-edge--pending {
-	filter: brightness(0.2) !important;
+	filter: brightness(0.5) !important;
+}
+
+/* Standings mode: disable animations and brightness filters */
+.bracket-container--standings .bracket-edge--pickable,
+.bracket-container--standings .bracket-edge--hover-pick,
+.bracket-container--standings .bracket-edge--hover-competitor {
+	animation: none;
+}
+
+.bracket-container--standings .bracket-edge--pending {
+	filter: none !important;
+}
+
+.bracket-container--standings .react-flow__node {
+	filter: none !important;
+}
+
+/* Bracket Toggle */
+.bracket-toggle {
+	display: flex;
+	justify-content: center;
+	gap: 0;
+	margin-bottom: 16px;
+}
+
+.bracket-toggle__btn {
+	font-family: var(--font-block);
+	font-size: 0.875rem;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	padding: 10px 24px;
+	border: 3px solid var(--black);
+	background: transparent;
+	color: var(--black);
+	cursor: pointer;
+	transition:
+		background 0.15s,
+		color 0.15s,
+		box-shadow 0.15s,
+		transform 0.1s;
+}
+
+.bracket-toggle__btn:first-child {
+	border-right: none;
+}
+
+.bracket-toggle__btn--active {
+	background: var(--yellow);
+	color: var(--black);
+	box-shadow: 4px 4px 0 var(--black);
+	cursor: default;
+}
+
+.bracket-toggle__btn:not(.bracket-toggle__btn--active):hover {
+	background: var(--beige);
+}
+
+.bracket-toggle__btn:not(.bracket-toggle__btn--active):active {
+	transform: translate(2px, 2px);
 }
 
 /* React Flow Container */

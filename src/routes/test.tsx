@@ -85,6 +85,7 @@ function TestPage() {
 						isAuthenticated={isAuthenticated}
 						tournamentResults={tournamentResults}
 						showPicks={showPicks}
+						onToggleShowPicks={() => setShowPicks(!showPicks)}
 					/>
 				</div>
 			</PredictionsProvider>

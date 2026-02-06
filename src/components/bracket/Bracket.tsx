@@ -33,6 +33,36 @@ export interface BracketProps {
 	getPickablePlayers?: (gameId: string) => string[];
 	tournamentResults?: Record<string, string>;
 	showPicks?: boolean;
+	onToggleShowPicks?: () => void;
+}
+
+function BracketToggle({
+	showPicks,
+	onToggle,
+}: {
+	showPicks: boolean;
+	onToggle: () => void;
+}) {
+	return (
+		<div className="bracket-toggle">
+			<button
+				type="button"
+				className={`bracket-toggle__btn${!showPicks ? " bracket-toggle__btn--active" : ""}`}
+				onClick={showPicks ? onToggle : undefined}
+				aria-pressed={!showPicks}
+			>
+				CURRENT STANDINGS
+			</button>
+			<button
+				type="button"
+				className={`bracket-toggle__btn${showPicks ? " bracket-toggle__btn--active" : ""}`}
+				onClick={!showPicks ? onToggle : undefined}
+				aria-pressed={showPicks}
+			>
+				MY PICKS
+			</button>
+		</div>
+	);
 }
 
 export type EdgeState = "winner" | "loser" | "pending" | "pickable" | "default";
@@ -198,6 +228,46 @@ const edgeStyle: React.CSSProperties = {
 	strokeWidth: 3,
 	filter: "drop-shadow(0px 0px 7px black)",
 };
+
+const EDGE_SOURCE_MAP: Map<string, string[]> = (() => {
+	const map = new Map<string, string[]>();
+	function add(source: string, target: string) {
+		const existing = map.get(target);
+		if (existing) {
+			existing.push(source);
+		} else {
+			map.set(target, [source]);
+		}
+	}
+	const r1 = splitForDisplay(bracket.round1);
+	const qf = splitForDisplay(bracket.quarters);
+	const sf = splitForDisplay(bracket.semis);
+
+	for (const [side, r1Games, qfGames, sfGames] of [
+		["left", r1.left, qf.left, sf.left],
+		["right", r1.right, qf.right, sf.right],
+	] as const) {
+		r1Games.forEach((game, i) => {
+			const qfGame = qfGames[Math.floor(i / 2)];
+			const target = `${qfGame.id}-p${(i % 2) + 1}`;
+			add(`${game.id}-p1`, target);
+			add(`${game.id}-p2`, target);
+		});
+		qfGames.forEach((game, i) => {
+			const semiGame = sfGames[0];
+			const target = `${semiGame.id}-p${i + 1}`;
+			add(`${game.id}-p1`, target);
+			add(`${game.id}-p2`, target);
+		});
+		sfGames.forEach((game) => {
+			const target = `${side}-finalist`;
+			add(`${game.id}-p1`, target);
+			add(`${game.id}-p2`, target);
+		});
+		add(`${side}-finalist`, "championship");
+	}
+	return map;
+})();
 
 function parseSourceNodeId(sourceNodeId: string): {
 	gameId: string;
@@ -534,6 +604,7 @@ function BracketContent({
 	isAuthenticated = false,
 	tournamentResults = {},
 	showPicks = false,
+	onToggleShowPicks,
 }: BracketProps) {
 	const ctx = usePredictionsContext();
 
@@ -583,32 +654,27 @@ function BracketContent({
 	);
 
 	const styledNodes = useMemo(() => {
-		const emptySlotIds = new Set(
-			nodes.filter((n) => n.type === "emptySlot").map((n) => n.id),
-		);
+		const nodeTypeMap = new Map(nodes.map((n) => [n.id, n.type]));
 		const pickableSlots = new Set<string>();
-		for (const slotId of emptySlotIds) {
-			const feedingEdges = edges.filter((e) => e.target === slotId);
-			const allPlayerSources =
-				feedingEdges.length >= 2 &&
-				feedingEdges.every((e) => {
-					const src = nodes.find((n) => n.id === e.source);
-					return src?.type === "playerNode";
-				});
-			if (allPlayerSources) {
-				pickableSlots.add(slotId);
+		for (const [targetId, sourceIds] of EDGE_SOURCE_MAP) {
+			if (
+				nodeTypeMap.get(targetId) === "emptySlot" &&
+				sourceIds.length >= 2 &&
+				sourceIds.every((id) => nodeTypeMap.get(id) === "playerNode")
+			) {
+				pickableSlots.add(targetId);
 			}
 		}
 		return nodes.map((node) => {
 			if (node.type === "emptySlot" && !pickableSlots.has(node.id)) {
 				return {
 					...node,
-					style: { ...node.style, filter: "brightness(0.2)" },
+					style: { ...node.style, filter: "brightness(0.5)" },
 				};
 			}
 			return node;
 		});
-	}, [nodes, edges]);
+	}, [nodes]);
 	const containerRef = useRef<HTMLDivElement>(null);
 	const [containerHeight, setContainerHeight] = useState<number | null>(null);
 	const rfInstanceRef = useRef<ReactFlowInstance | null>(null);
@@ -681,67 +747,77 @@ function BracketContent({
 	}, [containerHeight]);
 
 	return (
-		// biome-ignore lint/a11y/noStaticElementInteractions: mouse events for scroll/zoom unlock UX
-		<div
-			ref={containerRef}
-			className="bracket-container"
-			style={containerHeight ? { height: containerHeight } : undefined}
-			onMouseEnter={handleMouseEnter}
-			onMouseLeave={handleMouseLeave}
-		>
-			<ReactFlow
-				nodes={styledNodes}
-				edges={edges}
-				nodeTypes={nodeTypes}
-				edgeTypes={edgeTypes}
-				defaultEdgeOptions={defaultEdgeOptions}
-				minZoom={0.1}
-				maxZoom={1.5}
-				nodesDraggable={false}
-				nodesConnectable={false}
-				elementsSelectable={false}
-				zoomOnScroll={!scrollZoomLocked}
-				preventScrolling={!scrollZoomLocked}
-				fitView
-				fitViewOptions={{ padding: FIT_VIEW_PADDING }}
-				onInit={handleInit}
-				onNodeMouseEnter={(_event, node) => {
-					if (node.type === "emptySlot") {
-						setHoveredNodeId(node.id);
-						setHoveredNodeType("empty");
-						return;
-					}
-					const data = node.data as {
-						prediction?: { interactionMode?: string };
-					};
-					if (data.prediction?.interactionMode === "pickable") {
-						setHoveredNodeId(node.id);
-						setHoveredNodeType("player");
-					}
-				}}
-				onNodeMouseLeave={() => {
-					setHoveredNodeId(null);
-					setHoveredNodeType(null);
-				}}
-				onNodeClick={(_event, node) => {
-					const data = node.data as {
-						isPickable?: boolean;
-						gameId?: string;
-						playerId?: string;
-						onPick?: (gameId: string, playerId: string) => void;
-					};
-					if (data.isPickable && data.onPick && data.gameId && data.playerId) {
-						data.onPick(data.gameId, data.playerId);
-					}
-				}}
+		<>
+			{onToggleShowPicks && (
+				<BracketToggle showPicks={showPicks} onToggle={onToggleShowPicks} />
+			)}
+			{/* biome-ignore lint/a11y/noStaticElementInteractions: mouse events for scroll/zoom unlock UX */}
+			<div
+				ref={containerRef}
+				className={`bracket-container${!showPicks ? " bracket-container--standings" : ""}`}
+				style={containerHeight ? { height: containerHeight } : undefined}
+				onMouseEnter={handleMouseEnter}
+				onMouseLeave={handleMouseLeave}
 			>
-				<Controls
-					className="bracket-controls"
-					orientation="horizontal"
-					showInteractive={false}
-				/>
-			</ReactFlow>
-		</div>
+				<ReactFlow
+					nodes={styledNodes}
+					edges={edges}
+					nodeTypes={nodeTypes}
+					edgeTypes={edgeTypes}
+					defaultEdgeOptions={defaultEdgeOptions}
+					minZoom={0.1}
+					maxZoom={1.5}
+					nodesDraggable={false}
+					nodesConnectable={false}
+					elementsSelectable={false}
+					zoomOnScroll={!scrollZoomLocked}
+					preventScrolling={!scrollZoomLocked}
+					fitView
+					fitViewOptions={{ padding: FIT_VIEW_PADDING }}
+					onInit={handleInit}
+					onNodeMouseEnter={(_event, node) => {
+						if (node.type === "emptySlot") {
+							setHoveredNodeId(node.id);
+							setHoveredNodeType("empty");
+							return;
+						}
+						const data = node.data as {
+							prediction?: { interactionMode?: string };
+						};
+						if (data.prediction?.interactionMode === "pickable") {
+							setHoveredNodeId(node.id);
+							setHoveredNodeType("player");
+						}
+					}}
+					onNodeMouseLeave={() => {
+						setHoveredNodeId(null);
+						setHoveredNodeType(null);
+					}}
+					onNodeClick={(_event, node) => {
+						const data = node.data as {
+							isPickable?: boolean;
+							gameId?: string;
+							playerId?: string;
+							onPick?: (gameId: string, playerId: string) => void;
+						};
+						if (
+							data.isPickable &&
+							data.onPick &&
+							data.gameId &&
+							data.playerId
+						) {
+							data.onPick(data.gameId, data.playerId);
+						}
+					}}
+				>
+					<Controls
+						className="bracket-controls"
+						orientation="horizontal"
+						showInteractive={false}
+					/>
+				</ReactFlow>
+			</div>
+		</>
 	);
 }
 
