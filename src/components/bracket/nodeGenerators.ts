@@ -1,7 +1,6 @@
 import type { Node } from "@xyflow/react";
 import {
 	bracket,
-	FEEDER_GAMES,
 	type Game,
 	isLoser,
 	isWinner,
@@ -19,29 +18,6 @@ import {
 	ROUND_GAP,
 } from "./bracketTypes";
 import type { InteractionMode, PickState, PredictionState } from "./PlayerNode";
-
-// Node is large if its feeder is decided AND the current game is not decided
-function isNodeLarge(
-	gameId: string,
-	slot: "p1" | "p2",
-	hasResults: boolean,
-	tournamentResults: Record<string, string>,
-): boolean {
-	if (!hasResults) {
-		return gameId.startsWith("r1-"); // Initial state: only R1 is large
-	}
-
-	if (gameId.startsWith("r1-")) {
-		return !tournamentResults[gameId]; // R1: large if game not decided
-	}
-
-	const feeders = FEEDER_GAMES[gameId];
-	if (!feeders) return false;
-
-	const feederGame = slot === "p1" ? feeders[0] : feeders[1];
-	if (!tournamentResults[feederGame]) return false; // Small if feeder not decided
-	return !tournamentResults[gameId]; // Large if feeder decided AND game not decided
-}
 
 function getRingColor(side: "left" | "right"): string {
 	return side === "left" ? LEFT_RING_COLOR : RIGHT_RING_COLOR;
@@ -224,13 +200,6 @@ export function generateRound1Nodes({
 		const baseY = gameIndex * 2 * MATCH_GAP;
 		const player1 = game.player1;
 		const player2 = game.player2;
-		// For R1, slot doesn't matter - both check if game is decided
-		const gameLarge = isNodeLarge(
-			game.id,
-			"p1",
-			ctx.hasResults,
-			ctx.tournamentResults,
-		);
 
 		const p1Options = getPredictionOptions(game, player1, ctx);
 		const p1Loser = player1 ? isPlayerLoser(game.id, player1.id, ctx) : false;
@@ -242,7 +211,7 @@ export function generateRound1Nodes({
 				ringColor,
 				{ x: xPos, y: baseY },
 				side,
-				gameLarge ? "round1" : "later",
+				"round1",
 				undefined,
 				{ prediction: p1Options, showBio: true, isLoser: p1Loser },
 			),
@@ -258,7 +227,7 @@ export function generateRound1Nodes({
 				ringColor,
 				{ x: xPos, y: baseY + MATCH_GAP },
 				side,
-				gameLarge ? "round1" : "later",
+				"round1",
 				undefined,
 				{ prediction: p2Options, showBio: true, isLoser: p2Loser },
 			),
@@ -279,19 +248,7 @@ export function generateQuarterNodes({
 	const xPos = side === "left" ? ROUND_GAP : RIGHT_START_X - ROUND_GAP;
 
 	games.forEach((game, gameIndex) => {
-		const p1Large = isNodeLarge(
-			game.id,
-			"p1",
-			ctx.hasResults,
-			ctx.tournamentResults,
-		);
-		const p2Large = isNodeLarge(
-			game.id,
-			"p2",
-			ctx.hasResults,
-			ctx.tournamentResults,
-		);
-		const qfOffset = p1Large || p2Large ? MATCH_GAP * 0.5 : MATCH_GAP * 0.637;
+		const qfOffset = MATCH_GAP * 0.637;
 		const baseY = gameIndex * 4 * MATCH_GAP + qfOffset;
 
 		let player1: Player | undefined;
@@ -323,7 +280,7 @@ export function generateQuarterNodes({
 				ringColor,
 				{ x: xPos, y: baseY },
 				side,
-				p1Large ? "round1" : "later",
+				"later",
 				"TBD",
 				{ prediction: p1Options, showBio: false, isLoser: p1Loser },
 			),
@@ -339,7 +296,7 @@ export function generateQuarterNodes({
 				ringColor,
 				{ x: xPos, y: baseY + 2 * MATCH_GAP },
 				side,
-				p2Large ? "round1" : "later",
+				"later",
 				"TBD",
 				{ prediction: p2Options, showBio: false, isLoser: p2Loser },
 			),
@@ -360,20 +317,7 @@ export function generateSemiNodes({
 	const xPos = side === "left" ? ROUND_GAP * 2 : RIGHT_START_X - ROUND_GAP * 2;
 
 	games.forEach((game) => {
-		const p1Large = isNodeLarge(
-			game.id,
-			"p1",
-			ctx.hasResults,
-			ctx.tournamentResults,
-		);
-		const p2Large = isNodeLarge(
-			game.id,
-			"p2",
-			ctx.hasResults,
-			ctx.tournamentResults,
-		);
-		const sfOffset = p1Large || p2Large ? 1.35 : 1.5;
-		const baseY = sfOffset * MATCH_GAP;
+		const baseY = 1.5 * MATCH_GAP;
 
 		let player1: Player | undefined;
 		let player2: Player | undefined;
@@ -404,7 +348,7 @@ export function generateSemiNodes({
 				ringColor,
 				{ x: xPos, y: baseY },
 				side,
-				p1Large ? "round1" : "later",
+				"later",
 				"TBD",
 				{ prediction: p1Options, showBio: false, isLoser: p1Loser },
 			),
@@ -420,7 +364,7 @@ export function generateSemiNodes({
 				ringColor,
 				{ x: xPos, y: baseY + 4 * MATCH_GAP },
 				side,
-				p2Large ? "round1" : "later",
+				"later",
 				"TBD",
 				{ prediction: p2Options, showBio: false, isLoser: p2Loser },
 			),
@@ -436,13 +380,6 @@ export function generateFinalistNode({
 }: RoundGeneratorOptions): Node {
 	const finalGame = bracket.finals[0];
 	const ringColor = getRingColor(side);
-	// Left finalist is p1 (fed from sf-0), right finalist is p2 (fed from sf-1)
-	const finalistLarge = isNodeLarge(
-		"final",
-		side === "left" ? "p1" : "p2",
-		ctx.hasResults,
-		ctx.tournamentResults,
-	);
 
 	let finalist: Player | undefined;
 	const sfGameId = side === "left" ? "sf-0" : "sf-1";
@@ -479,9 +416,9 @@ export function generateFinalistNode({
 		finalist,
 		finalGame,
 		ringColor,
-		{ x: xPos, y: (finalistLarge ? 3.35 : 3.5) * MATCH_GAP },
+		{ x: xPos, y: 3.5 * MATCH_GAP },
 		side,
-		finalistLarge ? "round1" : "later",
+		"later",
 		"Finalist TBD",
 		{ prediction: finalistOptions, showBio: false, isLoser: finalistLoser },
 	);

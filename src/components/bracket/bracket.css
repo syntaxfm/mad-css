@@ -102,6 +102,7 @@
 	flex-shrink: 0;
 	transition:
 		box-shadow 0.3s ease,
+		transform 0.3s ease,
 		--ring-color 0.3s ease,
 		--inner-ring-color 0.3s ease;
 }
@@ -264,8 +265,8 @@
 	cursor: pointer;
 }
 
-.player-node--pickable:hover .player-photo {
-	transform: translateY(calc(var(--brain-size) * -1)) scale(1.1);
+.player-node--pickable:hover .player-photo-ring {
+	transform: scale(1.1);
 }
 
 .player-node--pickable:focus {
@@ -342,6 +343,32 @@
 	--badge-incorrect: #ef4444;
 	background: var(--badge-incorrect);
 	color: var(--white);
+}
+
+/* Edge State Animations */
+@keyframes marching-ants {
+	0% {
+		stroke-dashoffset: 0;
+	}
+	100% {
+		stroke-dashoffset: -28;
+	}
+}
+
+.bracket-edge--pickable {
+	animation: marching-ants 0.6s linear infinite;
+}
+
+.bracket-edge--hover-pick {
+	animation: marching-ants 0.4s linear infinite;
+}
+
+.bracket-edge--hover-competitor {
+	animation: marching-ants 0.4s linear infinite;
+}
+
+.bracket-edge--pending {
+	filter: brightness(0.2) !important;
 }
 
 /* React Flow Container */

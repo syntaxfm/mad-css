@@ -107,8 +107,8 @@ export interface FileRoutesByFullPath {
   '/api/leaderboard/calculate': typeof ApiLeaderboardCalculateRoute
   '/api/og/$username': typeof ApiOgUsernameRoute
   '/api/predictions/lock': typeof ApiPredictionsLockRoute
-  '/api/leaderboard': typeof ApiLeaderboardIndexRoute
-  '/api/predictions': typeof ApiPredictionsIndexRoute
+  '/api/leaderboard/': typeof ApiLeaderboardIndexRoute
+  '/api/predictions/': typeof ApiPredictionsIndexRoute
   '/api/admin/brackets/unlock': typeof ApiAdminBracketsUnlockRoute
 }
 export interface FileRoutesByTo {
@@ -158,8 +158,8 @@ export interface FileRouteTypes {
     | '/api/leaderboard/calculate'
     | '/api/og/$username'
     | '/api/predictions/lock'
-    | '/api/leaderboard'
-    | '/api/predictions'
+    | '/api/leaderboard/'
+    | '/api/predictions/'
     | '/api/admin/brackets/unlock'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -245,14 +245,14 @@ declare module '@tanstack/react-router' {
     '/api/predictions/': {
       id: '/api/predictions/'
       path: '/api/predictions'
-      fullPath: '/api/predictions'
+      fullPath: '/api/predictions/'
       preLoaderRoute: typeof ApiPredictionsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/leaderboard/': {
       id: '/api/leaderboard/'
       path: '/api/leaderboard'
-      fullPath: '/api/leaderboard'
+      fullPath: '/api/leaderboard/'
       preLoaderRoute: typeof ApiLeaderboardIndexRouteImport
       parentRoute: typeof rootRouteImport
     }

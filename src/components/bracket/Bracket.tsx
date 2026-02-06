@@ -35,6 +35,14 @@ export interface BracketProps {
 	showPicks?: boolean;
 }
 
+export type EdgeState = "winner" | "loser" | "pending" | "pickable" | "default";
+
+export type EdgeHoverState =
+	| "none"
+	| "hovered-pick"
+	| "hovered-competitor"
+	| "hovered-incoming";
+
 function BracketEdge({
 	sourceX,
 	sourceY,
@@ -43,16 +51,65 @@ function BracketEdge({
 	sourcePosition,
 	targetPosition,
 	target,
+	data,
 }: EdgeProps) {
+	const edgeState = (data?.state as EdgeState) ?? "default";
+	const hoverState = (data?.hoverState as EdgeHoverState) ?? "none";
+
+	let stroke = "#FFFFFF";
+	let strokeOpacity = 1;
+	let strokeDasharray: string | undefined;
+	let className = "";
+
+	if (hoverState === "hovered-pick") {
+		stroke = "#22c55e";
+		strokeDasharray = "18 6";
+		className = "bracket-edge--hover-pick";
+	} else if (hoverState === "hovered-competitor") {
+		stroke = "#ef4444";
+		strokeDasharray = "18 6";
+		className = "bracket-edge--hover-competitor";
+	} else if (hoverState === "hovered-incoming") {
+		stroke = "#FFFFFF";
+		strokeDasharray = "8 6";
+		className = "bracket-edge--pickable";
+	} else {
+		switch (edgeState) {
+			case "winner":
+				stroke = "#FFFFFF";
+				strokeOpacity = 1;
+				break;
+			case "loser":
+				stroke = "#FFFFFF";
+				strokeOpacity = 0.5;
+				break;
+			case "pending":
+				stroke = "#FFFFFF";
+				strokeDasharray = "8 6";
+				className = "bracket-edge--pending";
+				break;
+			case "pickable":
+				stroke = "#FFFFFF";
+				strokeDasharray = "8 6";
+				className = "bracket-edge--pickable";
+				break;
+			default:
+				break;
+		}
+	}
+
 	if (target === "championship") {
 		const horizontalY = sourceY + 30;
 		const edgePath = `M ${sourceX} ${sourceY} L ${sourceX} ${horizontalY} L ${targetX} ${horizontalY} L ${targetX} ${targetY - 35}`;
 		return (
 			<path
+				className={className}
 				d={edgePath}
 				fill="none"
-				stroke="#FFFFFF"
+				stroke={stroke}
 				strokeWidth={10}
+				strokeOpacity={strokeOpacity}
+				strokeDasharray={strokeDasharray}
 				style={{ filter: "none" }}
 			/>
 		);
@@ -67,7 +124,17 @@ function BracketEdge({
 		targetPosition,
 		borderRadius: 0,
 	});
-	return <path d={edgePath} fill="none" stroke="#FFFFFF" strokeWidth={10} />;
+	return (
+		<path
+			className={className}
+			d={edgePath}
+			fill="none"
+			stroke={stroke}
+			strokeWidth={10}
+			strokeOpacity={strokeOpacity}
+			strokeDasharray={strokeDasharray}
+		/>
+	);
 }
 
 const nodeTypes = {
@@ -132,17 +199,143 @@ const edgeStyle: React.CSSProperties = {
 	filter: "drop-shadow(0px 0px 7px black)",
 };
 
-function generateEdges(): Edge[] {
+function parseSourceNodeId(sourceNodeId: string): {
+	gameId: string;
+	slot: "p1" | "p2";
+} {
+	const lastDash = sourceNodeId.lastIndexOf("-");
+	const slot = sourceNodeId.slice(lastDash + 1) as "p1" | "p2";
+	const gameId = sourceNodeId.slice(0, lastDash);
+	return { gameId, slot };
+}
+
+function getSourcePlayerId(
+	sourceNodeId: string,
+	nodes: Node[],
+): string | undefined {
+	const node = nodes.find((n) => n.id === sourceNodeId);
+	if (!node) return undefined;
+	return (node.data as { playerId?: string })?.playerId;
+}
+
+function computeEdgeState(
+	sourceNodeId: string,
+	targetNodeId: string,
+	tournamentResults: Record<string, string>,
+	nodes: Node[],
+	allEdges: Edge[],
+): EdgeState {
+	const { gameId } = parseSourceNodeId(sourceNodeId);
+	const playerId = getSourcePlayerId(sourceNodeId, nodes);
+
+	// Finalist-to-championship edges: check if the final game is decided
+	if (sourceNodeId === "left-finalist" || sourceNodeId === "right-finalist") {
+		const finalWinner = tournamentResults.final;
+		if (finalWinner && playerId) {
+			return finalWinner === playerId ? "winner" : "loser";
+		}
+		const targetNode = nodes.find((n) => n.id === targetNodeId);
+		const targetIsEmpty = targetNode?.type === "emptySlot";
+		if (targetIsEmpty) {
+			const feedingEdges = allEdges.filter((e) => e.target === targetNodeId);
+			const allSourcesArePlayerNodes = feedingEdges.every((e) => {
+				const srcNode = nodes.find((n) => n.id === e.source);
+				return srcNode?.type === "playerNode";
+			});
+			if (feedingEdges.length >= 2 && allSourcesArePlayerNodes) {
+				return "pickable";
+			}
+			return "pending";
+		}
+		return "default";
+	}
+
+	const winner = tournamentResults[gameId];
+
+	if (winner && playerId) {
+		return winner === playerId ? "winner" : "loser";
+	}
+
+	// No result yet -- check if the target is an empty slot (pending/pickable)
+	const targetNode = nodes.find((n) => n.id === targetNodeId);
+	const targetIsEmpty = targetNode?.type === "emptySlot";
+
+	if (targetIsEmpty) {
+		const feedingEdges = allEdges.filter((e) => e.target === targetNodeId);
+		const allSourcesArePlayerNodes = feedingEdges.every((e) => {
+			const srcNode = nodes.find((n) => n.id === e.source);
+			return srcNode?.type === "playerNode";
+		});
+		if (feedingEdges.length >= 2 && allSourcesArePlayerNodes) {
+			return "pickable";
+		}
+		return "pending";
+	}
+
+	return "default";
+}
+
+function computeEdgeHoverState(
+	edgeSource: string,
+	edgeTarget: string,
+	hoveredNodeId: string | null,
+	hoveredNodeType: "player" | "empty" | null,
+	edges: Edge[],
+): EdgeHoverState {
+	if (!hoveredNodeId || !hoveredNodeType) return "none";
+
+	// Hovering an empty slot: highlight all edges flowing INTO it
+	if (hoveredNodeType === "empty") {
+		if (edgeTarget === hoveredNodeId) return "hovered-incoming";
+		return "none";
+	}
+
+	// Hovering a player node: green ants on hovered player's edges, red ants on competitor
+	const hoveredEdges = edges.filter((e) => e.source === hoveredNodeId);
+	if (hoveredEdges.length === 0) return "none";
+
+	if (edgeSource === hoveredNodeId) return "hovered-pick";
+
+	for (const hoveredEdge of hoveredEdges) {
+		const siblingEdges = edges.filter(
+			(e) => e.target === hoveredEdge.target && e.source !== hoveredNodeId,
+		);
+		if (siblingEdges.some((e) => e.source === edgeSource)) {
+			return "hovered-competitor";
+		}
+	}
+
+	return "none";
+}
+
+interface EdgeGeneratorContext {
+	tournamentResults: Record<string, string>;
+	nodes: Node[];
+	hoveredNodeId: string | null;
+	hoveredNodeType: "player" | "empty" | null;
+}
+
+function generateEdges(ctx: EdgeGeneratorContext): Edge[] {
 	const edges: Edge[] = [];
 	const round1 = splitForDisplay(bracket.round1);
 	const quarters = splitForDisplay(bracket.quarters);
 	const semis = splitForDisplay(bracket.semis);
 
+	function pushEdge(edge: Omit<Edge, "data">) {
+		edges.push({
+			...edge,
+			data: {
+				state: "default" as EdgeState,
+				hoverState: "none" as EdgeHoverState,
+			},
+		});
+	}
+
 	// LEFT SIDE EDGES
 	round1.left.forEach((game, gameIndex) => {
 		const quarterGame = quarters.left[Math.floor(gameIndex / 2)];
 
-		edges.push({
+		pushEdge({
 			id: `${game.id}-p1-to-${quarterGame.id}`,
 			source: `${game.id}-p1`,
 			target: `${quarterGame.id}-p${(gameIndex % 2) + 1}`,
@@ -152,7 +345,7 @@ function generateEdges(): Edge[] {
 			targetHandle: "in-top",
 		});
 
-		edges.push({
+		pushEdge({
 			id: `${game.id}-p2-to-${quarterGame.id}`,
 			source: `${game.id}-p2`,
 			target: `${quarterGame.id}-p${(gameIndex % 2) + 1}`,
@@ -165,7 +358,7 @@ function generateEdges(): Edge[] {
 	quarters.left.forEach((game, gameIndex) => {
 		const semiGame = semis.left[0];
 
-		edges.push({
+		pushEdge({
 			id: `${game.id}-p1-to-${semiGame.id}`,
 			source: `${game.id}-p1`,
 			target: `${semiGame.id}-p${gameIndex + 1}`,
@@ -175,7 +368,7 @@ function generateEdges(): Edge[] {
 			targetHandle: "in-top",
 		});
 
-		edges.push({
+		pushEdge({
 			id: `${game.id}-p2-to-${semiGame.id}`,
 			source: `${game.id}-p2`,
 			target: `${semiGame.id}-p${gameIndex + 1}`,
@@ -187,7 +380,7 @@ function generateEdges(): Edge[] {
 	});
 
 	semis.left.forEach((game) => {
-		edges.push({
+		pushEdge({
 			id: `${game.id}-p1-to-left-finalist`,
 			source: `${game.id}-p1`,
 			target: `left-finalist`,
@@ -197,7 +390,7 @@ function generateEdges(): Edge[] {
 			targetHandle: "in-top",
 		});
 
-		edges.push({
+		pushEdge({
 			id: `${game.id}-p2-to-left-finalist`,
 			source: `${game.id}-p2`,
 			target: `left-finalist`,
@@ -208,7 +401,7 @@ function generateEdges(): Edge[] {
 		});
 	});
 
-	edges.push({
+	pushEdge({
 		id: "left-finalist-to-champ",
 		source: `left-finalist`,
 		target: "championship",
@@ -222,7 +415,7 @@ function generateEdges(): Edge[] {
 	round1.right.forEach((game, gameIndex) => {
 		const quarterGame = quarters.right[Math.floor(gameIndex / 2)];
 
-		edges.push({
+		pushEdge({
 			id: `${game.id}-p1-to-${quarterGame.id}`,
 			source: `${game.id}-p1`,
 			target: `${quarterGame.id}-p${(gameIndex % 2) + 1}`,
@@ -232,7 +425,7 @@ function generateEdges(): Edge[] {
 			targetHandle: "in-top",
 		});
 
-		edges.push({
+		pushEdge({
 			id: `${game.id}-p2-to-${quarterGame.id}`,
 			source: `${game.id}-p2`,
 			target: `${quarterGame.id}-p${(gameIndex % 2) + 1}`,
@@ -246,7 +439,7 @@ function generateEdges(): Edge[] {
 	quarters.right.forEach((game, gameIndex) => {
 		const semiGame = semis.right[0];
 
-		edges.push({
+		pushEdge({
 			id: `${game.id}-p1-to-${semiGame.id}`,
 			source: `${game.id}-p1`,
 			target: `${semiGame.id}-p${gameIndex + 1}`,
@@ -256,7 +449,7 @@ function generateEdges(): Edge[] {
 			targetHandle: "in-top",
 		});
 
-		edges.push({
+		pushEdge({
 			id: `${game.id}-p2-to-${semiGame.id}`,
 			source: `${game.id}-p2`,
 			target: `${semiGame.id}-p${gameIndex + 1}`,
@@ -268,7 +461,7 @@ function generateEdges(): Edge[] {
 	});
 
 	semis.right.forEach((game) => {
-		edges.push({
+		pushEdge({
 			id: `${game.id}-p1-to-right-finalist`,
 			source: `${game.id}-p1`,
 			target: `right-finalist`,
@@ -278,7 +471,7 @@ function generateEdges(): Edge[] {
 			targetHandle: "in-top",
 		});
 
-		edges.push({
+		pushEdge({
 			id: `${game.id}-p2-to-right-finalist`,
 			source: `${game.id}-p2`,
 			target: `right-finalist`,
@@ -289,7 +482,7 @@ function generateEdges(): Edge[] {
 		});
 	});
 
-	edges.push({
+	pushEdge({
 		id: "right-finalist-to-champ",
 		source: `right-finalist`,
 		target: "championship",
@@ -298,6 +491,30 @@ function generateEdges(): Edge[] {
 		sourceHandle: "out-left",
 		targetHandle: "in-bottom",
 	});
+
+	// Pass 1: compute edge states (needs full edge list to check siblings)
+	for (const edge of edges) {
+		const state = computeEdgeState(
+			edge.source,
+			edge.target,
+			ctx.tournamentResults,
+			ctx.nodes,
+			edges,
+		);
+		(edge.data as { state: EdgeState }).state = state;
+	}
+
+	// Pass 2: apply hover states
+	for (const edge of edges) {
+		const hoverState = computeEdgeHoverState(
+			edge.source,
+			edge.target,
+			ctx.hoveredNodeId,
+			ctx.hoveredNodeType,
+			edges,
+		);
+		(edge.data as { hoverState: EdgeHoverState }).hoverState = hoverState;
+	}
 
 	return edges;
 }
@@ -326,6 +543,7 @@ function BracketContent({
 	const isLocked = ctx?.isLocked ?? propsIsLocked ?? false;
 
 	const isPickingEnabled = isInteractive && isAuthenticated && !isLocked;
+
 	const nodes = useMemo(
 		() =>
 			generateNodes(
@@ -347,7 +565,50 @@ function BracketContent({
 			isLocked,
 		],
 	);
-	const edges = useMemo(() => generateEdges(), []);
+
+	const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null);
+	const [hoveredNodeType, setHoveredNodeType] = useState<
+		"player" | "empty" | null
+	>(null);
+
+	const edges = useMemo(
+		() =>
+			generateEdges({
+				tournamentResults,
+				nodes,
+				hoveredNodeId,
+				hoveredNodeType,
+			}),
+		[tournamentResults, nodes, hoveredNodeId, hoveredNodeType],
+	);
+
+	const styledNodes = useMemo(() => {
+		const emptySlotIds = new Set(
+			nodes.filter((n) => n.type === "emptySlot").map((n) => n.id),
+		);
+		const pickableSlots = new Set<string>();
+		for (const slotId of emptySlotIds) {
+			const feedingEdges = edges.filter((e) => e.target === slotId);
+			const allPlayerSources =
+				feedingEdges.length >= 2 &&
+				feedingEdges.every((e) => {
+					const src = nodes.find((n) => n.id === e.source);
+					return src?.type === "playerNode";
+				});
+			if (allPlayerSources) {
+				pickableSlots.add(slotId);
+			}
+		}
+		return nodes.map((node) => {
+			if (node.type === "emptySlot" && !pickableSlots.has(node.id)) {
+				return {
+					...node,
+					style: { ...node.style, filter: "brightness(0.2)" },
+				};
+			}
+			return node;
+		});
+	}, [nodes, edges]);
 	const containerRef = useRef<HTMLDivElement>(null);
 	const [containerHeight, setContainerHeight] = useState<number | null>(null);
 	const rfInstanceRef = useRef<ReactFlowInstance | null>(null);
@@ -429,7 +690,7 @@ function BracketContent({
 			onMouseLeave={handleMouseLeave}
 		>
 			<ReactFlow
-				nodes={nodes}
+				nodes={styledNodes}
 				edges={edges}
 				nodeTypes={nodeTypes}
 				edgeTypes={edgeTypes}
@@ -444,6 +705,24 @@ function BracketContent({
 				fitView
 				fitViewOptions={{ padding: FIT_VIEW_PADDING }}
 				onInit={handleInit}
+				onNodeMouseEnter={(_event, node) => {
+					if (node.type === "emptySlot") {
+						setHoveredNodeId(node.id);
+						setHoveredNodeType("empty");
+						return;
+					}
+					const data = node.data as {
+						prediction?: { interactionMode?: string };
+					};
+					if (data.prediction?.interactionMode === "pickable") {
+						setHoveredNodeId(node.id);
+						setHoveredNodeType("player");
+					}
+				}}
+				onNodeMouseLeave={() => {
+					setHoveredNodeId(null);
+					setHoveredNodeType(null);
+				}}
 				onNodeClick={(_event, node) => {
 					const data = node.data as {
 						isPickable?: boolean;
