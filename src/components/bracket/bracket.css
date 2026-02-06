@@ -506,14 +506,52 @@
 	margin-top: -2px;
 }
 
-.bracket-actions {
+.bracket-toolbar {
 	display: flex;
 	justify-content: center;
-	gap: 10px;
+	align-items: center;
+	gap: 12px;
 	flex-wrap: wrap;
 	margin-bottom: 16px;
-	max-width: 500px;
+	max-width: 600px;
 	margin-inline: auto;
+}
+
+.bracket-toolbar-actions {
+	display: flex;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
+.bracket-controls.react-flow__controls {
+	top: 0;
+	right: 0;
+	bottom: auto;
+	left: auto;
+	box-shadow: none;
+}
+
+.bracket-controls .react-flow__controls-button {
+	background: var(--black);
+	border: 2px solid var(--yellow) !important;
+	border-radius: 0;
+	color: var(--yellow);
+	width: 32px;
+	height: 32px;
+
+	&:hover {
+		background: var(--yellow);
+	}
+
+	svg {
+		fill: var(--yellow);
+		max-width: 14px;
+		max-height: 14px;
+	}
+
+	&:hover svg {
+		fill: var(--black);
+	}
 }
 
 .bracket-toggle-badge {
@@ -571,36 +609,6 @@
 }
 
 /* Custom bracket controls styling */
-.bracket-controls.react-flow__controls {
-	top: 0;
-	right: 0;
-	bottom: auto;
-	left: auto;
-	box-shadow: none;
-}
-
-.bracket-controls .react-flow__controls-button {
-	background: var(--black);
-	border: 2px solid var(--yellow) !important;
-	border-radius: 0;
-	color: var(--yellow);
-	width: 32px;
-	height: 32px;
-}
-
-.bracket-controls .react-flow__controls-button:hover {
-	background: var(--yellow);
-}
-
-.bracket-controls .react-flow__controls-button svg {
-	fill: var(--yellow);
-	max-width: 14px;
-	max-height: 14px;
-}
-
-.bracket-controls .react-flow__controls-button:hover svg {
-	fill: var(--black);
-}
 
 .bracket-container .react-flow__attribution {
 	background: var(--black);

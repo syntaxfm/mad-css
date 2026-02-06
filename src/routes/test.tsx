@@ -77,9 +77,7 @@ function TestPage() {
 			<PredictionsProvider isAuthenticated={isAuthenticated} userId={userId}>
 				<div id="bracket" className="section">
 					<h2>The Bracket</h2>
-					<LoginSection
-						username={(session?.user as { username?: string })?.username}
-					/>
+					<LoginSection />
 					<Bracket
 						isInteractive
 						isAuthenticated={isAuthenticated}

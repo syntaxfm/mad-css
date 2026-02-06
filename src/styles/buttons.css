@@ -7,7 +7,6 @@
      Size:     .btn-xs | .btn-sm | (default) | .btn-lg
    ============================================ */
 
-/* ---- Base ---- */
 .btn {
 	display: inline-flex;
 	align-items: center;
@@ -29,108 +28,104 @@
 	transition:
 		transform 0.1s,
 		box-shadow 0.1s;
-}
 
-.btn:hover:not(:disabled) {
-	transform: translate(2px, 2px);
-	box-shadow: 2px 2px 0 var(--black);
-}
+	&:hover:not(:disabled) {
+		transform: translate(2px, 2px);
+		box-shadow: 2px 2px 0 var(--black);
+	}
 
-.btn:active:not(:disabled) {
-	transform: translate(4px, 4px);
-	box-shadow: none;
-}
+	&:active:not(:disabled) {
+		transform: translate(4px, 4px);
+		box-shadow: none;
+	}
 
-.btn:disabled {
-	background: var(--beige);
-	color: rgba(0, 0, 0, 0.3);
-	border-color: rgba(0, 0, 0, 0.2);
-	box-shadow: none;
-	cursor: not-allowed;
-}
+	&:disabled {
+		background: var(--beige);
+		color: rgba(0, 0, 0, 0.3);
+		border-color: rgba(0, 0, 0, 0.2);
+		box-shadow: none;
+		cursor: not-allowed;
+	}
 
-/* ---- Sizes ---- */
-.btn.btn-xs {
-	padding: 4px 10px;
-	font-size: 0.625rem;
-	border-width: 2px;
-	box-shadow: 2px 2px 0 var(--black);
-}
+	/* ---- Sizes ---- */
 
-.btn.btn-xs:hover:not(:disabled) {
-	box-shadow: 1px 1px 0 var(--black);
-	transform: translate(1px, 1px);
-}
+	&.btn-xs {
+		padding: 4px 10px;
+		font-size: 0.625rem;
+		border-width: 2px;
+		box-shadow: 2px 2px 0 var(--black);
 
-.btn.btn-xs:active:not(:disabled) {
-	box-shadow: none;
-	transform: translate(2px, 2px);
-}
+		&:hover:not(:disabled) {
+			box-shadow: 1px 1px 0 var(--black);
+			transform: translate(1px, 1px);
+		}
 
-.btn.btn-sm {
-	padding: 8px 16px;
-	font-size: 0.7rem;
-}
+		&:active:not(:disabled) {
+			box-shadow: none;
+			transform: translate(2px, 2px);
+		}
+	}
 
-.btn.btn-lg {
-	padding: 16px 32px;
-	font-size: 1rem;
-}
+	&.btn-sm {
+		padding: 8px 16px;
+		font-size: 0.7rem;
+	}
 
-/* ---- Variants ---- */
+	&.btn-lg {
+		padding: 16px 32px;
+		font-size: 1rem;
+	}
 
-/* Primary — yellow bg, black text (CTA / confirm) */
-.btn.btn-primary {
-	background: var(--yellow);
-	color: var(--black);
-}
+	/* ---- Variants ---- */
 
-.btn.btn-primary:disabled {
-	opacity: 0.4;
-	background: var(--yellow);
-	color: var(--black);
-	border-color: rgba(0, 0, 0, 0.2);
-}
+	&.btn-primary {
+		background: var(--yellow);
+		color: var(--black);
 
-/* Danger — orange bg, white text (destructive / lock) */
-.btn.btn-danger {
-	background: var(--orange);
-	color: var(--white);
-}
+		&:disabled {
+			opacity: 0.4;
+			background: var(--yellow);
+			color: var(--black);
+			border-color: rgba(0, 0, 0, 0.2);
+		}
+	}
 
-.btn.btn-danger:disabled {
-	background: rgba(0, 0, 0, 0.1);
-	color: rgba(0, 0, 0, 0.3);
-	border-color: rgba(0, 0, 0, 0.2);
-}
+	&.btn-danger {
+		background: var(--orange);
+		color: var(--white);
 
-/* Dark — black bg, white text */
-.btn.btn-dark {
-	background: var(--black);
-	color: var(--white);
-}
+		&:disabled {
+			background: rgba(0, 0, 0, 0.1);
+			color: rgba(0, 0, 0, 0.3);
+			border-color: rgba(0, 0, 0, 0.2);
+		}
+	}
 
-/* Ghost — transparent bg, text-colored border (reset / cancel style) */
-.btn.btn-ghost {
-	background: var(--beige);
-	color: var(--black);
-}
+	&.btn-dark {
+		background: var(--black);
+		color: var(--white);
+	}
 
-/* Outline — colored border, no fill */
-.btn.btn-outline {
-	background: var(--beige);
-	color: var(--orange);
-	border-color: var(--orange);
-	box-shadow: 4px 4px 0 var(--orange);
-}
+	&.btn-ghost {
+		background: var(--beige);
+		color: var(--black);
+	}
 
-.btn.btn-outline:hover:not(:disabled) {
-	box-shadow: 2px 2px 0 var(--orange);
-}
+	&.btn-outline {
+		background: var(--beige);
+		color: var(--orange);
+		border-color: var(--orange);
+		box-shadow: 2px 2px 0 var(--orange);
 
-.btn.btn-outline:disabled {
-	background: var(--beige);
-	color: rgba(0, 0, 0, 0.3);
-	border-color: rgba(0, 0, 0, 0.2);
-	box-shadow: none;
+		&:hover:not(:disabled) {
+			box-shadow: 2px 2px 0 var(--orange);
+		}
+
+		&:disabled {
+			background: var(--beige);
+			color: rgba(0, 0, 0, 0.3);
+			border-color: rgba(0, 0, 0, 0.2);
+			box-shadow: none;
+		}
+	}
 }

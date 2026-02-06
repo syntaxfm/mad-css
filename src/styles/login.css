@@ -422,29 +422,50 @@
 	color: var(--orange);
 }
 
-/* Lock confirmation overlay */
-.lock-confirm {
-	background: rgba(0, 0, 0, 0.08);
-	padding: 16px;
-	border-radius: 0;
-	border: 3px solid var(--black);
+/* Lock confirmation modal */
+.lock-modal {
+	border: 4px solid var(--black);
+	box-shadow: 8px 8px 0 var(--black);
+	background: var(--beige);
+	padding: 0;
+	max-width: 400px;
+	width: calc(100% - 40px);
 	text-align: center;
-	flex: 1 1 100%;
+
+	&::backdrop {
+		background: rgba(0, 0, 0, 0.6);
+	}
+
+	&[open] {
+		display: flex;
+	}
 }
 
-.lock-confirm p {
-	font-size: 0.9rem;
-	margin-bottom: 14px;
-	color: var(--black);
-	font-family: var(--font-block);
-	text-transform: uppercase;
-	letter-spacing: 0.04em;
+.lock-modal-content {
+	padding: 32px 28px;
+	width: 100%;
+
+	p {
+		font-family: var(--font-block);
+		font-size: 1.1rem;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		color: var(--black);
+		margin: 0;
+	}
 }
 
-.lock-confirm-buttons {
+.lock-modal-sub {
+	font-size: 0.85rem !important;
+	opacity: 0.6;
+	margin-top: 6px !important;
+}
+
+.lock-modal-buttons {
 	display: flex;
 	gap: 10px;
 	justify-content: center;
+	margin-top: 24px;
 }
 
 /* Error message */
@@ -479,7 +500,7 @@
 	font-size: 0.85rem;
 	text-transform: uppercase;
 	letter-spacing: 0.05em;
-	color: var(--black);
+	color: var(--white);
 	display: flex;
 	align-items: center;
 	gap: 10px;

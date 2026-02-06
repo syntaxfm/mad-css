@@ -11,9 +11,18 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "@xyflow/react/dist/style.css";
 import { usePredictionsContext } from "@/context/PredictionsContext";
-import { ALL_GAME_IDS, TOTAL_GAMES, bracket, splitForDisplay } from "@/data/players";
+import {
+	ALL_GAME_IDS,
+	bracket,
+	getNextGameTime,
+	splitForDisplay,
+	TOTAL_GAMES,
+} from "@/data/players";
+import { useCountdown } from "@/hooks/useCountdown";
+import { Scoreboard } from "@/components/scoreboard/Scoreboard";
 import { getPickablePlayersForGame } from "@/hooks/usePredictions";
 import { authClient } from "@/lib/auth-client";
+import { LoginSectionShare } from "@/components/LoginSection";
 import type { NodeContext } from "./bracketTypes";
 import {
 	generateChampionshipNode,
@@ -70,58 +79,96 @@ function BracketToggle({
 					<img src={userImage} alt="" className="bracket-toggle-avatar" />
 				)}
 				MY PICKS
-				{session?.user && (
-					isLocked ? (
+				{session?.user &&
+					(isLocked ? (
 						<span className="bracket-toggle-badge locked">Locked In</span>
 					) : (
-						<span className="bracket-toggle-badge">{pickCount}/{TOTAL_GAMES}</span>
-					)
-				)}
+						<span className="bracket-toggle-badge">
+							{pickCount}/{TOTAL_GAMES}
+						</span>
+					))}
 			</button>
 		</div>
 	);
 }
 
-function BracketActions() {
+const ROUND_LABELS: Record<string, string> = {
+	"left-r1": "Left R1",
+	"right-r1": "Right R1",
+	qf: "Quarterfinals",
+	sf: "Semifinals",
+	final: "Finals",
+};
+
+function NextResultsCountdown() {
 	const ctx = usePredictionsContext();
 	const { data: session } = authClient.useSession();
-	const [showLockConfirm, setShowLockConfirm] = useState(false);
+	const isLocked = ctx?.isLocked ?? false;
+	const nextGame = getNextGameTime();
+	const nextGameCountdown = useCountdown(nextGame?.time);
+	const nextGameLabel = nextGame ? ROUND_LABELS[nextGame.round] : null;
 
-	if (!session?.user || !ctx) return null;
-
-	const { pickCount, isLocked, isSaving, hasChanges, isDeadlinePassed } = ctx;
-	const canLock = pickCount === TOTAL_GAMES && !isLocked && !isDeadlinePassed;
-
-	if (isLocked || isDeadlinePassed) return null;
+	if (!session?.user || !isLocked || !nextGame || nextGameCountdown.totalMs <= 0) return null;
 
 	return (
-		<div className="bracket-actions">
-			{showLockConfirm ? (
-				<div className="lock-confirm">
-					<p>Lock your bracket? This cannot be undone.</p>
-					<div className="lock-confirm-buttons">
-						<button
-							type="button"
-							className="btn btn-primary btn-sm"
-							onClick={() => {
-								ctx.lockBracket?.();
-								setShowLockConfirm(false);
-							}}
-							disabled={!canLock || isSaving}
-						>
-							Yes, Lock It
-						</button>
-						<button
-							type="button"
-							className="btn btn-ghost btn-sm"
-							onClick={() => setShowLockConfirm(false)}
-						>
-							Cancel
-						</button>
-					</div>
-				</div>
-			) : (
-				<>
+		<div className="cta-next-results">
+			<span className="next-results-label">
+				{nextGameLabel} results in:
+			</span>
+			<Scoreboard countdown={nextGameCountdown} isUrgent={false} />
+		</div>
+	);
+}
+
+function BracketToolbar() {
+	const ctx = usePredictionsContext();
+	const { data: session } = authClient.useSession();
+	const dialogRef = useRef<HTMLDialogElement>(null);
+	const [copied, setCopied] = useState(false);
+
+	const isLoggedIn = !!session?.user && !!ctx;
+	const pickCount = ctx?.pickCount ?? 0;
+	const isLocked = ctx?.isLocked ?? false;
+	const isSaving = ctx?.isSaving ?? false;
+	const hasChanges = ctx?.hasChanges ?? false;
+	const isDeadlinePassed = ctx?.isDeadlinePassed ?? false;
+	const canLock = pickCount === TOTAL_GAMES && !isLocked && !isDeadlinePassed;
+	const showActions = isLoggedIn && !isLocked && !isDeadlinePassed;
+
+	const username = (session?.user as { username?: string })?.username;
+	const shareUrl = username
+		? `${typeof window !== "undefined" ? window.location.origin : ""}/bracket/${username}`
+		: null;
+	const twitterShareUrl = username
+		? `https://twitter.com/intent/tweet?text=${encodeURIComponent(`Check out my March Mad CSS bracket picks! 🏀\n\n${shareUrl}`)}`
+		: null;
+	const blueskyShareUrl = username
+		? `https://bsky.app/intent/compose?text=${encodeURIComponent(`Check out my March Mad CSS bracket picks! 🏀\n\n${shareUrl}`)}`
+		: null;
+	const showShare = isLoggedIn && isLocked && !!shareUrl;
+
+	const handleCopyLink = async () => {
+		if (!shareUrl) return;
+		try {
+			await navigator.clipboard.writeText(shareUrl);
+		} catch {
+			const input = document.createElement("input");
+			input.value = shareUrl;
+			document.body.appendChild(input);
+			input.select();
+			document.execCommand("copy");
+			document.body.removeChild(input);
+		}
+		setCopied(true);
+		setTimeout(() => setCopied(false), 2000);
+	};
+
+	if (!showActions && !showShare) return null;
+
+	return (
+		<div className="bracket-toolbar">
+			{showActions && (
+				<div className="bracket-toolbar-actions">
 					<button
 						type="button"
 						className="btn"
@@ -133,7 +180,7 @@ function BracketActions() {
 					<button
 						type="button"
 						className="btn btn-danger"
-						onClick={() => setShowLockConfirm(true)}
+						onClick={() => dialogRef.current?.showModal()}
 						disabled={!canLock || isSaving}
 						title={
 							pickCount < TOTAL_GAMES
@@ -154,7 +201,41 @@ function BracketActions() {
 							Reset
 						</button>
 					)}
-				</>
+					<dialog ref={dialogRef} className="lock-modal">
+						<div className="lock-modal-content">
+							<p>Lock your bracket?</p>
+							<p className="lock-modal-sub">This cannot be undone.</p>
+							<div className="lock-modal-buttons">
+								<button
+									type="button"
+									className="btn btn-primary"
+									onClick={() => {
+										ctx.lockBracket?.();
+										dialogRef.current?.close();
+									}}
+									disabled={!canLock || isSaving}
+								>
+									Yes, Lock It
+								</button>
+								<button
+									type="button"
+									className="btn btn-ghost"
+									onClick={() => dialogRef.current?.close()}
+								>
+									Cancel
+								</button>
+							</div>
+						</div>
+					</dialog>
+				</div>
+			)}
+			{showShare && (
+				<LoginSectionShare
+					twitterShareUrl={twitterShareUrl}
+					blueskyShareUrl={blueskyShareUrl}
+					copied={copied}
+					onCopyLink={handleCopyLink}
+				/>
 			)}
 		</div>
 	);
@@ -803,7 +884,7 @@ function BracketContent({
 			{onToggleShowPicks && (
 				<BracketToggle showPicks={showPicks} onToggle={onToggleShowPicks} />
 			)}
-			<BracketActions />
+			<BracketToolbar />
 			{/* biome-ignore lint/a11y/noStaticElementInteractions: mouse events for scroll/zoom unlock UX */}
 			<div
 				ref={containerRef}
@@ -878,6 +959,7 @@ function BracketContent({
 					/>
 				</ReactFlow>
 			</div>
+			<NextResultsCountdown />
 		</>
 	);
 }

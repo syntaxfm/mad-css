@@ -1,6 +1,5 @@
-import { useState } from "react";
 import { usePredictionsContext } from "@/context/PredictionsContext";
-import { getNextGameTime, TOTAL_GAMES } from "@/data/players";
+import { getNextGameTime } from "@/data/players";
 import { useCountdown } from "@/hooks/useCountdown";
 import { authClient } from "@/lib/auth-client";
 import { Scoreboard } from "./scoreboard/Scoreboard";
@@ -14,35 +13,8 @@ const ROUND_LABELS: Record<string, string> = {
 	final: "Finals",
 };
 
-// Sub-component: Progress display with pick count and countdown
-function LoginSectionProgress({
-	pickCount,
-	deadline,
-	countdown,
-	isUrgent,
-}: {
-	pickCount: number;
-	deadline: string | undefined;
-	countdown: ReturnType<typeof useCountdown>;
-	isUrgent: boolean;
-}) {
-	return (
-		<div className="cta-progress">
-			<div className="progress-header">
-				<div className="progress-count">
-					{pickCount} <span>/ {TOTAL_GAMES} picks</span>
-				</div>
-				{deadline && countdown.totalMs > 0 && (
-					<Scoreboard countdown={countdown} isUrgent={isUrgent} />
-				)}
-			</div>
-		</div>
-	);
-}
-
-// Sub-component: Action buttons (save, lock, reset)
 // Sub-component: Share buttons (copy link, X, Bluesky)
-function LoginSectionShare({
+export function LoginSectionShare({
 	twitterShareUrl,
 	blueskyShareUrl,
 	copied,
@@ -140,20 +112,14 @@ function LoginSectionShare({
 	);
 }
 
-export interface LoginSectionProps {
-	username?: string | null;
-}
-
-export function LoginSection({ username = null }: LoginSectionProps) {
+export function LoginSection() {
 	const ctx = usePredictionsContext();
 
-	const pickCount = ctx?.pickCount ?? 0;
 	const isLocked = ctx?.isLocked ?? false;
 	const error = ctx?.error ?? null;
 	const deadline = ctx?.deadline;
 	const isDeadlinePassed = ctx?.isDeadlinePassed ?? false;
 	const { data: session, isPending } = authClient.useSession();
-	const [copied, setCopied] = useState(false);
 	const countdown = useCountdown(deadline);
 	const isUrgent =
 		countdown.totalMs > 0 && countdown.totalMs < 24 * 60 * 60 * 1000;
@@ -162,37 +128,6 @@ export function LoginSection({ username = null }: LoginSectionProps) {
 	const nextGame = getNextGameTime();
 	const nextGameCountdown = useCountdown(nextGame?.time);
 	const nextGameLabel = nextGame ? ROUND_LABELS[nextGame.round] : null;
-
-	const shareUrl = username
-		? `${typeof window !== "undefined" ? window.location.origin : ""}/bracket/${username}`
-		: null;
-
-	const handleCopyLink = async () => {
-		if (!shareUrl) return;
-		try {
-			await navigator.clipboard.writeText(shareUrl);
-			setCopied(true);
-			setTimeout(() => setCopied(false), 2000);
-		} catch {
-			// Fallback for older browsers
-			const input = document.createElement("input");
-			input.value = shareUrl;
-			document.body.appendChild(input);
-			input.select();
-			document.execCommand("copy");
-			document.body.removeChild(input);
-			setCopied(true);
-			setTimeout(() => setCopied(false), 2000);
-		}
-	};
-
-	const twitterShareUrl = username
-		? `https://twitter.com/intent/tweet?text=${encodeURIComponent(`Check out my March Mad CSS bracket picks! 🏀\n\n${shareUrl}`)}`
-		: null;
-
-	const blueskyShareUrl = username
-		? `https://bsky.app/intent/compose?text=${encodeURIComponent(`Check out my March Mad CSS bracket picks! 🏀\n\n${shareUrl}`)}`
-		: null;
 
 	if (isPending) {
 		return (
@@ -203,46 +138,14 @@ export function LoginSection({ username = null }: LoginSectionProps) {
 	}
 
 	if (session?.user) {
+		const hasDeadlineMessage = isDeadlinePassed && !isLocked;
+		if (!hasDeadlineMessage && !error) return null;
+
 		return (
 			<div className="bracket-cta logged-in">
-				{isLocked && (
-					<>
-						{/* Next results countdown */}
-						{nextGame && nextGameCountdown.totalMs > 0 && (
-							<div className="cta-next-results">
-								<span className="next-results-label">
-									{nextGameLabel} results in:
-								</span>
-								<Scoreboard countdown={nextGameCountdown} isUrgent={false} />
-							</div>
-						)}
-
-						{/* Share section - only show when locked and username exists */}
-						{shareUrl && (
-							<LoginSectionShare
-								twitterShareUrl={twitterShareUrl}
-								blueskyShareUrl={blueskyShareUrl}
-								copied={copied}
-								onCopyLink={handleCopyLink}
-							/>
-						)}
-					</>
-				)}
-
-				{isDeadlinePassed && !isLocked && (
+				{hasDeadlineMessage && (
 					<div className="cta-status deadline-passed">Deadline has passed</div>
 				)}
-
-				{/* Progress section - only show when not locked */}
-				{!isLocked && !isDeadlinePassed && (
-					<LoginSectionProgress
-						pickCount={pickCount}
-						deadline={deadline}
-						countdown={countdown}
-						isUrgent={isUrgent}
-					/>
-				)}
-
 				{error && <p className="cta-error">{error}</p>}
 			</div>
 		);
