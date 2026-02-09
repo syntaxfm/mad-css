@@ -19,8 +19,17 @@
 	],
 	"main": "src/server.ts",
 	"observability": {
-		"enabled": true
-	},
+    "traces": {
+      "enabled": true,
+      // Must match the destination name in the dashboard
+      "destinations": ["sentry-traces"],
+    },
+    "logs": {
+      "enabled": true,
+      // Must match the destination name in the dashboard
+      "destinations": ["sentry-logs"],
+    },
+  },
 	"d1_databases": [
 		{
 			"binding": "DB",
