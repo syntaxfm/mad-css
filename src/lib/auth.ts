@@ -1,7 +1,7 @@
+import * as Sentry from "@sentry/tanstackstart-react";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { tanstackStartCookies } from "better-auth/tanstack-start";
-import * as Sentry from "@sentry/tanstackstart-react";
 import { eq } from "drizzle-orm";
 import { createDb } from "@/db";
 import * as schema from "@/db/schema";
@@ -17,6 +17,7 @@ export function createAuth(d1: D1Database) {
 			}),
 			trustedOrigins: [
 				"http://localhost:3000",
+				"https://madcss.com",
 				process.env.BETTER_AUTH_URL,
 			].filter(Boolean) as string[],
 			socialProviders: {
