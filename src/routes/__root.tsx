@@ -1,4 +1,5 @@
 import { TanStackDevtools } from "@tanstack/react-devtools";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
 	createRootRoute,
 	HeadContent,
@@ -6,11 +7,22 @@ import {
 	Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
+import { AdminButton } from "@/components/AdminButton";
 import { createIsomorphicFn } from "@tanstack/react-start";
 import { getRequestUrl } from "@tanstack/react-start/server";
 import { Footer } from "@/components/footer/Footer";
 import { Header } from "@/components/Header";
+import { NotFound } from "@/components/NotFound";
 import appCss from "../styles/styles.css?url";
+
+const queryClient = new QueryClient({
+	defaultOptions: {
+		queries: {
+			staleTime: 1000 * 60 * 5, // 5 min default
+			retry: 2,
+		},
+	},
+});
 
 const getLocation = createIsomorphicFn()
 	.server(() => getRequestUrl())
@@ -118,15 +130,6 @@ export const Route = createRootRoute({
 	notFoundComponent: NotFound,
 });
 
-function NotFound() {
-	return (
-		<div style={{ padding: "2rem", textAlign: "center" }}>
-			<h1>404 - Page Not Found</h1>
-			<p>The page you're looking for doesn't exist.</p>
-		</div>
-	);
-}
-
 function RootDocument() {
 	return (
 		<html lang="en">
@@ -134,22 +137,25 @@ function RootDocument() {
 				<HeadContent />
 			</head>
 			<body>
-				<Header />
-				<Outlet />
-				<Footer />
-				{process.env.NODE_ENV === "development" && (
-					<TanStackDevtools
-						config={{
-							position: "bottom-right",
-						}}
-						plugins={[
-							{
-								name: "Tanstack Router",
-								render: <TanStackRouterDevtoolsPanel />,
-							},
-						]}
-					/>
-				)}
+				<QueryClientProvider client={queryClient}>
+					<Header />
+					<Outlet />
+					<Footer />
+					<AdminButton />
+					{process.env.NODE_ENV === "development" && (
+						<TanStackDevtools
+							config={{
+								position: "bottom-right",
+							}}
+							plugins={[
+								{
+									name: "Tanstack Router",
+									render: <TanStackRouterDevtoolsPanel />,
+								},
+							]}
+						/>
+					)}
+				</QueryClientProvider>
 				<Scripts />
 			</body>
 		</html>

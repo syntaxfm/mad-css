@@ -9,12 +9,64 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TestRouteImport } from './routes/test'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as BracketUsernameRouteImport } from './routes/bracket/$username'
+import { Route as ApiPredictionsIndexRouteImport } from './routes/api/predictions/index'
+import { Route as ApiPredictionsLockRouteImport } from './routes/api/predictions/lock'
+import { Route as ApiOgUsernameRouteImport } from './routes/api/og.$username'
+import { Route as ApiLeaderboardCalculateRouteImport } from './routes/api/leaderboard/calculate'
+import { Route as ApiBracketUsernameRouteImport } from './routes/api/bracket/$username'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ApiAdminUsersRouteImport } from './routes/api/admin/users'
+import { Route as ApiAdminCheckRouteImport } from './routes/api/admin/check'
+import { Route as ApiAdminBracketsUnlockRouteImport } from './routes/api/admin/brackets/unlock'
+import { Route as ApiAdminBracketsLockRouteImport } from './routes/api/admin/brackets/lock'
 
+const TestRoute = TestRouteImport.update({
+  id: '/test',
+  path: '/test',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BracketUsernameRoute = BracketUsernameRouteImport.update({
+  id: '/bracket/$username',
+  path: '/bracket/$username',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPredictionsIndexRoute = ApiPredictionsIndexRouteImport.update({
+  id: '/api/predictions/',
+  path: '/api/predictions/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPredictionsLockRoute = ApiPredictionsLockRouteImport.update({
+  id: '/api/predictions/lock',
+  path: '/api/predictions/lock',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiOgUsernameRoute = ApiOgUsernameRouteImport.update({
+  id: '/api/og/$username',
+  path: '/api/og/$username',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiLeaderboardCalculateRoute = ApiLeaderboardCalculateRouteImport.update({
+  id: '/api/leaderboard/calculate',
+  path: '/api/leaderboard/calculate',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiBracketUsernameRoute = ApiBracketUsernameRouteImport.update({
+  id: '/api/bracket/$username',
+  path: '/api/bracket/$username',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
@@ -22,40 +74,207 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAdminUsersRoute = ApiAdminUsersRouteImport.update({
+  id: '/api/admin/users',
+  path: '/api/admin/users',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminCheckRoute = ApiAdminCheckRouteImport.update({
+  id: '/api/admin/check',
+  path: '/api/admin/check',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminBracketsUnlockRoute = ApiAdminBracketsUnlockRouteImport.update({
+  id: '/api/admin/brackets/unlock',
+  path: '/api/admin/brackets/unlock',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminBracketsLockRoute = ApiAdminBracketsLockRouteImport.update({
+  id: '/api/admin/brackets/lock',
+  path: '/api/admin/brackets/lock',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/test': typeof TestRoute
+  '/bracket/$username': typeof BracketUsernameRoute
+  '/api/admin/check': typeof ApiAdminCheckRoute
+  '/api/admin/users': typeof ApiAdminUsersRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/bracket/$username': typeof ApiBracketUsernameRoute
+  '/api/leaderboard/calculate': typeof ApiLeaderboardCalculateRoute
+  '/api/og/$username': typeof ApiOgUsernameRoute
+  '/api/predictions/lock': typeof ApiPredictionsLockRoute
+  '/api/predictions/': typeof ApiPredictionsIndexRoute
+  '/api/admin/brackets/lock': typeof ApiAdminBracketsLockRoute
+  '/api/admin/brackets/unlock': typeof ApiAdminBracketsUnlockRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/test': typeof TestRoute
+  '/bracket/$username': typeof BracketUsernameRoute
+  '/api/admin/check': typeof ApiAdminCheckRoute
+  '/api/admin/users': typeof ApiAdminUsersRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/bracket/$username': typeof ApiBracketUsernameRoute
+  '/api/leaderboard/calculate': typeof ApiLeaderboardCalculateRoute
+  '/api/og/$username': typeof ApiOgUsernameRoute
+  '/api/predictions/lock': typeof ApiPredictionsLockRoute
+  '/api/predictions': typeof ApiPredictionsIndexRoute
+  '/api/admin/brackets/lock': typeof ApiAdminBracketsLockRoute
+  '/api/admin/brackets/unlock': typeof ApiAdminBracketsUnlockRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/test': typeof TestRoute
+  '/bracket/$username': typeof BracketUsernameRoute
+  '/api/admin/check': typeof ApiAdminCheckRoute
+  '/api/admin/users': typeof ApiAdminUsersRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/bracket/$username': typeof ApiBracketUsernameRoute
+  '/api/leaderboard/calculate': typeof ApiLeaderboardCalculateRoute
+  '/api/og/$username': typeof ApiOgUsernameRoute
+  '/api/predictions/lock': typeof ApiPredictionsLockRoute
+  '/api/predictions/': typeof ApiPredictionsIndexRoute
+  '/api/admin/brackets/lock': typeof ApiAdminBracketsLockRoute
+  '/api/admin/brackets/unlock': typeof ApiAdminBracketsUnlockRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/auth/$'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/test'
+    | '/bracket/$username'
+    | '/api/admin/check'
+    | '/api/admin/users'
+    | '/api/auth/$'
+    | '/api/bracket/$username'
+    | '/api/leaderboard/calculate'
+    | '/api/og/$username'
+    | '/api/predictions/lock'
+    | '/api/predictions/'
+    | '/api/admin/brackets/lock'
+    | '/api/admin/brackets/unlock'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/auth/$'
-  id: '__root__' | '/' | '/api/auth/$'
+  to:
+    | '/'
+    | '/admin'
+    | '/test'
+    | '/bracket/$username'
+    | '/api/admin/check'
+    | '/api/admin/users'
+    | '/api/auth/$'
+    | '/api/bracket/$username'
+    | '/api/leaderboard/calculate'
+    | '/api/og/$username'
+    | '/api/predictions/lock'
+    | '/api/predictions'
+    | '/api/admin/brackets/lock'
+    | '/api/admin/brackets/unlock'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/test'
+    | '/bracket/$username'
+    | '/api/admin/check'
+    | '/api/admin/users'
+    | '/api/auth/$'
+    | '/api/bracket/$username'
+    | '/api/leaderboard/calculate'
+    | '/api/og/$username'
+    | '/api/predictions/lock'
+    | '/api/predictions/'
+    | '/api/admin/brackets/lock'
+    | '/api/admin/brackets/unlock'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
+  TestRoute: typeof TestRoute
+  BracketUsernameRoute: typeof BracketUsernameRoute
+  ApiAdminCheckRoute: typeof ApiAdminCheckRoute
+  ApiAdminUsersRoute: typeof ApiAdminUsersRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiBracketUsernameRoute: typeof ApiBracketUsernameRoute
+  ApiLeaderboardCalculateRoute: typeof ApiLeaderboardCalculateRoute
+  ApiOgUsernameRoute: typeof ApiOgUsernameRoute
+  ApiPredictionsLockRoute: typeof ApiPredictionsLockRoute
+  ApiPredictionsIndexRoute: typeof ApiPredictionsIndexRoute
+  ApiAdminBracketsLockRoute: typeof ApiAdminBracketsLockRoute
+  ApiAdminBracketsUnlockRoute: typeof ApiAdminBracketsUnlockRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/test': {
+      id: '/test'
+      path: '/test'
+      fullPath: '/test'
+      preLoaderRoute: typeof TestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bracket/$username': {
+      id: '/bracket/$username'
+      path: '/bracket/$username'
+      fullPath: '/bracket/$username'
+      preLoaderRoute: typeof BracketUsernameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/predictions/': {
+      id: '/api/predictions/'
+      path: '/api/predictions'
+      fullPath: '/api/predictions/'
+      preLoaderRoute: typeof ApiPredictionsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/predictions/lock': {
+      id: '/api/predictions/lock'
+      path: '/api/predictions/lock'
+      fullPath: '/api/predictions/lock'
+      preLoaderRoute: typeof ApiPredictionsLockRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/og/$username': {
+      id: '/api/og/$username'
+      path: '/api/og/$username'
+      fullPath: '/api/og/$username'
+      preLoaderRoute: typeof ApiOgUsernameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/leaderboard/calculate': {
+      id: '/api/leaderboard/calculate'
+      path: '/api/leaderboard/calculate'
+      fullPath: '/api/leaderboard/calculate'
+      preLoaderRoute: typeof ApiLeaderboardCalculateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/bracket/$username': {
+      id: '/api/bracket/$username'
+      path: '/api/bracket/$username'
+      fullPath: '/api/bracket/$username'
+      preLoaderRoute: typeof ApiBracketUsernameRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/auth/$': {
@@ -65,12 +284,52 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/admin/users': {
+      id: '/api/admin/users'
+      path: '/api/admin/users'
+      fullPath: '/api/admin/users'
+      preLoaderRoute: typeof ApiAdminUsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/check': {
+      id: '/api/admin/check'
+      path: '/api/admin/check'
+      fullPath: '/api/admin/check'
+      preLoaderRoute: typeof ApiAdminCheckRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/brackets/unlock': {
+      id: '/api/admin/brackets/unlock'
+      path: '/api/admin/brackets/unlock'
+      fullPath: '/api/admin/brackets/unlock'
+      preLoaderRoute: typeof ApiAdminBracketsUnlockRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/brackets/lock': {
+      id: '/api/admin/brackets/lock'
+      path: '/api/admin/brackets/lock'
+      fullPath: '/api/admin/brackets/lock'
+      preLoaderRoute: typeof ApiAdminBracketsLockRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
+  TestRoute: TestRoute,
+  BracketUsernameRoute: BracketUsernameRoute,
+  ApiAdminCheckRoute: ApiAdminCheckRoute,
+  ApiAdminUsersRoute: ApiAdminUsersRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiBracketUsernameRoute: ApiBracketUsernameRoute,
+  ApiLeaderboardCalculateRoute: ApiLeaderboardCalculateRoute,
+  ApiOgUsernameRoute: ApiOgUsernameRoute,
+  ApiPredictionsLockRoute: ApiPredictionsLockRoute,
+  ApiPredictionsIndexRoute: ApiPredictionsIndexRoute,
+  ApiAdminBracketsLockRoute: ApiAdminBracketsLockRoute,
+  ApiAdminBracketsUnlockRoute: ApiAdminBracketsUnlockRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
