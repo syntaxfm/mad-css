@@ -21,6 +21,7 @@ export const getRouter = () => {
 			// https://docs.sentry.io/platforms/javascript/guides/tanstackstart-react/configuration/options/#sendDefaultPii
 			sendDefaultPii: true,
 			integrations: [],
+			enableLogs: true,
 		});
 	}
 	return router;
