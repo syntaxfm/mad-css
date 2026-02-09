@@ -1,4 +1,3 @@
-import type { D1Database } from "@cloudflare/workers-types";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { tanstackStartCookies } from "better-auth/tanstack-start";

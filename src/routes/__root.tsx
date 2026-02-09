@@ -38,63 +38,63 @@ export const Route = createRootRoute({
 				{
 					charSet: "utf-8",
 				},
-			{
-				name: "viewport",
-				content: "width=device-width, initial-scale=1",
-			},
-			{
-				name: "color-scheme",
-				content: "dark",
-			},
-			{
-				name: "theme-color",
-				content: "#f3370e",
-			},
-			{
-				title: "March Mad CSS",
-			},
-			{
-				name: "description",
-				content: "The Ultimate CSS Tournament. Brought to you by Syntax",
-			},
-			// Open Graph
-			{
-				property: "og:title",
-				content: "March Mad CSS",
-			},
-			{
-				property: "og:description",
-				content: "The Ultimate CSS Tournament. Brought to you by Syntax",
-			},
-			{
-				property: "og:image",
-				content: `${origin}/og.jpg`,
-			},
-			{
-				property: "og:type",
-				content: "website",
-			},
-			// Twitter
-			{
-				name: "twitter:card",
-				content: "summary_large_image",
-			},
-			{
-				name: "twitter:image",
-				content: `${origin}/og.jpg`,
-			},
-			{
-				name: "twitter:title",
-				content: "March Mad CSS",
-			},
-			{
-				name: "twitter:site",
-				content: "@syntaxfm",
-			},
-			{
-				name: "twitter:description",
-				content: "The Ultimate CSS Tournament. Brought to you by Syntax",
-			},
+				{
+					name: "viewport",
+					content: "width=device-width, initial-scale=1",
+				},
+				{
+					name: "color-scheme",
+					content: "dark",
+				},
+				{
+					name: "theme-color",
+					content: "#f3370e",
+				},
+				{
+					title: "March Mad CSS",
+				},
+				{
+					name: "description",
+					content: "The Ultimate CSS Tournament. Brought to you by Syntax",
+				},
+				// Open Graph
+				{
+					property: "og:title",
+					content: "March Mad CSS",
+				},
+				{
+					property: "og:description",
+					content: "The Ultimate CSS Tournament. Brought to you by Syntax",
+				},
+				{
+					property: "og:image",
+					content: `${origin}/og.jpg`,
+				},
+				{
+					property: "og:type",
+					content: "website",
+				},
+				// Twitter
+				{
+					name: "twitter:card",
+					content: "summary_large_image",
+				},
+				{
+					name: "twitter:image",
+					content: `${origin}/og.jpg`,
+				},
+				{
+					name: "twitter:title",
+					content: "March Mad CSS",
+				},
+				{
+					name: "twitter:site",
+					content: "@syntaxfm",
+				},
+				{
+					name: "twitter:description",
+					content: "The Ultimate CSS Tournament. Brought to you by Syntax",
+				},
 			],
 			links: [
 				{
