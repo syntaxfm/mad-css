@@ -11,6 +11,7 @@ export function createAuth(d1: D1Database) {
 		const db = createDb(d1);
 
 		return betterAuth({
+			baseURL: process.env.BETTER_AUTH_URL,
 			database: drizzleAdapter(db, {
 				provider: "sqlite",
 				schema,
