@@ -18,6 +18,7 @@ export function createAuth(d1: D1Database) {
 			trustedOrigins: [
 				"http://localhost:3000",
 				"https://madcss.com",
+				"https://fix-forward-mad-css.syntax-3eb.workers.dev/",
 				process.env.BETTER_AUTH_URL,
 			].filter(Boolean) as string[],
 			socialProviders: {
