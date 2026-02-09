@@ -9,12 +9,6 @@ import * as schema from "@/db/schema";
 export function createAuth(d1: D1Database) {
 	try {
 		const db = createDb(d1);
-		console.log("🔑 GITHUB_CLIENT_ID", process.env.GITHUB_CLIENT_ID);
-		console.log(
-			"🔑 GITHUB_CLIENT_SECRET",
-			process.env.GITHUB_CLIENT_SECRET.slice(-5),
-		);
-		console.log("BETTER_AUTH_SECRET", process.env.BETTER_AUTH_SECRET.slice(-5));
 		return betterAuth({
 			baseURL: process.env.BETTER_AUTH_URL,
 			database: drizzleAdapter(db, {
@@ -23,8 +17,6 @@ export function createAuth(d1: D1Database) {
 			}),
 			trustedOrigins: [
 				"http://localhost:3000",
-				"https://madcss.com",
-				"https://fix-forward-mad-css.syntax-3eb.workers.dev/",
 				process.env.BETTER_AUTH_URL,
 			].filter(Boolean) as string[],
 			socialProviders: {
