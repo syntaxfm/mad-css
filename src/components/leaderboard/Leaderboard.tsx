@@ -1,26 +1,69 @@
-import { useEffect, useState } from "react";
-import type { LeaderboardEntry } from "@/routes/api/leaderboard/index";
+import { useQuery } from "@tanstack/react-query";
+import { createServerFn } from "@tanstack/react-start";
 import { LeaderboardScore } from "./LeaderboardScore";
 import "./leaderboard.css";
 
-export function Leaderboard() {
-	const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
-	const [loading, setLoading] = useState(true);
+type LeaderboardEntry = {
+	rank: number;
+	userId: string;
+	userName: string;
+	userImage: string | null;
+	username: string | null;
+	round1Score: number;
+	round2Score: number;
+	round3Score: number;
+	round4Score: number;
+	totalScore: number;
+};
 
-	useEffect(() => {
-		fetch("/api/leaderboard/")
-			.then((res) => {
-				if (!res.ok) throw new Error(`HTTP ${res.status}`);
-				return res.json() as Promise<{ leaderboard?: LeaderboardEntry[] }>;
-			})
-			.then((data) => {
-				setEntries(data.leaderboard || []);
-				setLoading(false);
-			})
-			.catch(() => {
-				setLoading(false);
-			});
-	}, []);
+const getLeaderboard = createServerFn({ method: "GET" }).handler(async () => {
+	const { env } = await import("cloudflare:workers");
+	const { createDb } = await import("@/db");
+	const { desc, eq } = await import("drizzle-orm");
+	const schema = await import("@/db/schema");
+
+	const db = createDb(env.DB);
+
+	const scores = await db
+		.select({
+			userId: schema.userScore.userId,
+			round1Score: schema.userScore.round1Score,
+			round2Score: schema.userScore.round2Score,
+			round3Score: schema.userScore.round3Score,
+			round4Score: schema.userScore.round4Score,
+			totalScore: schema.userScore.totalScore,
+			userName: schema.user.name,
+			userImage: schema.user.image,
+			username: schema.user.username,
+		})
+		.from(schema.userScore)
+		.innerJoin(schema.user, eq(schema.userScore.userId, schema.user.id))
+		.orderBy(desc(schema.userScore.totalScore))
+		.limit(100);
+
+	return scores.map(
+		(score, index): LeaderboardEntry => ({
+			rank: index + 1,
+			userId: score.userId,
+			userName: score.userName,
+			userImage: score.userImage,
+			username: score.username,
+			round1Score: score.round1Score,
+			round2Score: score.round2Score,
+			round3Score: score.round3Score,
+			round4Score: score.round4Score,
+			totalScore: score.totalScore,
+		}),
+	);
+});
+
+export function Leaderboard() {
+	const { data, isLoading } = useQuery<LeaderboardEntry[]>({
+		queryKey: ["leaderboard"],
+		queryFn: () => getLeaderboard(),
+		staleTime: 1000 * 60 * 5,
+	});
+	const entries = data ?? [];
 
 	return (
 		<section className="section leaderboard-section">
@@ -35,7 +78,7 @@ export function Leaderboard() {
 
 						<h3 className="leaderboard-title">Top Predictors</h3>
 
-						{loading ? (
+						{isLoading ? (
 							<div className="leaderboard-empty">Loading...</div>
 						) : entries.length === 0 ? (
 							<div className="leaderboard-empty">

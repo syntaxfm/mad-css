@@ -14,7 +14,6 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BracketUsernameRouteImport } from './routes/bracket/$username'
 import { Route as ApiPredictionsIndexRouteImport } from './routes/api/predictions/index'
-import { Route as ApiLeaderboardIndexRouteImport } from './routes/api/leaderboard/index'
 import { Route as ApiPredictionsLockRouteImport } from './routes/api/predictions/lock'
 import { Route as ApiOgUsernameRouteImport } from './routes/api/og.$username'
 import { Route as ApiLeaderboardCalculateRouteImport } from './routes/api/leaderboard/calculate'
@@ -48,11 +47,6 @@ const BracketUsernameRoute = BracketUsernameRouteImport.update({
 const ApiPredictionsIndexRoute = ApiPredictionsIndexRouteImport.update({
   id: '/api/predictions/',
   path: '/api/predictions/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiLeaderboardIndexRoute = ApiLeaderboardIndexRouteImport.update({
-  id: '/api/leaderboard/',
-  path: '/api/leaderboard/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPredictionsLockRoute = ApiPredictionsLockRouteImport.update({
@@ -113,7 +107,6 @@ export interface FileRoutesByFullPath {
   '/api/leaderboard/calculate': typeof ApiLeaderboardCalculateRoute
   '/api/og/$username': typeof ApiOgUsernameRoute
   '/api/predictions/lock': typeof ApiPredictionsLockRoute
-  '/api/leaderboard/': typeof ApiLeaderboardIndexRoute
   '/api/predictions/': typeof ApiPredictionsIndexRoute
   '/api/admin/brackets/lock': typeof ApiAdminBracketsLockRoute
   '/api/admin/brackets/unlock': typeof ApiAdminBracketsUnlockRoute
@@ -130,7 +123,6 @@ export interface FileRoutesByTo {
   '/api/leaderboard/calculate': typeof ApiLeaderboardCalculateRoute
   '/api/og/$username': typeof ApiOgUsernameRoute
   '/api/predictions/lock': typeof ApiPredictionsLockRoute
-  '/api/leaderboard': typeof ApiLeaderboardIndexRoute
   '/api/predictions': typeof ApiPredictionsIndexRoute
   '/api/admin/brackets/lock': typeof ApiAdminBracketsLockRoute
   '/api/admin/brackets/unlock': typeof ApiAdminBracketsUnlockRoute
@@ -148,7 +140,6 @@ export interface FileRoutesById {
   '/api/leaderboard/calculate': typeof ApiLeaderboardCalculateRoute
   '/api/og/$username': typeof ApiOgUsernameRoute
   '/api/predictions/lock': typeof ApiPredictionsLockRoute
-  '/api/leaderboard/': typeof ApiLeaderboardIndexRoute
   '/api/predictions/': typeof ApiPredictionsIndexRoute
   '/api/admin/brackets/lock': typeof ApiAdminBracketsLockRoute
   '/api/admin/brackets/unlock': typeof ApiAdminBracketsUnlockRoute
@@ -167,7 +158,6 @@ export interface FileRouteTypes {
     | '/api/leaderboard/calculate'
     | '/api/og/$username'
     | '/api/predictions/lock'
-    | '/api/leaderboard/'
     | '/api/predictions/'
     | '/api/admin/brackets/lock'
     | '/api/admin/brackets/unlock'
@@ -184,7 +174,6 @@ export interface FileRouteTypes {
     | '/api/leaderboard/calculate'
     | '/api/og/$username'
     | '/api/predictions/lock'
-    | '/api/leaderboard'
     | '/api/predictions'
     | '/api/admin/brackets/lock'
     | '/api/admin/brackets/unlock'
@@ -201,7 +190,6 @@ export interface FileRouteTypes {
     | '/api/leaderboard/calculate'
     | '/api/og/$username'
     | '/api/predictions/lock'
-    | '/api/leaderboard/'
     | '/api/predictions/'
     | '/api/admin/brackets/lock'
     | '/api/admin/brackets/unlock'
@@ -219,7 +207,6 @@ export interface RootRouteChildren {
   ApiLeaderboardCalculateRoute: typeof ApiLeaderboardCalculateRoute
   ApiOgUsernameRoute: typeof ApiOgUsernameRoute
   ApiPredictionsLockRoute: typeof ApiPredictionsLockRoute
-  ApiLeaderboardIndexRoute: typeof ApiLeaderboardIndexRoute
   ApiPredictionsIndexRoute: typeof ApiPredictionsIndexRoute
   ApiAdminBracketsLockRoute: typeof ApiAdminBracketsLockRoute
   ApiAdminBracketsUnlockRoute: typeof ApiAdminBracketsUnlockRoute
@@ -260,13 +247,6 @@ declare module '@tanstack/react-router' {
       path: '/api/predictions'
       fullPath: '/api/predictions/'
       preLoaderRoute: typeof ApiPredictionsIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/leaderboard/': {
-      id: '/api/leaderboard/'
-      path: '/api/leaderboard'
-      fullPath: '/api/leaderboard/'
-      preLoaderRoute: typeof ApiLeaderboardIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/predictions/lock': {
@@ -347,7 +327,6 @@ const rootRouteChildren: RootRouteChildren = {
   ApiLeaderboardCalculateRoute: ApiLeaderboardCalculateRoute,
   ApiOgUsernameRoute: ApiOgUsernameRoute,
   ApiPredictionsLockRoute: ApiPredictionsLockRoute,
-  ApiLeaderboardIndexRoute: ApiLeaderboardIndexRoute,
   ApiPredictionsIndexRoute: ApiPredictionsIndexRoute,
   ApiAdminBracketsLockRoute: ApiAdminBracketsLockRoute,
   ApiAdminBracketsUnlockRoute: ApiAdminBracketsUnlockRoute,
