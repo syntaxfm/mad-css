@@ -271,6 +271,7 @@ function AdminPage() {
 	const [searchInput, setSearchInput] = useState("");
 	const [searchQuery, setSearchQuery] = useState("");
 	const [unlockingUserId, setUnlockingUserId] = useState<string | null>(null);
+	const [lockingUserId, setLockingUserId] = useState<string | null>(null);
 
 	// Fetch data function for subsequent requests (pagination, search)
 	const fetchData = async (page: number, search: string) => {
@@ -377,6 +378,44 @@ function AdminPage() {
 		}
 	};
 
+	const handleLockBracket = async (userId: string, userName: string) => {
+		if (!confirm(`Lock bracket for ${userName}?`)) return;
+
+		setLockingUserId(userId);
+		setMessage(null);
+
+		try {
+			const response = await fetch("/api/admin/brackets/lock", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ userId }),
+			});
+
+			const data = (await response.json()) as {
+				success?: boolean;
+				error?: string;
+			};
+
+			if (response.ok) {
+				setMessage({
+					type: "success",
+					text: `Locked bracket for ${userName}`,
+				});
+				invalidateAllPredictions(queryClient);
+				fetchData(pagination.page, searchQuery);
+			} else {
+				setMessage({
+					type: "error",
+					text: data.error || "Failed to lock bracket",
+				});
+			}
+		} catch {
+			setMessage({ type: "error", text: "Network error while locking" });
+		} finally {
+			setLockingUserId(null);
+		}
+	};
+
 	return (
 		<div className="admin-page">
 			<div className="admin-header">
@@ -477,26 +516,37 @@ function AdminPage() {
 											: "-"}
 									</td>
 									<td className="actions-cell">
-										{user.username && user.isLocked && (
-											<>
-												<Link
-													to="/bracket/$username"
-													params={{ username: user.username }}
-													className="view-bracket-link"
-												>
-													View
-												</Link>
-												<button
-													type="button"
-													className="unlock-btn"
-													onClick={() =>
-														handleUnlockBracket(user.id, user.name)
-													}
-													disabled={unlockingUserId === user.id}
-												>
-													{unlockingUserId === user.id ? "..." : "Unlock"}
-												</button>
-											</>
+										{user.username && (
+											<Link
+												to="/bracket/$username"
+												params={{ username: user.username }}
+												className="view-bracket-link"
+											>
+												View
+											</Link>
+										)}
+										{user.isLocked ? (
+											<button
+												type="button"
+												className="unlock-btn"
+												onClick={() =>
+													handleUnlockBracket(user.id, user.name)
+												}
+												disabled={unlockingUserId === user.id}
+											>
+												{unlockingUserId === user.id ? "..." : "Unlock"}
+											</button>
+										) : (
+											<button
+												type="button"
+												className="lock-btn"
+												onClick={() =>
+													handleLockBracket(user.id, user.name)
+												}
+												disabled={lockingUserId === user.id}
+											>
+												{lockingUserId === user.id ? "..." : "Lock"}
+											</button>
 										)}
 									</td>
 								</tr>

@@ -24,6 +24,7 @@ import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiAdminUsersRouteImport } from './routes/api/admin/users'
 import { Route as ApiAdminCheckRouteImport } from './routes/api/admin/check'
 import { Route as ApiAdminBracketsUnlockRouteImport } from './routes/api/admin/brackets/unlock'
+import { Route as ApiAdminBracketsLockRouteImport } from './routes/api/admin/brackets/lock'
 
 const TestRoute = TestRouteImport.update({
   id: '/test',
@@ -101,6 +102,11 @@ const ApiAdminBracketsUnlockRoute = ApiAdminBracketsUnlockRouteImport.update({
   path: '/api/admin/brackets/unlock',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAdminBracketsLockRoute = ApiAdminBracketsLockRouteImport.update({
+  id: '/api/admin/brackets/lock',
+  path: '/api/admin/brackets/lock',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -117,6 +123,7 @@ export interface FileRoutesByFullPath {
   '/api/predictions/lock': typeof ApiPredictionsLockRoute
   '/api/leaderboard/': typeof ApiLeaderboardIndexRoute
   '/api/predictions/': typeof ApiPredictionsIndexRoute
+  '/api/admin/brackets/lock': typeof ApiAdminBracketsLockRoute
   '/api/admin/brackets/unlock': typeof ApiAdminBracketsUnlockRoute
 }
 export interface FileRoutesByTo {
@@ -134,6 +141,7 @@ export interface FileRoutesByTo {
   '/api/predictions/lock': typeof ApiPredictionsLockRoute
   '/api/leaderboard': typeof ApiLeaderboardIndexRoute
   '/api/predictions': typeof ApiPredictionsIndexRoute
+  '/api/admin/brackets/lock': typeof ApiAdminBracketsLockRoute
   '/api/admin/brackets/unlock': typeof ApiAdminBracketsUnlockRoute
 }
 export interface FileRoutesById {
@@ -152,6 +160,7 @@ export interface FileRoutesById {
   '/api/predictions/lock': typeof ApiPredictionsLockRoute
   '/api/leaderboard/': typeof ApiLeaderboardIndexRoute
   '/api/predictions/': typeof ApiPredictionsIndexRoute
+  '/api/admin/brackets/lock': typeof ApiAdminBracketsLockRoute
   '/api/admin/brackets/unlock': typeof ApiAdminBracketsUnlockRoute
 }
 export interface FileRouteTypes {
@@ -171,6 +180,7 @@ export interface FileRouteTypes {
     | '/api/predictions/lock'
     | '/api/leaderboard/'
     | '/api/predictions/'
+    | '/api/admin/brackets/lock'
     | '/api/admin/brackets/unlock'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -188,6 +198,7 @@ export interface FileRouteTypes {
     | '/api/predictions/lock'
     | '/api/leaderboard'
     | '/api/predictions'
+    | '/api/admin/brackets/lock'
     | '/api/admin/brackets/unlock'
   id:
     | '__root__'
@@ -205,6 +216,7 @@ export interface FileRouteTypes {
     | '/api/predictions/lock'
     | '/api/leaderboard/'
     | '/api/predictions/'
+    | '/api/admin/brackets/lock'
     | '/api/admin/brackets/unlock'
   fileRoutesById: FileRoutesById
 }
@@ -223,6 +235,7 @@ export interface RootRouteChildren {
   ApiPredictionsLockRoute: typeof ApiPredictionsLockRoute
   ApiLeaderboardIndexRoute: typeof ApiLeaderboardIndexRoute
   ApiPredictionsIndexRoute: typeof ApiPredictionsIndexRoute
+  ApiAdminBracketsLockRoute: typeof ApiAdminBracketsLockRoute
   ApiAdminBracketsUnlockRoute: typeof ApiAdminBracketsUnlockRoute
 }
 
@@ -333,6 +346,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminBracketsUnlockRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/admin/brackets/lock': {
+      id: '/api/admin/brackets/lock'
+      path: '/api/admin/brackets/lock'
+      fullPath: '/api/admin/brackets/lock'
+      preLoaderRoute: typeof ApiAdminBracketsLockRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -351,6 +371,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPredictionsLockRoute: ApiPredictionsLockRoute,
   ApiLeaderboardIndexRoute: ApiLeaderboardIndexRoute,
   ApiPredictionsIndexRoute: ApiPredictionsIndexRoute,
+  ApiAdminBracketsLockRoute: ApiAdminBracketsLockRoute,
   ApiAdminBracketsUnlockRoute: ApiAdminBracketsUnlockRoute,
 }
 export const routeTree = rootRouteImport

@@ -372,6 +372,31 @@
 	cursor: not-allowed;
 }
 
+.lock-btn {
+	padding: 6px 12px;
+	background: transparent;
+	border: 2px solid var(--yellow);
+	color: var(--yellow);
+	font-family: var(--font-block);
+	font-size: 0.65rem;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	cursor: pointer;
+	transition:
+		background 0.2s,
+		color 0.2s;
+}
+
+.lock-btn:hover:not(:disabled) {
+	background: var(--yellow);
+	color: var(--black);
+}
+
+.lock-btn:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
 /* ============================================
    Messages
    ============================================ */
