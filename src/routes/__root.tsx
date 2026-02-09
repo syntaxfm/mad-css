@@ -7,9 +7,9 @@ import {
 	Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
-import { AdminButton } from "@/components/AdminButton";
 import { createIsomorphicFn } from "@tanstack/react-start";
 import { getRequestUrl } from "@tanstack/react-start/server";
+import { AdminButton } from "@/components/AdminButton";
 import { Footer } from "@/components/footer/Footer";
 import { Header } from "@/components/Header";
 import { NotFound } from "@/components/NotFound";
@@ -32,7 +32,6 @@ export const Route = createRootRoute({
 	head: () => {
 		const url = getLocation();
 		const origin = url.origin;
-		console.log(origin);
 		return {
 			meta: [
 				{

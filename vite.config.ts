@@ -3,6 +3,7 @@ import tsConfigPaths from 'vite-tsconfig-paths'
 import { cloudflare } from '@cloudflare/vite-plugin'
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import viteReact from '@vitejs/plugin-react'
+import { sentryTanstackStart } from '@sentry/tanstackstart-react'
 
 export default defineConfig({
   server: {
@@ -17,5 +18,10 @@ export default defineConfig({
     }),
     tanstackStart(),
     viteReact(),
+    sentryTanstackStart({
+      org: "syntax-fm",
+      project: "mad-css",
+      authToken: process.env.SENTRY_AUTH_TOKEN,
+    }),
   ],
 })
