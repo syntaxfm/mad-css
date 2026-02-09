@@ -1,4 +1,5 @@
 @import "./reset.css";
+@import "./buttons.css";
 
 :root {
 	--orange: #f3370e;
@@ -6,6 +7,7 @@
 	--black: #000;
 	--white: #fff;
 	--beige: #f5eeda;
+	--bluesky: #0f73ff;
 	/* TODO: Add web fonts */
 	--font-serif: "serif", serif;
 	--font-block: "Alfa Slab One", "CollegiateBlackFLF", sans-serif;
@@ -143,4 +145,62 @@ p {
 		background: var(--yellow);
 		z-index: -1;
 	}
+}
+
+/* 404 Not Found Page */
+.not-found {
+	max-width: 500px;
+	margin: 60px auto;
+	padding: 40px;
+	background: var(--beige);
+	border: 4px solid var(--black);
+	text-align: center;
+	mask-image:
+		url("./assets/paper/repeating-paper-top.png"),
+		url("./assets/paper/repeating-paper-bottom.png"),
+		linear-gradient(black, black);
+	mask-size:
+		auto 20px,
+		auto 20px,
+		100% 100%;
+	mask-position:
+		center 0px,
+		center 100%,
+		center;
+	mask-repeat: repeat-x, repeat-x, no-repeat;
+	mask-composite: exclude;
+}
+
+.not-found-code {
+	font-family: var(--font-block);
+	font-size: 8rem;
+	color: var(--orange);
+	line-height: 1;
+	letter-spacing: 0.05em;
+}
+
+.not-found-title {
+	font-family: var(--font-serif);
+	font-size: 2.5rem;
+	color: var(--black);
+	margin: 0.5rem 0 1rem;
+	text-transform: uppercase;
+}
+
+.not-found-text {
+	color: var(--black);
+	margin-bottom: 1.5rem;
+}
+
+
+.sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
 }
