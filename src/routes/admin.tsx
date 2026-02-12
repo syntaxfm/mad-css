@@ -4,6 +4,11 @@ import { getRequestHeaders } from "@tanstack/react-start/server";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { TOTAL_GAMES } from "@/data/players";
+import {
+	SIMULATION_STAGES,
+	STAGE_CONFIG,
+	type SimulationStage,
+} from "@/lib/simulation";
 import { deleteUserFn, generateTestUserFn } from "@/lib/users.server";
 import type { AdminStats, AdminUser } from "@/routes/api/admin/users";
 import "@/styles/admin.css";
@@ -248,6 +253,7 @@ function AdminPage() {
 	const [isLoading, setIsLoading] = useState(false);
 	const [searchInput, setSearchInput] = useState("");
 	const [searchQuery, setSearchQuery] = useState("");
+	const [simStage, setSimStage] = useState<SimulationStage | "">("");
 
 	// Fetch data function for subsequent requests (pagination, search)
 	const fetchData = async (page: number, search: string) => {
@@ -285,21 +291,31 @@ function AdminPage() {
 		setMessage(null);
 
 		try {
+			const body: { simulationStage?: string } = {};
+			if (simStage) {
+				body.simulationStage = simStage;
+			}
+
 			const response = await fetch("/api/leaderboard/calculate", {
 				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(body),
 			});
 
 			const data = (await response.json()) as {
 				updated?: number;
+				simulated?: boolean;
 				error?: string;
 			};
 
 			if (response.ok) {
+				const label = simStage
+					? `(simulated: ${STAGE_CONFIG[simStage].label})`
+					: "(live data)";
 				setMessage({
 					type: "success",
-					text: `Recalculated scores for ${data.updated} users.`,
+					text: `Recalculated scores for ${data.updated} users ${label}.`,
 				});
-				// Refresh current page data
 				fetchData(pagination.page, searchQuery);
 			} else {
 				setMessage({
@@ -384,14 +400,30 @@ function AdminPage() {
 			)}
 
 			<div className="admin-actions">
-				<button
-					type="button"
-					className="admin-btn"
-					onClick={handleRecalculateScores}
-					disabled={isCalculating}
-				>
-					{isCalculating ? "Calculating..." : "Recalculate All Scores"}
-				</button>
+				<div className="admin-action-group">
+					<select
+						className="admin-select"
+						value={simStage}
+						onChange={(e) =>
+							setSimStage(e.target.value as SimulationStage | "")
+						}
+					>
+						<option value="">Live Data</option>
+						{SIMULATION_STAGES.map((stage) => (
+							<option key={stage} value={stage}>
+								Sim: {STAGE_CONFIG[stage].label}
+							</option>
+						))}
+					</select>
+					<button
+						type="button"
+						className="admin-btn"
+						onClick={handleRecalculateScores}
+						disabled={isCalculating}
+					>
+						{isCalculating ? "Calculating..." : "Recalculate All Scores"}
+					</button>
+				</div>
 				<button
 					type="button"
 					className="admin-btn"

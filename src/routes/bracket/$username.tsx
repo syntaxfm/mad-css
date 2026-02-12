@@ -1,8 +1,10 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 import { Bracket } from "@/components/bracket/Bracket";
 import { NotFound } from "@/components/NotFound";
+import { getResultsFromBracket } from "@/data/players";
 import "@/styles/share-bracket.css";
 
 const usernameInputSchema = z.object({
@@ -110,8 +112,35 @@ export const Route = createFileRoute("/bracket/$username")({
 	component: BracketPage,
 });
 
+function getBracketResults(): Record<string, string> {
+	const results: Record<string, string> = {};
+	for (const r of getResultsFromBracket()) {
+		results[r.gameId] = r.winnerId;
+	}
+	return results;
+}
+
 function BracketPage() {
 	const data = Route.useLoaderData();
+	const [tournamentResults, setTournamentResults] =
+		useState<Record<string, string>>(getBracketResults);
+
+	// Listen for simulation overrides from the admin button
+	useEffect(() => {
+		const handler = (e: Event) => {
+			const customEvent = e as CustomEvent<{
+				results: Record<string, string> | null;
+			}>;
+			if (customEvent.detail.results) {
+				setTournamentResults(customEvent.detail.results);
+			} else {
+				setTournamentResults(getBracketResults());
+			}
+		};
+		window.addEventListener("tournament-results-changed", handler);
+		return () =>
+			window.removeEventListener("tournament-results-changed", handler);
+	}, []);
 
 	// Convert array predictions to record format
 	const predictions: Record<string, string> = {};
@@ -138,12 +167,17 @@ function BracketPage() {
 							</span>
 						</div>
 					</div>
-					<a href="/test" className="btn-primary">
+					<a href="/test" className="btn btn-primary">
 						Make Your Own Picks
 					</a>
 				</div>
 			</div>
-			<Bracket isInteractive predictions={predictions} showPicks />
+			<Bracket
+				isInteractive
+				predictions={predictions}
+				tournamentResults={tournamentResults}
+				showPicks
+			/>
 		</div>
 	);
 }

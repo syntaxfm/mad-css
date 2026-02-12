@@ -9,6 +9,10 @@ import {
 } from "@/data/players";
 import { createDb } from "@/db";
 import * as schema from "@/db/schema";
+import {
+	buildResultsUpToStage,
+	type SimulationStage,
+} from "@/lib/simulation";
 
 // Points per correct pick in each round
 const ROUND_1_POINTS = 10;
@@ -62,15 +66,28 @@ export function calculateScoresForUser(
 	};
 }
 
-export async function recalculateAllUserScores(database: D1Database) {
+export async function recalculateAllUserScores(
+	database: D1Database,
+	simulationStage?: SimulationStage,
+) {
 	const db = createDb(database);
 
-	// Get results from players.ts (single source of truth)
-	const bracketResults = getResultsFromBracket();
-	const results = bracketResults.map((r) => ({
-		gameId: r.gameId,
-		winnerId: r.winnerId,
-	}));
+	let results: Array<{ gameId: string; winnerId: string }>;
+
+	if (simulationStage) {
+		// Use simulated results for the given stage
+		const simulated = buildResultsUpToStage(simulationStage);
+		results = Object.entries(simulated).map(([gameId, winnerId]) => ({
+			gameId,
+			winnerId,
+		}));
+	} else {
+		// Use real results from players.ts
+		results = getResultsFromBracket().map((r) => ({
+			gameId: r.gameId,
+			winnerId: r.winnerId,
+		}));
+	}
 
 	if (results.length === 0) {
 		return { updated: 0 };
