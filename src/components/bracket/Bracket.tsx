@@ -134,7 +134,8 @@ function BracketToolbar() {
 	const blueskyShareUrl = username
 		? `https://bsky.app/intent/compose?text=${encodeURIComponent(`Check out my March Mad CSS bracket picks! 🏀\n\n${shareUrl}`)}`
 		: null;
-	const showShare = isLoggedIn && isDeadlinePassed && !!shareUrl;
+	const isBracketComplete = pickCount === TOTAL_GAMES;
+	const showShare = isLoggedIn && (isBracketComplete || isDeadlinePassed) && !!shareUrl;
 
 	const handleCopyLink = async () => {
 		if (!shareUrl) return;
