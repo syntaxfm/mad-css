@@ -131,6 +131,35 @@
 	flex-wrap: wrap;
 }
 
+.admin-action-group {
+	display: flex;
+	gap: 0;
+	align-items: stretch;
+}
+
+.admin-select {
+	padding: 12px 16px;
+	background: var(--beige);
+	border: 3px solid var(--black);
+	border-right: none;
+	color: var(--black);
+	font-family: var(--font-block);
+	font-size: 0.75rem;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	cursor: pointer;
+	appearance: none;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' fill='none' stroke='%23000' stroke-width='2'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: right 10px center;
+	padding-right: 32px;
+}
+
+.admin-action-group .admin-btn {
+	border-left: none;
+	box-shadow: 4px 4px 0 var(--black);
+}
+
 .admin-btn {
 	display: inline-flex;
 	align-items: center;
@@ -159,6 +188,37 @@
 .admin-btn:active:not(:disabled) {
 	transform: translate(4px, 4px);
 	box-shadow: none;
+}
+
+.delete-user-btn {
+	padding: 4px 10px;
+	background: var(--orange);
+	color: var(--white);
+	border: 2px solid var(--black);
+	box-shadow: 2px 2px 0 var(--black);
+	font-family: var(--font-block);
+	font-size: 0.65rem;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	cursor: pointer;
+	transition:
+		transform 0.1s,
+		box-shadow 0.1s;
+}
+
+.delete-user-btn:hover:not(:disabled) {
+	transform: translate(1px, 1px);
+	box-shadow: 1px 1px 0 var(--black);
+}
+
+.delete-user-btn:active:not(:disabled) {
+	transform: translate(2px, 2px);
+	box-shadow: none;
+}
+
+.delete-user-btn:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
 }
 
 .admin-btn:disabled {
@@ -296,18 +356,6 @@
 	letter-spacing: 0.05em;
 }
 
-.status-badge.locked {
-	background: var(--yellow);
-	color: var(--black);
-	border: 2px solid var(--black);
-}
-
-.status-badge.unlocked {
-	background: transparent;
-	border: 2px solid var(--orange);
-	color: var(--orange);
-}
-
 /* ============================================
    Action Buttons
    ============================================ */
@@ -347,55 +395,6 @@
 	box-shadow: 1px 1px 0 var(--black);
 }
 
-.unlock-btn {
-	padding: 6px 12px;
-	background: transparent;
-	border: 2px solid var(--orange);
-	color: var(--orange);
-	font-family: var(--font-block);
-	font-size: 0.65rem;
-	text-transform: uppercase;
-	letter-spacing: 0.05em;
-	cursor: pointer;
-	transition:
-		background 0.2s,
-		color 0.2s;
-}
-
-.unlock-btn:hover:not(:disabled) {
-	background: var(--orange);
-	color: var(--white);
-}
-
-.unlock-btn:disabled {
-	opacity: 0.5;
-	cursor: not-allowed;
-}
-
-.lock-btn {
-	padding: 6px 12px;
-	background: transparent;
-	border: 2px solid var(--yellow);
-	color: var(--yellow);
-	font-family: var(--font-block);
-	font-size: 0.65rem;
-	text-transform: uppercase;
-	letter-spacing: 0.05em;
-	cursor: pointer;
-	transition:
-		background 0.2s,
-		color 0.2s;
-}
-
-.lock-btn:hover:not(:disabled) {
-	background: var(--yellow);
-	color: var(--black);
-}
-
-.lock-btn:disabled {
-	opacity: 0.5;
-	cursor: not-allowed;
-}
 
 /* ============================================
    Messages

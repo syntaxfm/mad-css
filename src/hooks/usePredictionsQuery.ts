@@ -7,8 +7,6 @@ import {
 
 export type PredictionsData = {
 	predictions: Record<string, string>;
-	isLocked: boolean;
-	lockedAt: string | null;
 };
 
 async function fetchPredictions(): Promise<PredictionsData> {
@@ -26,8 +24,6 @@ async function fetchPredictions(): Promise<PredictionsData> {
 
 	return {
 		predictions,
-		isLocked: data.isLocked,
-		lockedAt: data.lockedAt,
 	};
 }
 
@@ -53,20 +49,6 @@ async function savePredictionsApi(
 	}
 }
 
-async function lockBracketApi(): Promise<{ lockedAt: string }> {
-	const response = await fetch("/api/predictions/lock", {
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-	});
-
-	if (!response.ok) {
-		const data = await response.json();
-		throw new Error(data.error || "Failed to lock bracket");
-	}
-
-	return response.json();
-}
-
 export function predictionsQueryKey(userId: string | undefined) {
 	return ["predictions", userId] as const;
 }
@@ -76,11 +58,7 @@ export function usePredictionsQuery(userId: string | undefined) {
 		queryKey: predictionsQueryKey(userId),
 		queryFn: fetchPredictions,
 		enabled: !!userId,
-		staleTime: (query) => {
-			// If locked, cache for 1 hour (only admin unlock invalidates)
-			// If unlocked, cache for 30 seconds
-			return query.state.data?.isLocked ? 1000 * 60 * 60 : 1000 * 30;
-		},
+		staleTime: 1000 * 30,
 	});
 }
 
@@ -98,21 +76,7 @@ export function useSavePredictionsMutation(userId: string | undefined) {
 	});
 }
 
-export function useLockBracketMutation(userId: string | undefined) {
-	const queryClient = useQueryClient();
-	return useMutation({
-		mutationFn: lockBracketApi,
-		onSuccess: () => {
-			if (userId) {
-				queryClient.invalidateQueries({
-					queryKey: predictionsQueryKey(userId),
-				});
-			}
-		},
-	});
-}
-
-// Helper to invalidate all predictions (used by admin unlock)
+// Helper to invalidate all predictions (used by admin)
 export function invalidateAllPredictions(queryClient: QueryClient) {
 	queryClient.invalidateQueries({ queryKey: ["predictions"] });
 }

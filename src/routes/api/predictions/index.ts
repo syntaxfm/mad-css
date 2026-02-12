@@ -10,7 +10,7 @@ import { predictionsArraySchema } from "@/lib/schemas/prediction";
 export const Route = createFileRoute("/api/predictions/")({
 	server: {
 		handlers: {
-			// GET: Fetch user's predictions and lock status
+			// GET: Fetch user's predictions
 			GET: async ({ request }) => {
 				const authResult = await requireAuth(request, env.DB);
 				if (!authResult.success) return authResult.response;
@@ -27,21 +27,9 @@ export const Route = createFileRoute("/api/predictions/")({
 					.from(schema.userPrediction)
 					.where(eq(schema.userPrediction.userId, userId));
 
-				// Fetch bracket status
-				const bracketStatus = await db
-					.select()
-					.from(schema.userBracketStatus)
-					.where(eq(schema.userBracketStatus.userId, userId))
-					.limit(1);
-
-				const isLocked = bracketStatus[0]?.isLocked ?? false;
-				const lockedAt = bracketStatus[0]?.lockedAt ?? null;
-
 				return new Response(
 					JSON.stringify({
 						predictions,
-						isLocked,
-						lockedAt,
 						deadline: BRACKET_DEADLINE,
 					}),
 					{
@@ -51,30 +39,13 @@ export const Route = createFileRoute("/api/predictions/")({
 				);
 			},
 
-			// POST: Save predictions (reject if locked or past deadline)
+			// POST: Save predictions (reject if past deadline)
 			POST: async ({ request }) => {
 				const authResult = await requireAuth(request, env.DB);
 				if (!authResult.success) return authResult.response;
 
 				const db = createDb(env.DB);
 				const userId = authResult.user.id;
-
-				// Check if bracket is locked
-				const bracketStatus = await db
-					.select()
-					.from(schema.userBracketStatus)
-					.where(eq(schema.userBracketStatus.userId, userId))
-					.limit(1);
-
-				if (bracketStatus[0]?.isLocked) {
-					return new Response(
-						JSON.stringify({ error: "Bracket is already locked" }),
-						{
-							status: 400,
-							headers: { "Content-Type": "application/json" },
-						},
-					);
-				}
 
 				// Check deadline
 				const now = new Date();

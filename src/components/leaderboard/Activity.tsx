@@ -18,7 +18,7 @@ type ActivityItem = {
 const getRecentPickers = createServerFn({ method: "GET" }).handler(async () => {
 	const { env } = await import("cloudflare:workers");
 	const { createDb } = await import("@/db");
-	const { desc, eq, inArray } = await import("drizzle-orm");
+	const { desc, eq } = await import("drizzle-orm");
 	const schema = await import("@/db/schema");
 	const { bracket, players } = await import("@/data/players");
 
@@ -43,38 +43,48 @@ const getRecentPickers = createServerFn({ method: "GET" }).handler(async () => {
 
 	const db = createDb(env.DB);
 
-	const lockedUsers = await db
-		.select({
-			userId: schema.userBracketStatus.userId,
-			userName: schema.user.name,
-			userImage: schema.user.image,
-			username: schema.user.username,
-		})
-		.from(schema.userBracketStatus)
-		.innerJoin(schema.user, eq(schema.userBracketStatus.userId, schema.user.id))
-		.where(eq(schema.userBracketStatus.isLocked, true))
-		.orderBy(desc(schema.userBracketStatus.lockedAt))
-		.limit(40);
-
-	if (lockedUsers.length === 0) {
-		return [];
-	}
-
-	const userIds = lockedUsers.map((u) => u.userId);
-	const allPredictions = await db
+	// Get recent predictions with user info
+	const recentPredictions = await db
 		.select({
 			userId: schema.userPrediction.userId,
 			gameId: schema.userPrediction.gameId,
 			predictedWinnerId: schema.userPrediction.predictedWinnerId,
+			userName: schema.user.name,
+			userImage: schema.user.image,
+			username: schema.user.username,
 		})
 		.from(schema.userPrediction)
-		.where(inArray(schema.userPrediction.userId, userIds));
+		.innerJoin(schema.user, eq(schema.userPrediction.userId, schema.user.id))
+		.orderBy(desc(schema.userPrediction.updatedAt))
+		.limit(400);
 
+	if (recentPredictions.length === 0) {
+		return [];
+	}
+
+	// Group predictions by user
+	const userMap = new Map<
+		string,
+		{
+			userId: string;
+			userName: string;
+			userImage: string | null;
+			username: string | null;
+		}
+	>();
 	const predictionsByUser = new Map<
 		string,
 		{ gameId: string; predictedWinnerId: string }[]
 	>();
-	for (const p of allPredictions) {
+	for (const p of recentPredictions) {
+		if (!userMap.has(p.userId)) {
+			userMap.set(p.userId, {
+				userId: p.userId,
+				userName: p.userName,
+				userImage: p.userImage,
+				username: p.username,
+			});
+		}
 		const list = predictionsByUser.get(p.userId) || [];
 		list.push({
 			gameId: p.gameId,
@@ -85,7 +95,7 @@ const getRecentPickers = createServerFn({ method: "GET" }).handler(async () => {
 
 	const items: ActivityItem[] = [];
 
-	for (const user of lockedUsers) {
+	for (const user of userMap.values()) {
 		const predictions = predictionsByUser.get(user.userId) || [];
 		if (predictions.length === 0) continue;
 

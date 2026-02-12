@@ -98,7 +98,6 @@ export const userRelations = relations(user, ({ many, one }) => ({
 	sessions: many(session),
 	accounts: many(account),
 	predictions: many(userPrediction),
-	bracketStatus: one(userBracketStatus),
 	score: one(userScore),
 }));
 
@@ -146,24 +145,6 @@ export const userPrediction = sqliteTable(
 	],
 );
 
-export const userBracketStatus = sqliteTable(
-	"user_bracket_status",
-	{
-		id: text("id").primaryKey(),
-		userId: text("user_id")
-			.notNull()
-			.unique()
-			.references(() => user.id, { onDelete: "cascade" }),
-		isLocked: integer("is_locked", { mode: "boolean" })
-			.default(false)
-			.notNull(),
-		lockedAt: integer("locked_at", { mode: "timestamp_ms" }),
-		createdAt: integer("created_at", { mode: "timestamp_ms" })
-			.default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
-			.notNull(),
-	},
-	(table) => [index("user_bracket_status_userId_idx").on(table.userId)],
-);
 
 export const userPredictionRelations = relations(userPrediction, ({ one }) => ({
 	user: one(user, {
@@ -172,15 +153,6 @@ export const userPredictionRelations = relations(userPrediction, ({ one }) => ({
 	}),
 }));
 
-export const userBracketStatusRelations = relations(
-	userBracketStatus,
-	({ one }) => ({
-		user: one(user, {
-			fields: [userBracketStatus.userId],
-			references: [user.id],
-		}),
-	}),
-);
 
 // =============================================================================
 // USER SCORES (LEADERBOARD)

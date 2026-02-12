@@ -1,5 +1,5 @@
 import type { D1Database } from "@cloudflare/workers-types";
-import { eq, inArray } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import {
 	FINAL_GAME_IDS,
 	getResultsFromBracket,
@@ -9,6 +9,10 @@ import {
 } from "@/data/players";
 import { createDb } from "@/db";
 import * as schema from "@/db/schema";
+import {
+	buildResultsUpToStage,
+	type SimulationStage,
+} from "@/lib/simulation";
 
 // Points per correct pick in each round
 const ROUND_1_POINTS = 10;
@@ -62,33 +66,45 @@ export function calculateScoresForUser(
 	};
 }
 
-export async function recalculateAllUserScores(database: D1Database) {
+export async function recalculateAllUserScores(
+	database: D1Database,
+	simulationStage?: SimulationStage,
+) {
 	const db = createDb(database);
 
-	// Get results from players.ts (single source of truth)
-	const bracketResults = getResultsFromBracket();
-	const results = bracketResults.map((r) => ({
-		gameId: r.gameId,
-		winnerId: r.winnerId,
-	}));
+	let results: Array<{ gameId: string; winnerId: string }>;
+
+	if (simulationStage) {
+		// Use simulated results for the given stage
+		const simulated = buildResultsUpToStage(simulationStage);
+		results = Object.entries(simulated).map(([gameId, winnerId]) => ({
+			gameId,
+			winnerId,
+		}));
+	} else {
+		// Use real results from players.ts
+		results = getResultsFromBracket().map((r) => ({
+			gameId: r.gameId,
+			winnerId: r.winnerId,
+		}));
+	}
 
 	if (results.length === 0) {
 		return { updated: 0 };
 	}
 
-	// Get all users with locked brackets
-	const lockedUsers = await db
-		.select({ userId: schema.userBracketStatus.userId })
-		.from(schema.userBracketStatus)
-		.where(eq(schema.userBracketStatus.isLocked, true));
+	// Get all distinct user IDs that have predictions
+	const usersWithPredictions = await db
+		.selectDistinct({ userId: schema.userPrediction.userId })
+		.from(schema.userPrediction);
 
-	if (lockedUsers.length === 0) {
+	if (usersWithPredictions.length === 0) {
 		return { updated: 0 };
 	}
 
-	const userIds = lockedUsers.map((u) => u.userId);
+	const userIds = usersWithPredictions.map((u) => u.userId);
 
-	// Get all predictions for locked users
+	// Get all predictions for these users
 	const allPredictions = await db
 		.select({
 			userId: schema.userPrediction.userId,
@@ -96,7 +112,12 @@ export async function recalculateAllUserScores(database: D1Database) {
 			predictedWinnerId: schema.userPrediction.predictedWinnerId,
 		})
 		.from(schema.userPrediction)
-		.where(inArray(schema.userPrediction.userId, userIds));
+		.where(
+			sql`${schema.userPrediction.userId} IN (${sql.join(
+				userIds.map((id) => sql`${id}`),
+				sql`, `,
+			)})`,
+		);
 
 	// Group predictions by user
 	const predictionsByUser = new Map<

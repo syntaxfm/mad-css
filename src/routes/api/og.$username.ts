@@ -66,17 +66,6 @@ export const Route = createFileRoute("/api/og/$username")({
 
 				const user = users[0];
 
-				// Check if bracket is locked
-				const bracketStatus = await db
-					.select()
-					.from(schema.userBracketStatus)
-					.where(eq(schema.userBracketStatus.userId, users[0].id))
-					.limit(1);
-
-				if (!bracketStatus[0]?.isLocked) {
-					return generateBasicOgImage(baseUrl);
-				}
-
 				// Get ALL predictions
 				const predictions = await db
 					.select({
@@ -85,6 +74,10 @@ export const Route = createFileRoute("/api/og/$username")({
 					})
 					.from(schema.userPrediction)
 					.where(eq(schema.userPrediction.userId, users[0].id));
+
+				if (predictions.length === 0) {
+					return generateBasicOgImage(baseUrl);
+				}
 
 				// Build prediction map
 				const predictionMap = new Map<string, string>();

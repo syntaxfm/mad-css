@@ -4,6 +4,10 @@ import { createDb } from "@/db";
 import { isAdminUser } from "@/lib/admin";
 import { requireAuth } from "@/lib/middleware/auth";
 import { recalculateAllUserScores } from "@/lib/scoring";
+import {
+	SIMULATION_STAGES,
+	type SimulationStage,
+} from "@/lib/simulation";
 
 export const Route = createFileRoute("/api/leaderboard/calculate")({
 	server: {
@@ -15,7 +19,6 @@ export const Route = createFileRoute("/api/leaderboard/calculate")({
 				const db = createDb(env.DB);
 				const userId = authResult.user.id;
 
-				// Server-side admin validation
 				const isAdmin = await isAdminUser(db, userId);
 				if (!isAdmin) {
 					return new Response(JSON.stringify({ error: "Forbidden" }), {
@@ -24,12 +27,34 @@ export const Route = createFileRoute("/api/leaderboard/calculate")({
 					});
 				}
 
-				const result = await recalculateAllUserScores(env.DB);
+				let simulationStage: SimulationStage | undefined;
+				try {
+					const body = (await request.json()) as {
+						simulationStage?: string;
+					};
+					if (
+						body.simulationStage &&
+						SIMULATION_STAGES.includes(
+							body.simulationStage as SimulationStage,
+						)
+					) {
+						simulationStage =
+							body.simulationStage as SimulationStage;
+					}
+				} catch {
+					// No body or invalid JSON — use real results
+				}
+
+				const result = await recalculateAllUserScores(
+					env.DB,
+					simulationStage,
+				);
 
 				return new Response(
 					JSON.stringify({
 						success: true,
 						updated: result.updated,
+						simulated: !!simulationStage,
 					}),
 					{
 						status: 200,

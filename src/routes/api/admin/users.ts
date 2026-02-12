@@ -11,16 +11,13 @@ export type AdminUser = {
 	name: string;
 	username: string | null;
 	image: string | null;
-	isLocked: boolean;
-	lockedAt: number | null;
 	predictionsCount: number;
 	totalScore: number;
 };
 
 export type AdminStats = {
 	totalUsers: number;
-	lockedBrackets: number;
-	unlockedBrackets: number;
+	usersWithPicks: number;
 };
 
 export const Route = createFileRoute("/api/admin/users")({
@@ -48,7 +45,7 @@ export const Route = createFileRoute("/api/admin/users")({
 					});
 				}
 
-				// Fetch all users with their bracket status, prediction counts, and scores
+				// Fetch all users with their prediction counts and scores
 				const users = await db
 					.select({
 						id: schema.user.id,
@@ -58,11 +55,6 @@ export const Route = createFileRoute("/api/admin/users")({
 					})
 					.from(schema.user)
 					.orderBy(desc(schema.user.createdAt));
-
-				// Get bracket statuses
-				const bracketStatuses = await db
-					.select()
-					.from(schema.userBracketStatus);
 
 				// Get prediction counts per user
 				const predictionCounts = await db
@@ -76,13 +68,7 @@ export const Route = createFileRoute("/api/admin/users")({
 				// Get scores
 				const scores = await db.select().from(schema.userScore);
 
-				// Map bracket statuses
-				const statusMap = new Map(
-					bracketStatuses.map((s) => [
-						s.userId,
-						{ isLocked: s.isLocked, lockedAt: s.lockedAt },
-					]),
-				);
+				// Map data
 				const predictionMap = new Map(
 					predictionCounts.map((p) => [p.userId, p.count]),
 				);
@@ -93,18 +79,15 @@ export const Route = createFileRoute("/api/admin/users")({
 					name: user.name,
 					username: user.username,
 					image: user.image,
-					isLocked: statusMap.get(user.id)?.isLocked ?? false,
-					lockedAt: statusMap.get(user.id)?.lockedAt?.getTime() ?? null,
 					predictionsCount: predictionMap.get(user.id) ?? 0,
 					totalScore: scoreMap.get(user.id) ?? 0,
 				}));
 
 				// Calculate stats
-				const lockedCount = bracketStatuses.filter((s) => s.isLocked).length;
+				const usersWithPicks = predictionCounts.length;
 				const stats: AdminStats = {
 					totalUsers: users.length,
-					lockedBrackets: lockedCount,
-					unlockedBrackets: users.length - lockedCount,
+					usersWithPicks,
 				};
 
 				return new Response(JSON.stringify({ users: adminUsers, stats }), {

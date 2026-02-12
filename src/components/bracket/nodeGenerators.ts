@@ -187,9 +187,6 @@ function getPredictionOptions(
 
 	// Game has a result - determine correct/incorrect
 	if (actualWinner) {
-		if (ctx.isLocked && !ctx.showPicks) {
-			return defaults;
-		}
 		const isWinnerPlayer = actualWinner === player.id;
 		const wasPickedForThisGame = userPick === player.id;
 
@@ -207,9 +204,6 @@ function getPredictionOptions(
 
 	// No result yet - determine pending/none pick state
 	if (userPick) {
-		if (ctx.isLocked && !ctx.showPicks) {
-			return { pickState: { status: "noPick" }, interactionMode, onPick };
-		}
 		const isPickedForThisGame = userPick === player.id;
 		const pickState: PickState = isPickedForThisGame
 			? { status: "pending" }

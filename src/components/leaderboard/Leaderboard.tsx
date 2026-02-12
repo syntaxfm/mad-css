@@ -5,6 +5,7 @@ import "./leaderboard.css";
 
 type LeaderboardEntry = {
 	rank: number;
+	showRank: boolean;
 	userId: string;
 	userName: string;
 	userImage: string | null;
@@ -41,19 +42,28 @@ const getLeaderboard = createServerFn({ method: "GET" }).handler(async () => {
 		.orderBy(desc(schema.userScore.totalScore))
 		.limit(100);
 
+	let currentRank = 1;
 	return scores.map(
-		(score, index): LeaderboardEntry => ({
-			rank: index + 1,
-			userId: score.userId,
-			userName: score.userName,
-			userImage: score.userImage,
-			username: score.username,
-			round1Score: score.round1Score,
-			round2Score: score.round2Score,
-			round3Score: score.round3Score,
-			round4Score: score.round4Score,
-			totalScore: score.totalScore,
-		}),
+		(score, index): LeaderboardEntry => {
+			const isTied =
+				index > 0 && score.totalScore === scores[index - 1].totalScore;
+			if (index > 0 && !isTied) {
+				currentRank = index + 1;
+			}
+			return {
+				rank: currentRank,
+				showRank: !isTied,
+				userId: score.userId,
+				userName: score.userName,
+				userImage: score.userImage,
+				username: score.username,
+				round1Score: score.round1Score,
+				round2Score: score.round2Score,
+				round3Score: score.round3Score,
+				round4Score: score.round4Score,
+				totalScore: score.totalScore,
+			};
+		},
 	);
 });
 
@@ -82,7 +92,7 @@ export function Leaderboard() {
 							<div className="leaderboard-empty">Loading...</div>
 						) : entries.length === 0 ? (
 							<div className="leaderboard-empty">
-								<p>No scores yet. Lock your bracket and check back after Round 1!</p>
+								<p>No scores yet. Make your picks and check back after Round 1!</p>
 							</div>
 						) : (
 							<table className="leaderboard-table">
@@ -96,7 +106,9 @@ export function Leaderboard() {
 								<tbody>
 									{entries.map((entry) => (
 										<tr key={entry.userId}>
-											<td className="leaderboard-rank">{entry.rank}</td>
+											<td className="leaderboard-rank">
+											{entry.showRank ? entry.rank : ""}
+										</td>
 											<td>
 												{entry.username ? (
 													<a

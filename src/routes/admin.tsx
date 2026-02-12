@@ -1,11 +1,15 @@
-import { useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { getRequestHeaders } from "@tanstack/react-start/server";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { TOTAL_GAMES } from "@/data/players";
-import { invalidateAllPredictions } from "@/hooks/usePredictionsQuery";
+import {
+	SIMULATION_STAGES,
+	STAGE_CONFIG,
+	type SimulationStage,
+} from "@/lib/simulation";
+import { deleteUserFn, generateTestUserFn } from "@/lib/users.server";
 import type { AdminStats, AdminUser } from "@/routes/api/admin/users";
 import "@/styles/admin.css";
 
@@ -58,7 +62,7 @@ const getAdminDataFn = createServerFn({ method: "GET" })
 		const { createAuth } = await import("@/lib/auth");
 		const { createDb } = await import("@/db");
 		const { isAdminUser } = await import("@/lib/admin");
-		const { count, desc, eq, like, sql } = await import("drizzle-orm");
+		const { count, desc, like, sql } = await import("drizzle-orm");
 		const schema = await import("@/db/schema");
 
 		const page = data.page;
@@ -120,22 +124,8 @@ const getAdminDataFn = createServerFn({ method: "GET" })
 			.limit(PAGE_SIZE)
 			.offset(offset);
 
-		// Get bracket statuses for these users
-		const userIds = users.map((u) => u.id);
-		const bracketStatuses =
-			userIds.length > 0
-				? await db
-						.select()
-						.from(schema.userBracketStatus)
-						.where(
-							sql`${schema.userBracketStatus.userId} IN (${sql.join(
-								userIds.map((id) => sql`${id}`),
-								sql`, `,
-							)})`,
-						)
-				: [];
-
 		// Get prediction counts for these users
+		const userIds = users.map((u) => u.id);
 		const predictionCounts =
 			userIds.length > 0
 				? await db
@@ -168,12 +158,6 @@ const getAdminDataFn = createServerFn({ method: "GET" })
 				: [];
 
 		// Map data
-		const statusMap = new Map(
-			bracketStatuses.map((s) => [
-				s.userId,
-				{ isLocked: s.isLocked, lockedAt: s.lockedAt },
-			]),
-		);
 		const predictionMap = new Map(
 			predictionCounts.map((p) => [p.userId, p.count]),
 		);
@@ -184,25 +168,23 @@ const getAdminDataFn = createServerFn({ method: "GET" })
 			name: user.name,
 			username: user.username,
 			image: user.image,
-			isLocked: statusMap.get(user.id)?.isLocked ?? false,
-			lockedAt: statusMap.get(user.id)?.lockedAt?.getTime() ?? null,
 			predictionsCount: predictionMap.get(user.id) ?? 0,
 			totalScore: scoreMap.get(user.id) ?? 0,
 		}));
 
-		// Get global stats (not filtered by search) using COUNT queries
+		// Get global stats
 		const [{ count: allUsersCount }] = await db
 			.select({ count: count() })
 			.from(schema.user);
 
-		const [{ count: lockedCount }] = await db
-			.select({ count: count() })
-			.from(schema.userBracketStatus)
-			.where(eq(schema.userBracketStatus.isLocked, true));
+		// Count users who have at least one prediction
+		const [{ count: usersWithPicks }] = await db
+			.select({ count: sql<number>`COUNT(DISTINCT ${schema.userPrediction.userId})` })
+			.from(schema.userPrediction);
+
 		const stats: AdminStats = {
 			totalUsers: allUsersCount,
-			lockedBrackets: lockedCount,
-			unlockedBrackets: allUsersCount - lockedCount,
+			usersWithPicks,
 		};
 
 		return {
@@ -255,7 +237,6 @@ function StatCard({ label, value }: { label: string; value: number }) {
 
 function AdminPage() {
 	const loaderData = Route.useLoaderData();
-	const queryClient = useQueryClient();
 
 	const [users, setUsers] = useState<AdminUser[]>(loaderData.users);
 	const [stats, setStats] = useState<AdminStats>(loaderData.stats);
@@ -267,11 +248,12 @@ function AdminPage() {
 		text: string;
 	} | null>(null);
 	const [isCalculating, setIsCalculating] = useState(false);
+	const [isGenerating, setIsGenerating] = useState(false);
+	const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(false);
 	const [searchInput, setSearchInput] = useState("");
 	const [searchQuery, setSearchQuery] = useState("");
-	const [unlockingUserId, setUnlockingUserId] = useState<string | null>(null);
-	const [lockingUserId, setLockingUserId] = useState<string | null>(null);
+	const [simStage, setSimStage] = useState<SimulationStage | "">("");
 
 	// Fetch data function for subsequent requests (pagination, search)
 	const fetchData = async (page: number, search: string) => {
@@ -309,21 +291,31 @@ function AdminPage() {
 		setMessage(null);
 
 		try {
+			const body: { simulationStage?: string } = {};
+			if (simStage) {
+				body.simulationStage = simStage;
+			}
+
 			const response = await fetch("/api/leaderboard/calculate", {
 				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(body),
 			});
 
 			const data = (await response.json()) as {
 				updated?: number;
+				simulated?: boolean;
 				error?: string;
 			};
 
 			if (response.ok) {
+				const label = simStage
+					? `(simulated: ${STAGE_CONFIG[simStage].label})`
+					: "(live data)";
 				setMessage({
 					type: "success",
-					text: `Recalculated scores for ${data.updated} users.`,
+					text: `Recalculated scores for ${data.updated} users ${label}.`,
 				});
-				// Refresh current page data
 				fetchData(pagination.page, searchQuery);
 			} else {
 				setMessage({
@@ -338,81 +330,54 @@ function AdminPage() {
 		}
 	};
 
-	const handleUnlockBracket = async (userId: string, userName: string) => {
-		if (!confirm(`Unlock bracket for ${userName}?`)) return;
-
-		setUnlockingUserId(userId);
+	const handleGenerateTestUser = async () => {
+		setIsGenerating(true);
 		setMessage(null);
 
 		try {
-			const response = await fetch("/api/admin/brackets/unlock", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ userId }),
-			});
-
-			const data = (await response.json()) as {
-				success?: boolean;
-				error?: string;
-			};
-
-			if (response.ok) {
+			const result = await generateTestUserFn();
+			if (result.success) {
 				setMessage({
 					type: "success",
-					text: `Unlocked bracket for ${userName}`,
+					text: `Created ${result.name} with ${result.predictionsCount} predictions.`,
 				});
-				// Invalidate predictions cache so unlocked user sees fresh data
-				invalidateAllPredictions(queryClient);
-				// Refresh current page data
 				fetchData(pagination.page, searchQuery);
 			} else {
 				setMessage({
 					type: "error",
-					text: data.error || "Failed to unlock bracket",
+					text: result.error || "Failed to generate test user",
 				});
 			}
 		} catch {
-			setMessage({ type: "error", text: "Network error while unlocking" });
+			setMessage({ type: "error", text: "Failed to generate test user" });
 		} finally {
-			setUnlockingUserId(null);
+			setIsGenerating(false);
 		}
 	};
 
-	const handleLockBracket = async (userId: string, userName: string) => {
-		if (!confirm(`Lock bracket for ${userName}?`)) return;
-
-		setLockingUserId(userId);
+	const handleDeleteUser = async (userId: string, userName: string) => {
+		if (!confirm(`Delete ${userName} and all their associated data?`)) return;
+		setDeletingUserId(userId);
 		setMessage(null);
 
 		try {
-			const response = await fetch("/api/admin/brackets/lock", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ userId }),
-			});
-
-			const data = (await response.json()) as {
-				success?: boolean;
-				error?: string;
-			};
-
-			if (response.ok) {
+			const result = await deleteUserFn({ data: { userId } });
+			if (result.success) {
 				setMessage({
 					type: "success",
-					text: `Locked bracket for ${userName}`,
+					text: `Deleted ${result.name} and all associated data.`,
 				});
-				invalidateAllPredictions(queryClient);
 				fetchData(pagination.page, searchQuery);
 			} else {
 				setMessage({
 					type: "error",
-					text: data.error || "Failed to lock bracket",
+					text: result.error || "Failed to delete user",
 				});
 			}
 		} catch {
-			setMessage({ type: "error", text: "Network error while locking" });
+			setMessage({ type: "error", text: "Failed to delete user" });
 		} finally {
-			setLockingUserId(null);
+			setDeletingUserId(null);
 		}
 	};
 
@@ -427,8 +392,7 @@ function AdminPage() {
 
 			<div className="admin-stats">
 				<StatCard label="Total Users" value={stats.totalUsers} />
-				<StatCard label="Locked Brackets" value={stats.lockedBrackets} />
-				<StatCard label="Unlocked Brackets" value={stats.unlockedBrackets} />
+				<StatCard label="Users with Picks" value={stats.usersWithPicks} />
 			</div>
 
 			{message && (
@@ -436,13 +400,37 @@ function AdminPage() {
 			)}
 
 			<div className="admin-actions">
+				<div className="admin-action-group">
+					<select
+						className="admin-select"
+						value={simStage}
+						onChange={(e) =>
+							setSimStage(e.target.value as SimulationStage | "")
+						}
+					>
+						<option value="">Live Data</option>
+						{SIMULATION_STAGES.map((stage) => (
+							<option key={stage} value={stage}>
+								Sim: {STAGE_CONFIG[stage].label}
+							</option>
+						))}
+					</select>
+					<button
+						type="button"
+						className="admin-btn"
+						onClick={handleRecalculateScores}
+						disabled={isCalculating}
+					>
+						{isCalculating ? "Calculating..." : "Recalculate All Scores"}
+					</button>
+				</div>
 				<button
 					type="button"
 					className="admin-btn"
-					onClick={handleRecalculateScores}
-					disabled={isCalculating}
+					onClick={handleGenerateTestUser}
+					disabled={isGenerating}
 				>
-					{isCalculating ? "Calculating..." : "Recalculate All Scores"}
+					{isGenerating ? "Generating..." : "Generate Test User"}
 				</button>
 			</div>
 
@@ -461,17 +449,15 @@ function AdminPage() {
 					<thead>
 						<tr>
 							<th>User</th>
-							<th>Status</th>
 							<th>Picks</th>
 							<th>Score</th>
-							<th>Locked On</th>
 							<th>Actions</th>
 						</tr>
 					</thead>
 					<tbody>
 						{users.length === 0 ? (
 							<tr>
-								<td colSpan={6} className="no-results">
+								<td colSpan={4} className="no-results">
 									{isLoading ? "Loading..." : "No users found"}
 								</td>
 							</tr>
@@ -499,22 +485,10 @@ function AdminPage() {
 											</div>
 										</div>
 									</td>
-									<td>
-										<span
-											className={`status-badge ${user.isLocked ? "locked" : "unlocked"}`}
-										>
-											{user.isLocked ? "Locked" : "Unlocked"}
-										</span>
-									</td>
 									<td className="numeric">
 										{user.predictionsCount}/{TOTAL_GAMES}
 									</td>
 									<td className="numeric">{user.totalScore}</td>
-									<td className="numeric">
-										{user.lockedAt
-											? new Date(user.lockedAt).toLocaleDateString()
-											: "-"}
-									</td>
 									<td className="actions-cell">
 										{user.username && (
 											<Link
@@ -525,29 +499,18 @@ function AdminPage() {
 												View
 											</Link>
 										)}
-										{user.isLocked ? (
-											<button
-												type="button"
-												className="unlock-btn"
-												onClick={() =>
-													handleUnlockBracket(user.id, user.name)
-												}
-												disabled={unlockingUserId === user.id}
-											>
-												{unlockingUserId === user.id ? "..." : "Unlock"}
-											</button>
-										) : (
-											<button
-												type="button"
-												className="lock-btn"
-												onClick={() =>
-													handleLockBracket(user.id, user.name)
-												}
-												disabled={lockingUserId === user.id}
-											>
-												{lockingUserId === user.id ? "..." : "Lock"}
-											</button>
-										)}
+										<button
+											type="button"
+											className="delete-user-btn"
+											onClick={() =>
+												handleDeleteUser(user.id, user.name)
+											}
+											disabled={deletingUserId === user.id}
+										>
+											{deletingUserId === user.id
+												? "..."
+												: "Delete"}
+										</button>
 									</td>
 								</tr>
 							))
