@@ -161,6 +161,37 @@
 	box-shadow: none;
 }
 
+.delete-user-btn {
+	padding: 4px 10px;
+	background: var(--orange);
+	color: var(--white);
+	border: 2px solid var(--black);
+	box-shadow: 2px 2px 0 var(--black);
+	font-family: var(--font-block);
+	font-size: 0.65rem;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	cursor: pointer;
+	transition:
+		transform 0.1s,
+		box-shadow 0.1s;
+}
+
+.delete-user-btn:hover:not(:disabled) {
+	transform: translate(1px, 1px);
+	box-shadow: 1px 1px 0 var(--black);
+}
+
+.delete-user-btn:active:not(:disabled) {
+	transform: translate(2px, 2px);
+	box-shadow: none;
+}
+
+.delete-user-btn:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
 .admin-btn:disabled {
 	opacity: 0.5;
 	cursor: not-allowed;

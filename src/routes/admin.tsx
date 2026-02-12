@@ -4,6 +4,7 @@ import { getRequestHeaders } from "@tanstack/react-start/server";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { TOTAL_GAMES } from "@/data/players";
+import { deleteUserFn, generateTestUserFn } from "@/lib/users.server";
 import type { AdminStats, AdminUser } from "@/routes/api/admin/users";
 import "@/styles/admin.css";
 
@@ -242,6 +243,8 @@ function AdminPage() {
 		text: string;
 	} | null>(null);
 	const [isCalculating, setIsCalculating] = useState(false);
+	const [isGenerating, setIsGenerating] = useState(false);
+	const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(false);
 	const [searchInput, setSearchInput] = useState("");
 	const [searchQuery, setSearchQuery] = useState("");
@@ -311,6 +314,57 @@ function AdminPage() {
 		}
 	};
 
+	const handleGenerateTestUser = async () => {
+		setIsGenerating(true);
+		setMessage(null);
+
+		try {
+			const result = await generateTestUserFn();
+			if (result.success) {
+				setMessage({
+					type: "success",
+					text: `Created ${result.name} with ${result.predictionsCount} predictions.`,
+				});
+				fetchData(pagination.page, searchQuery);
+			} else {
+				setMessage({
+					type: "error",
+					text: result.error || "Failed to generate test user",
+				});
+			}
+		} catch {
+			setMessage({ type: "error", text: "Failed to generate test user" });
+		} finally {
+			setIsGenerating(false);
+		}
+	};
+
+	const handleDeleteUser = async (userId: string, userName: string) => {
+		if (!confirm(`Delete ${userName} and all their associated data?`)) return;
+		setDeletingUserId(userId);
+		setMessage(null);
+
+		try {
+			const result = await deleteUserFn({ data: { userId } });
+			if (result.success) {
+				setMessage({
+					type: "success",
+					text: `Deleted ${result.name} and all associated data.`,
+				});
+				fetchData(pagination.page, searchQuery);
+			} else {
+				setMessage({
+					type: "error",
+					text: result.error || "Failed to delete user",
+				});
+			}
+		} catch {
+			setMessage({ type: "error", text: "Failed to delete user" });
+		} finally {
+			setDeletingUserId(null);
+		}
+	};
+
 	return (
 		<div className="admin-page">
 			<div className="admin-header">
@@ -337,6 +391,14 @@ function AdminPage() {
 					disabled={isCalculating}
 				>
 					{isCalculating ? "Calculating..." : "Recalculate All Scores"}
+				</button>
+				<button
+					type="button"
+					className="admin-btn"
+					onClick={handleGenerateTestUser}
+					disabled={isGenerating}
+				>
+					{isGenerating ? "Generating..." : "Generate Test User"}
 				</button>
 			</div>
 
@@ -405,6 +467,18 @@ function AdminPage() {
 												View
 											</Link>
 										)}
+										<button
+											type="button"
+											className="delete-user-btn"
+											onClick={() =>
+												handleDeleteUser(user.id, user.name)
+											}
+											disabled={deletingUserId === user.id}
+										>
+											{deletingUserId === user.id
+												? "..."
+												: "Delete"}
+										</button>
 									</td>
 								</tr>
 							))
