@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BRACKET_DEADLINE, bracket, TOTAL_GAMES } from "@/data/players";
 import {
 	useLockBracketMutation,
@@ -223,6 +223,26 @@ export function usePredictions(isAuthenticated: boolean, userId?: string) {
 		isAuthenticated,
 		saveMutation,
 	]);
+
+	// Auto-save after each pick with a short debounce
+	const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+	useEffect(() => {
+		if (!hasChanges || isLocked || isDeadlinePassed || !isAuthenticated || !localPredictions) return;
+
+		if (autoSaveTimerRef.current) {
+			clearTimeout(autoSaveTimerRef.current);
+		}
+
+		autoSaveTimerRef.current = setTimeout(() => {
+			saveMutation.mutate(localPredictions);
+		}, 500);
+
+		return () => {
+			if (autoSaveTimerRef.current) {
+				clearTimeout(autoSaveTimerRef.current);
+			}
+		};
+	}, [hasChanges, localPredictions, isLocked, isDeadlinePassed, isAuthenticated, saveMutation]);
 
 	// Reset all predictions
 	const resetPredictions = useCallback(() => {

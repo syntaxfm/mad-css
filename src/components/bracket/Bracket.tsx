@@ -130,7 +130,6 @@ function BracketToolbar() {
 	const pickCount = ctx?.pickCount ?? 0;
 	const isLocked = ctx?.isLocked ?? false;
 	const isSaving = ctx?.isSaving ?? false;
-	const hasChanges = ctx?.hasChanges ?? false;
 	const isDeadlinePassed = ctx?.isDeadlinePassed ?? false;
 	const canLock = pickCount === TOTAL_GAMES && !isLocked && !isDeadlinePassed;
 	const showActions = isLoggedIn && !isLocked && !isDeadlinePassed;
@@ -169,14 +168,6 @@ function BracketToolbar() {
 		<div className="bracket-toolbar">
 			{showActions && (
 				<div className="bracket-toolbar-actions">
-					<button
-						type="button"
-						className="btn"
-						onClick={ctx.savePredictions}
-						disabled={isSaving || !hasChanges}
-					>
-						{isSaving ? "Saving..." : "Save"}
-					</button>
 					<button
 						type="button"
 						className="btn btn-danger"
