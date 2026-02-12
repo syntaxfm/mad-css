@@ -41,18 +41,6 @@ const getBracketData = createServerFn({ method: "GET" })
 
 		const user = users[0];
 
-		const bracketStatus = await db
-			.select()
-			.from(schema.userBracketStatus)
-			.where(eq(schema.userBracketStatus.userId, user.id))
-			.limit(1);
-
-		const isLocked = bracketStatus[0]?.isLocked ?? false;
-
-		if (!isLocked) {
-			return { found: false as const };
-		}
-
 		const predictions = await db
 			.select({
 				gameId: schema.userPrediction.gameId,
@@ -60,6 +48,10 @@ const getBracketData = createServerFn({ method: "GET" })
 			})
 			.from(schema.userPrediction)
 			.where(eq(schema.userPrediction.userId, user.id));
+
+		if (predictions.length === 0) {
+			return { found: false as const };
+		}
 
 		return {
 			found: true as const,

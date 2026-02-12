@@ -14,15 +14,12 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BracketUsernameRouteImport } from './routes/bracket/$username'
 import { Route as ApiPredictionsIndexRouteImport } from './routes/api/predictions/index'
-import { Route as ApiPredictionsLockRouteImport } from './routes/api/predictions/lock'
 import { Route as ApiOgUsernameRouteImport } from './routes/api/og.$username'
 import { Route as ApiLeaderboardCalculateRouteImport } from './routes/api/leaderboard/calculate'
 import { Route as ApiBracketUsernameRouteImport } from './routes/api/bracket/$username'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiAdminUsersRouteImport } from './routes/api/admin/users'
 import { Route as ApiAdminCheckRouteImport } from './routes/api/admin/check'
-import { Route as ApiAdminBracketsUnlockRouteImport } from './routes/api/admin/brackets/unlock'
-import { Route as ApiAdminBracketsLockRouteImport } from './routes/api/admin/brackets/lock'
 
 const TestRoute = TestRouteImport.update({
   id: '/test',
@@ -47,11 +44,6 @@ const BracketUsernameRoute = BracketUsernameRouteImport.update({
 const ApiPredictionsIndexRoute = ApiPredictionsIndexRouteImport.update({
   id: '/api/predictions/',
   path: '/api/predictions/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPredictionsLockRoute = ApiPredictionsLockRouteImport.update({
-  id: '/api/predictions/lock',
-  path: '/api/predictions/lock',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiOgUsernameRoute = ApiOgUsernameRouteImport.update({
@@ -84,16 +76,6 @@ const ApiAdminCheckRoute = ApiAdminCheckRouteImport.update({
   path: '/api/admin/check',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiAdminBracketsUnlockRoute = ApiAdminBracketsUnlockRouteImport.update({
-  id: '/api/admin/brackets/unlock',
-  path: '/api/admin/brackets/unlock',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAdminBracketsLockRoute = ApiAdminBracketsLockRouteImport.update({
-  id: '/api/admin/brackets/lock',
-  path: '/api/admin/brackets/lock',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -106,10 +88,7 @@ export interface FileRoutesByFullPath {
   '/api/bracket/$username': typeof ApiBracketUsernameRoute
   '/api/leaderboard/calculate': typeof ApiLeaderboardCalculateRoute
   '/api/og/$username': typeof ApiOgUsernameRoute
-  '/api/predictions/lock': typeof ApiPredictionsLockRoute
   '/api/predictions/': typeof ApiPredictionsIndexRoute
-  '/api/admin/brackets/lock': typeof ApiAdminBracketsLockRoute
-  '/api/admin/brackets/unlock': typeof ApiAdminBracketsUnlockRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -122,10 +101,7 @@ export interface FileRoutesByTo {
   '/api/bracket/$username': typeof ApiBracketUsernameRoute
   '/api/leaderboard/calculate': typeof ApiLeaderboardCalculateRoute
   '/api/og/$username': typeof ApiOgUsernameRoute
-  '/api/predictions/lock': typeof ApiPredictionsLockRoute
   '/api/predictions': typeof ApiPredictionsIndexRoute
-  '/api/admin/brackets/lock': typeof ApiAdminBracketsLockRoute
-  '/api/admin/brackets/unlock': typeof ApiAdminBracketsUnlockRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -139,10 +115,7 @@ export interface FileRoutesById {
   '/api/bracket/$username': typeof ApiBracketUsernameRoute
   '/api/leaderboard/calculate': typeof ApiLeaderboardCalculateRoute
   '/api/og/$username': typeof ApiOgUsernameRoute
-  '/api/predictions/lock': typeof ApiPredictionsLockRoute
   '/api/predictions/': typeof ApiPredictionsIndexRoute
-  '/api/admin/brackets/lock': typeof ApiAdminBracketsLockRoute
-  '/api/admin/brackets/unlock': typeof ApiAdminBracketsUnlockRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -157,10 +130,7 @@ export interface FileRouteTypes {
     | '/api/bracket/$username'
     | '/api/leaderboard/calculate'
     | '/api/og/$username'
-    | '/api/predictions/lock'
     | '/api/predictions/'
-    | '/api/admin/brackets/lock'
-    | '/api/admin/brackets/unlock'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -173,10 +143,7 @@ export interface FileRouteTypes {
     | '/api/bracket/$username'
     | '/api/leaderboard/calculate'
     | '/api/og/$username'
-    | '/api/predictions/lock'
     | '/api/predictions'
-    | '/api/admin/brackets/lock'
-    | '/api/admin/brackets/unlock'
   id:
     | '__root__'
     | '/'
@@ -189,10 +156,7 @@ export interface FileRouteTypes {
     | '/api/bracket/$username'
     | '/api/leaderboard/calculate'
     | '/api/og/$username'
-    | '/api/predictions/lock'
     | '/api/predictions/'
-    | '/api/admin/brackets/lock'
-    | '/api/admin/brackets/unlock'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -206,10 +170,7 @@ export interface RootRouteChildren {
   ApiBracketUsernameRoute: typeof ApiBracketUsernameRoute
   ApiLeaderboardCalculateRoute: typeof ApiLeaderboardCalculateRoute
   ApiOgUsernameRoute: typeof ApiOgUsernameRoute
-  ApiPredictionsLockRoute: typeof ApiPredictionsLockRoute
   ApiPredictionsIndexRoute: typeof ApiPredictionsIndexRoute
-  ApiAdminBracketsLockRoute: typeof ApiAdminBracketsLockRoute
-  ApiAdminBracketsUnlockRoute: typeof ApiAdminBracketsUnlockRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -247,13 +208,6 @@ declare module '@tanstack/react-router' {
       path: '/api/predictions'
       fullPath: '/api/predictions/'
       preLoaderRoute: typeof ApiPredictionsIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/predictions/lock': {
-      id: '/api/predictions/lock'
-      path: '/api/predictions/lock'
-      fullPath: '/api/predictions/lock'
-      preLoaderRoute: typeof ApiPredictionsLockRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/og/$username': {
@@ -298,20 +252,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminCheckRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/admin/brackets/unlock': {
-      id: '/api/admin/brackets/unlock'
-      path: '/api/admin/brackets/unlock'
-      fullPath: '/api/admin/brackets/unlock'
-      preLoaderRoute: typeof ApiAdminBracketsUnlockRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/admin/brackets/lock': {
-      id: '/api/admin/brackets/lock'
-      path: '/api/admin/brackets/lock'
-      fullPath: '/api/admin/brackets/lock'
-      preLoaderRoute: typeof ApiAdminBracketsLockRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -326,10 +266,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiBracketUsernameRoute: ApiBracketUsernameRoute,
   ApiLeaderboardCalculateRoute: ApiLeaderboardCalculateRoute,
   ApiOgUsernameRoute: ApiOgUsernameRoute,
-  ApiPredictionsLockRoute: ApiPredictionsLockRoute,
   ApiPredictionsIndexRoute: ApiPredictionsIndexRoute,
-  ApiAdminBracketsLockRoute: ApiAdminBracketsLockRoute,
-  ApiAdminBracketsUnlockRoute: ApiAdminBracketsUnlockRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

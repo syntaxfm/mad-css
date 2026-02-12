@@ -38,7 +38,6 @@ export interface BracketProps {
 	isInteractive?: boolean;
 	predictions?: Record<string, string>;
 	onPick?: (gameId: string, playerId: string) => void;
-	isLocked?: boolean;
 	isAuthenticated?: boolean;
 	getPickablePlayers?: (gameId: string) => string[];
 	tournamentResults?: Record<string, string>;
@@ -56,7 +55,6 @@ function BracketToggle({
 	const { data: session } = authClient.useSession();
 	const ctx = usePredictionsContext();
 	const userImage = session?.user?.image;
-	const isLocked = ctx?.isLocked ?? false;
 	const pickCount = ctx?.pickCount ?? 0;
 
 	return (
@@ -79,14 +77,11 @@ function BracketToggle({
 					<img src={userImage} alt="" className="bracket-toggle-avatar" />
 				)}
 				MY PICKS
-				{session?.user &&
-					(isLocked ? (
-						<span className="bracket-toggle-badge locked">Locked In</span>
-					) : (
-						<span className="bracket-toggle-badge">
-							{pickCount}/{TOTAL_GAMES}
-						</span>
-					))}
+				{session?.user && (
+					<span className="bracket-toggle-badge">
+						{pickCount}/{TOTAL_GAMES}
+					</span>
+				)}
 			</button>
 		</div>
 	);
@@ -101,14 +96,12 @@ const ROUND_LABELS: Record<string, string> = {
 };
 
 function NextResultsCountdown() {
-	const ctx = usePredictionsContext();
 	const { data: session } = authClient.useSession();
-	const isLocked = ctx?.isLocked ?? false;
 	const nextGame = getNextGameTime();
 	const nextGameCountdown = useCountdown(nextGame?.time);
 	const nextGameLabel = nextGame ? ROUND_LABELS[nextGame.round] : null;
 
-	if (!session?.user || !isLocked || !nextGame || nextGameCountdown.totalMs <= 0) return null;
+	if (!session?.user || !nextGame || nextGameCountdown.totalMs <= 0) return null;
 
 	return (
 		<div className="cta-next-results">
@@ -123,16 +116,13 @@ function NextResultsCountdown() {
 function BracketToolbar() {
 	const ctx = usePredictionsContext();
 	const { data: session } = authClient.useSession();
-	const dialogRef = useRef<HTMLDialogElement>(null);
 	const [copied, setCopied] = useState(false);
 
 	const isLoggedIn = !!session?.user && !!ctx;
 	const pickCount = ctx?.pickCount ?? 0;
-	const isLocked = ctx?.isLocked ?? false;
 	const isSaving = ctx?.isSaving ?? false;
 	const isDeadlinePassed = ctx?.isDeadlinePassed ?? false;
-	const canLock = pickCount === TOTAL_GAMES && !isLocked && !isDeadlinePassed;
-	const showActions = isLoggedIn && !isLocked && !isDeadlinePassed;
+	const showActions = isLoggedIn && !isDeadlinePassed;
 
 	const username = (session?.user as { username?: string })?.username;
 	const shareUrl = username
@@ -144,7 +134,7 @@ function BracketToolbar() {
 	const blueskyShareUrl = username
 		? `https://bsky.app/intent/compose?text=${encodeURIComponent(`Check out my March Mad CSS bracket picks! 🏀\n\n${shareUrl}`)}`
 		: null;
-	const showShare = isLoggedIn && isLocked && !!shareUrl;
+	const showShare = isLoggedIn && isDeadlinePassed && !!shareUrl;
 
 	const handleCopyLink = async () => {
 		if (!shareUrl) return;
@@ -168,19 +158,6 @@ function BracketToolbar() {
 		<div className="bracket-toolbar">
 			{showActions && (
 				<div className="bracket-toolbar-actions">
-					<button
-						type="button"
-						className="btn btn-danger"
-						onClick={() => dialogRef.current?.showModal()}
-						disabled={!canLock || isSaving}
-						title={
-							pickCount < TOTAL_GAMES
-								? `Need all ${TOTAL_GAMES} picks to lock`
-								: "Lock your bracket"
-						}
-					>
-						Lock Bracket
-					</button>
 					{pickCount > 0 && (
 						<button
 							type="button"
@@ -192,32 +169,6 @@ function BracketToolbar() {
 							Reset
 						</button>
 					)}
-					<dialog ref={dialogRef} className="lock-modal">
-						<div className="lock-modal-content">
-							<p>Lock your bracket?</p>
-							<p className="lock-modal-sub">This cannot be undone.</p>
-							<div className="lock-modal-buttons">
-								<button
-									type="button"
-									className="btn btn-primary"
-									onClick={() => {
-										ctx.lockBracket?.();
-										dialogRef.current?.close();
-									}}
-									disabled={!canLock || isSaving}
-								>
-									Yes, Lock It
-								</button>
-								<button
-									type="button"
-									className="btn btn-ghost"
-									onClick={() => dialogRef.current?.close()}
-								>
-									Cancel
-								</button>
-							</div>
-						</div>
-					</dialog>
 				</div>
 			)}
 			{showShare && (
@@ -312,7 +263,6 @@ function generateNodes(
 	isPickingEnabled = false,
 	tournamentResults: Record<string, string> = {},
 	showPicks = false,
-	isLocked = false,
 ): Node[] {
 	const hasResults = Object.keys(tournamentResults).length > 0;
 
@@ -335,7 +285,6 @@ function generateNodes(
 		isInteractive,
 		isPickingEnabled,
 		showPicks,
-		isLocked,
 		onPick,
 	};
 
@@ -715,7 +664,6 @@ function BracketContent({
 	isInteractive = false,
 	predictions: propsPredictions,
 	onPick: propsOnPick,
-	isLocked: propsIsLocked,
 	isAuthenticated = false,
 	tournamentResults = {},
 	showPicks = false,
@@ -726,9 +674,9 @@ function BracketContent({
 	// Use context if available, otherwise fall back to props
 	const predictions = ctx?.predictions ?? propsPredictions ?? {};
 	const onPick = ctx?.setPrediction ?? propsOnPick;
-	const isLocked = ctx?.isLocked ?? propsIsLocked ?? false;
+	const isDeadlinePassed = ctx?.isDeadlinePassed ?? false;
 
-	const isPickingEnabled = isInteractive && isAuthenticated && !isLocked;
+	const isPickingEnabled = isInteractive && isAuthenticated && !isDeadlinePassed;
 
 	const nodes = useMemo(
 		() =>
@@ -739,7 +687,6 @@ function BracketContent({
 				isPickingEnabled,
 				tournamentResults,
 				showPicks,
-				isLocked,
 			),
 		[
 			isInteractive,
@@ -748,7 +695,6 @@ function BracketContent({
 			isPickingEnabled,
 			tournamentResults,
 			showPicks,
-			isLocked,
 		],
 	);
 

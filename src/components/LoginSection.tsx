@@ -115,7 +115,6 @@ export function LoginSectionShare({
 export function LoginSection() {
 	const ctx = usePredictionsContext();
 
-	const isLocked = ctx?.isLocked ?? false;
 	const error = ctx?.error ?? null;
 	const deadline = ctx?.deadline;
 	const isDeadlinePassed = ctx?.isDeadlinePassed ?? false;
@@ -138,12 +137,11 @@ export function LoginSection() {
 	}
 
 	if (session?.user) {
-		const hasDeadlineMessage = isDeadlinePassed && !isLocked;
-		if (!hasDeadlineMessage && !error) return null;
+		if (!isDeadlinePassed && !error) return null;
 
 		return (
 			<div className="bracket-cta logged-in">
-				{hasDeadlineMessage && (
+				{isDeadlinePassed && (
 					<div className="cta-status deadline-passed">Deadline has passed</div>
 				)}
 				{error && <p className="cta-error">{error}</p>}
@@ -156,7 +154,7 @@ export function LoginSection() {
 		<div className="bracket-cta">
 			<p className="cta-headline font_block">Think you can call it?</p>
 			<p className="cta-sub">
-				Lock in your predictions before <strong>March 6</strong> for a chance to
+				Make your predictions before <strong>March 6</strong> for a chance to
 				win some amazing prizes!
 			</p>
 			{deadline && countdown.totalMs > 0 ? (

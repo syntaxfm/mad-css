@@ -296,18 +296,6 @@
 	letter-spacing: 0.05em;
 }
 
-.status-badge.locked {
-	background: var(--yellow);
-	color: var(--black);
-	border: 2px solid var(--black);
-}
-
-.status-badge.unlocked {
-	background: transparent;
-	border: 2px solid var(--orange);
-	color: var(--orange);
-}
-
 /* ============================================
    Action Buttons
    ============================================ */
@@ -347,55 +335,6 @@
 	box-shadow: 1px 1px 0 var(--black);
 }
 
-.unlock-btn {
-	padding: 6px 12px;
-	background: transparent;
-	border: 2px solid var(--orange);
-	color: var(--orange);
-	font-family: var(--font-block);
-	font-size: 0.65rem;
-	text-transform: uppercase;
-	letter-spacing: 0.05em;
-	cursor: pointer;
-	transition:
-		background 0.2s,
-		color 0.2s;
-}
-
-.unlock-btn:hover:not(:disabled) {
-	background: var(--orange);
-	color: var(--white);
-}
-
-.unlock-btn:disabled {
-	opacity: 0.5;
-	cursor: not-allowed;
-}
-
-.lock-btn {
-	padding: 6px 12px;
-	background: transparent;
-	border: 2px solid var(--yellow);
-	color: var(--yellow);
-	font-family: var(--font-block);
-	font-size: 0.65rem;
-	text-transform: uppercase;
-	letter-spacing: 0.05em;
-	cursor: pointer;
-	transition:
-		background 0.2s,
-		color 0.2s;
-}
-
-.lock-btn:hover:not(:disabled) {
-	background: var(--yellow);
-	color: var(--black);
-}
-
-.lock-btn:disabled {
-	opacity: 0.5;
-	cursor: not-allowed;
-}
 
 /* ============================================
    Messages

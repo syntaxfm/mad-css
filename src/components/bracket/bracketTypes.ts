@@ -9,7 +9,6 @@ export interface NodeContext {
 	isInteractive: boolean;
 	isPickingEnabled: boolean;
 	showPicks: boolean;
-	isLocked: boolean;
 	onPick?: (gameId: string, playerId: string) => void;
 }
 

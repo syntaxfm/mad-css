@@ -2,8 +2,8 @@
 // TOURNAMENT CONFIG
 // =============================================================================
 
-// Deadline for locking brackets (ISO 8601 format)
-// After this time, no new brackets can be created or locked
+// Deadline for bracket edits (ISO 8601 format)
+// After this time, no brackets can be created or changed
 export const BRACKET_DEADLINE = "2026-03-06T13:00:00Z";
 
 // Game schedule - when results will be announced for each round

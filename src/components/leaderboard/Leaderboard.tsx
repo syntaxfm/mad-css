@@ -82,7 +82,7 @@ export function Leaderboard() {
 							<div className="leaderboard-empty">Loading...</div>
 						) : entries.length === 0 ? (
 							<div className="leaderboard-empty">
-								<p>No scores yet. Lock your bracket and check back after Round 1!</p>
+								<p>No scores yet. Make your picks and check back after Round 1!</p>
 							</div>
 						) : (
 							<table className="leaderboard-table">

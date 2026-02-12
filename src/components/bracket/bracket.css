@@ -565,11 +565,7 @@
 	letter-spacing: 0.03em;
 }
 
-.bracket-toggle-badge.locked {
-	background: var(--orange);
-	color: var(--white);
-	border-color: var(--orange);
-}
+
 
 /* React Flow Container */
 .bracket-container {

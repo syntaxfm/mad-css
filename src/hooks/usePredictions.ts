@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BRACKET_DEADLINE, bracket, TOTAL_GAMES } from "@/data/players";
 import {
-	useLockBracketMutation,
 	usePredictionsQuery,
 	useSavePredictionsMutation,
 } from "./usePredictionsQuery";
@@ -13,8 +12,6 @@ export type Prediction = {
 
 export type PredictionsState = {
 	predictions: Record<string, string>; // gameId -> playerId
-	isLocked: boolean;
-	lockedAt: string | null;
 	isLoading: boolean;
 	isSaving: boolean;
 	error: string | null;
@@ -127,9 +124,8 @@ export function usePredictions(isAuthenticated: boolean, userId?: string) {
 		error: queryError,
 	} = usePredictionsQuery(isAuthenticated ? userId : undefined);
 
-	// Mutations
+	// Mutation
 	const saveMutation = useSavePredictionsMutation(userId);
-	const lockMutation = useLockBracketMutation(userId);
 
 	// Local state for optimistic updates while picking
 	const [localPredictions, setLocalPredictions] = useState<Record<
@@ -164,8 +160,6 @@ export function usePredictions(isAuthenticated: boolean, userId?: string) {
 
 	// The actual predictions to use (local if available, otherwise from query)
 	const predictions = localPredictions ?? queryData?.predictions ?? {};
-	const isLocked = queryData?.isLocked ?? false;
-	const lockedAt = queryData?.lockedAt ?? null;
 
 	// Calculate deadline status
 	const isDeadlinePassed = new Date() > new Date(BRACKET_DEADLINE);
@@ -174,19 +168,15 @@ export function usePredictions(isAuthenticated: boolean, userId?: string) {
 	const isLoading = isAuthenticated && queryIsLoading;
 
 	// Determine saving state
-	const isSaving = saveMutation.isPending || lockMutation.isPending;
+	const isSaving = saveMutation.isPending;
 
 	// Determine error state
-	const error =
-		queryError?.message ||
-		saveMutation.error?.message ||
-		lockMutation.error?.message ||
-		null;
+	const error = queryError?.message || saveMutation.error?.message || null;
 
 	// Set a prediction with cascading logic
 	const setPrediction = useCallback(
 		(gameId: string, playerId: string) => {
-			if (isLocked || isDeadlinePassed) return;
+			if (isDeadlinePassed) return;
 
 			setLocalPredictions((prev) => {
 				const current = prev ?? queryData?.predictions ?? {};
@@ -207,27 +197,26 @@ export function usePredictions(isAuthenticated: boolean, userId?: string) {
 				return newPredictions;
 			});
 		},
-		[isLocked, isDeadlinePassed, queryData?.predictions],
+		[isDeadlinePassed, queryData?.predictions],
 	);
 
 	// Save predictions to the server
 	const savePredictions = useCallback(async () => {
-		if (isLocked || isDeadlinePassed || !isAuthenticated || !localPredictions)
-			return;
+		if (isDeadlinePassed || !isAuthenticated || !localPredictions) return;
 
 		await saveMutation.mutateAsync(localPredictions);
-	}, [
-		localPredictions,
-		isLocked,
-		isDeadlinePassed,
-		isAuthenticated,
-		saveMutation,
-	]);
+	}, [localPredictions, isDeadlinePassed, isAuthenticated, saveMutation]);
 
 	// Auto-save after each pick with a short debounce
 	const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 	useEffect(() => {
-		if (!hasChanges || isLocked || isDeadlinePassed || !isAuthenticated || !localPredictions) return;
+		if (
+			!hasChanges ||
+			isDeadlinePassed ||
+			!isAuthenticated ||
+			!localPredictions
+		)
+			return;
 
 		if (autoSaveTimerRef.current) {
 			clearTimeout(autoSaveTimerRef.current);
@@ -242,41 +231,25 @@ export function usePredictions(isAuthenticated: boolean, userId?: string) {
 				clearTimeout(autoSaveTimerRef.current);
 			}
 		};
-	}, [hasChanges, localPredictions, isLocked, isDeadlinePassed, isAuthenticated, saveMutation]);
+	}, [
+		hasChanges,
+		localPredictions,
+		isDeadlinePassed,
+		isAuthenticated,
+		saveMutation,
+	]);
 
 	// Reset all predictions
 	const resetPredictions = useCallback(() => {
-		if (isLocked || isDeadlinePassed) return;
+		if (isDeadlinePassed) return;
 
 		setLocalPredictions({});
-	}, [isLocked, isDeadlinePassed]);
-
-	// Lock the bracket
-	const lockBracket = useCallback(async () => {
-		if (isLocked || isDeadlinePassed || !isAuthenticated) return;
-
-		// First save any unsaved predictions
-		if (hasChanges && localPredictions) {
-			await saveMutation.mutateAsync(localPredictions);
-		}
-
-		await lockMutation.mutateAsync();
-	}, [
-		isLocked,
-		isDeadlinePassed,
-		isAuthenticated,
-		hasChanges,
-		localPredictions,
-		saveMutation,
-		lockMutation,
-	]);
+	}, [isDeadlinePassed]);
 
 	const pickCount = Object.keys(predictions).length;
 
 	return {
 		predictions,
-		isLocked,
-		lockedAt,
 		isLoading,
 		isSaving,
 		error,
@@ -287,7 +260,6 @@ export function usePredictions(isAuthenticated: boolean, userId?: string) {
 		totalGames: TOTAL_GAMES,
 		setPrediction,
 		savePredictions,
-		lockBracket,
 		resetPredictions,
 		getPickablePlayersForGame: (gameId: string) =>
 			getPickablePlayersForGame(gameId, predictions),
