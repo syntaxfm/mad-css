@@ -18,52 +18,55 @@ const usernameInputSchema = z.object({
 const getBracketData = createServerFn({ method: "GET" })
 	.inputValidator((d: unknown) => usernameInputSchema.parse(d))
 	.handler(async ({ data }) => {
+		const Sentry = await import("@sentry/tanstackstart-react");
 		const { username } = data;
 		const { env } = await import("cloudflare:workers");
 		const { eq } = await import("drizzle-orm");
 		const { createDb } = await import("@/db");
 		const schema = await import("@/db/schema");
 
-		const db = createDb(env.DB);
+		return Sentry.startSpan({ name: "bracket.getData", op: "db" }, async () => {
+			const db = createDb(env.DB);
 
-		const users = await db
-			.select({
-				id: schema.user.id,
-				name: schema.user.name,
-				image: schema.user.image,
-				username: schema.user.username,
-			})
-			.from(schema.user)
-			.where(eq(schema.user.username, username))
-			.limit(1);
+			const users = await db
+				.select({
+					id: schema.user.id,
+					name: schema.user.name,
+					image: schema.user.image,
+					username: schema.user.username,
+				})
+				.from(schema.user)
+				.where(eq(schema.user.username, username))
+				.limit(1);
 
-		if (users.length === 0 || !users[0].username) {
-			return { found: false as const };
-		}
+			if (users.length === 0 || !users[0].username) {
+				return { found: false as const };
+			}
 
-		const user = users[0];
+			const user = users[0];
 
-		const predictions = await db
-			.select({
-				gameId: schema.userPrediction.gameId,
-				predictedWinnerId: schema.userPrediction.predictedWinnerId,
-			})
-			.from(schema.userPrediction)
-			.where(eq(schema.userPrediction.userId, user.id));
+			const predictions = await db
+				.select({
+					gameId: schema.userPrediction.gameId,
+					predictedWinnerId: schema.userPrediction.predictedWinnerId,
+				})
+				.from(schema.userPrediction)
+				.where(eq(schema.userPrediction.userId, user.id));
 
-		if (predictions.length === 0) {
-			return { found: false as const };
-		}
+			if (predictions.length === 0) {
+				return { found: false as const };
+			}
 
-		return {
-			found: true as const,
-			user: {
-				name: user.name,
-				image: user.image,
-				username: user.username,
-			},
-			predictions,
-		};
+			return {
+				found: true as const,
+				user: {
+					name: user.name,
+					image: user.image,
+					username: user.username,
+				},
+				predictions,
+			};
+		});
 	});
 
 export const Route = createFileRoute("/bracket/$username")({
@@ -125,7 +128,6 @@ function BracketPage() {
 	const [tournamentResults, setTournamentResults] =
 		useState<Record<string, string>>(getBracketResults);
 
-	// Listen for simulation overrides from the admin button
 	useEffect(() => {
 		const handler = (e: Event) => {
 			const customEvent = e as CustomEvent<{
@@ -142,7 +144,6 @@ function BracketPage() {
 			window.removeEventListener("tournament-results-changed", handler);
 	}, []);
 
-	// Convert array predictions to record format
 	const predictions: Record<string, string> = {};
 	for (const p of data.predictions) {
 		predictions[p.gameId] = p.predictedWinnerId;

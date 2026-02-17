@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@cloudflare/vite-plugin": "^1.23.1",
+    "@sentry/cloudflare": "^10.39.0",
     "@sentry/tanstackstart-react": "^10.38.0",
     "@tailwindcss/vite": "^4.1.18",
     "@tanstack/react-devtools": "^0.9.5",

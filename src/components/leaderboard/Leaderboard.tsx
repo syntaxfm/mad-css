@@ -18,33 +18,34 @@ type LeaderboardEntry = {
 };
 
 const getLeaderboard = createServerFn({ method: "GET" }).handler(async () => {
+	const Sentry = await import("@sentry/tanstackstart-react");
 	const { env } = await import("cloudflare:workers");
 	const { createDb } = await import("@/db");
 	const { desc, eq } = await import("drizzle-orm");
 	const schema = await import("@/db/schema");
 
-	const db = createDb(env.DB);
+	return Sentry.startSpan({ name: "leaderboard.fetch", op: "db" }, async () => {
+		const db = createDb(env.DB);
 
-	const scores = await db
-		.select({
-			userId: schema.userScore.userId,
-			round1Score: schema.userScore.round1Score,
-			round2Score: schema.userScore.round2Score,
-			round3Score: schema.userScore.round3Score,
-			round4Score: schema.userScore.round4Score,
-			totalScore: schema.userScore.totalScore,
-			userName: schema.user.name,
-			userImage: schema.user.image,
-			username: schema.user.username,
-		})
-		.from(schema.userScore)
-		.innerJoin(schema.user, eq(schema.userScore.userId, schema.user.id))
-		.orderBy(desc(schema.userScore.totalScore))
-		.limit(100);
+		const scores = await db
+			.select({
+				userId: schema.userScore.userId,
+				round1Score: schema.userScore.round1Score,
+				round2Score: schema.userScore.round2Score,
+				round3Score: schema.userScore.round3Score,
+				round4Score: schema.userScore.round4Score,
+				totalScore: schema.userScore.totalScore,
+				userName: schema.user.name,
+				userImage: schema.user.image,
+				username: schema.user.username,
+			})
+			.from(schema.userScore)
+			.innerJoin(schema.user, eq(schema.userScore.userId, schema.user.id))
+			.orderBy(desc(schema.userScore.totalScore))
+			.limit(100);
 
-	let currentRank = 1;
-	return scores.map(
-		(score, index): LeaderboardEntry => {
+		let currentRank = 1;
+		return scores.map((score, index): LeaderboardEntry => {
 			const isTied =
 				index > 0 && score.totalScore === scores[index - 1].totalScore;
 			if (index > 0 && !isTied) {
@@ -63,8 +64,8 @@ const getLeaderboard = createServerFn({ method: "GET" }).handler(async () => {
 				round4Score: score.round4Score,
 				totalScore: score.totalScore,
 			};
-		},
-	);
+		});
+	});
 });
 
 export function Leaderboard() {
@@ -92,7 +93,9 @@ export function Leaderboard() {
 							<div className="leaderboard-empty">Loading...</div>
 						) : entries.length === 0 ? (
 							<div className="leaderboard-empty">
-								<p>No scores yet. Make your picks and check back after Round 1!</p>
+								<p>
+									No scores yet. Make your picks and check back after Round 1!
+								</p>
 							</div>
 						) : (
 							<table className="leaderboard-table">
@@ -107,8 +110,8 @@ export function Leaderboard() {
 									{entries.map((entry) => (
 										<tr key={entry.userId}>
 											<td className="leaderboard-rank">
-											{entry.showRank ? entry.rank : ""}
-										</td>
+												{entry.showRank ? entry.rank : ""}
+											</td>
 											<td>
 												{entry.username ? (
 													<a
