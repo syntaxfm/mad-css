@@ -207,7 +207,6 @@ const testSentryServerFn = createServerFn({ method: "POST" }).handler(
 	async () => {
 		const Sentry = await import("@sentry/tanstackstart-react");
 		Sentry.captureException(new Error("[Sentry Test] Server error capture"));
-		Sentry.captureMessage("[Sentry Test] Server message");
 		await Sentry.flush(3000);
 		return { success: true };
 	},
