@@ -47,6 +47,7 @@ const getRecentPickers = createServerFn({ method: "GET" }).handler(async () => {
 
 			const db = createDb(env.DB);
 
+			// Get recent predictions with user info
 			const recentPredictions = await db
 				.select({
 					userId: schema.userPrediction.userId,
@@ -68,6 +69,7 @@ const getRecentPickers = createServerFn({ method: "GET" }).handler(async () => {
 				return [];
 			}
 
+			// Group predictions by user
 			const userMap = new Map<
 				string,
 				{

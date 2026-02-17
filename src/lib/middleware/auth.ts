@@ -6,6 +6,10 @@ type AuthResult =
 	| { success: true; user: { id: string; name: string; email: string } }
 	| { success: false; response: Response };
 
+/**
+ * Validates request authentication and returns user or error response.
+ * Use in API handlers to reduce auth boilerplate.
+ */
 export async function requireAuth(
 	request: Request,
 	db: D1Database,

@@ -8,6 +8,10 @@ type AdminResult =
 	| { success: true; user: { id: string; name: string; email: string } }
 	| { success: false; response: Response };
 
+/**
+ * Validates request authentication and admin status.
+ * Use in admin API handlers to reduce auth boilerplate.
+ */
 export async function requireAdmin(
 	request: Request,
 	d1: D1Database,
