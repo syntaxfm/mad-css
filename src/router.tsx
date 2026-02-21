@@ -4,6 +4,43 @@ import { createRouter } from "@tanstack/react-router";
 // Import the generated route tree
 import { routeTree } from "./routeTree.gen";
 
+const EXTENSION_ERROR_PATTERNS = [
+	/runtime\.sendMessage\(\)/i,
+	/extension context invalidated/i,
+	/message port closed/i,
+	/could not establish connection/i,
+	/receiving end does not exist/i,
+	/tab not found/i,
+];
+
+const EXTENSION_STACK_PATTERNS = [
+	/chrome-extension:\/\//,
+	/moz-extension:\/\//,
+	/safari-web-extension:\/\//,
+	/webkit-masked-url:\/\//,
+];
+
+function isThirdPartyExtensionError(event: Sentry.ErrorEvent): boolean {
+	const message = event.message || event.exception?.values?.[0]?.value || "";
+
+	if (EXTENSION_ERROR_PATTERNS.some((pattern) => pattern.test(message))) {
+		return true;
+	}
+
+	const frames = event.exception?.values?.[0]?.stacktrace?.frames;
+	if (
+		frames?.some((frame) =>
+			EXTENSION_STACK_PATTERNS.some((pattern) =>
+				pattern.test(frame.filename ?? ""),
+			),
+		)
+	) {
+		return true;
+	}
+
+	return false;
+}
+
 // Create a new router instance
 export const getRouter = () => {
 	const router = createRouter({
@@ -22,6 +59,12 @@ export const getRouter = () => {
 			sendDefaultPii: true,
 			integrations: [],
 			enableLogs: true,
+			beforeSend(event) {
+				if (isThirdPartyExtensionError(event)) {
+					return null;
+				}
+				return event;
+			},
 		});
 	}
 	return router;
