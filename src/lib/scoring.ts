@@ -1,5 +1,5 @@
 import type { D1Database } from "@cloudflare/workers-types";
-import { eq, sql } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 import {
 	FINAL_GAME_IDS,
 	getResultsFromBracket,
@@ -9,10 +9,7 @@ import {
 } from "@/data/players";
 import { createDb } from "@/db";
 import * as schema from "@/db/schema";
-import {
-	buildResultsUpToStage,
-	type SimulationStage,
-} from "@/lib/simulation";
+import { buildResultsUpToStage, type SimulationStage } from "@/lib/simulation";
 
 // Points per correct pick in each round
 const ROUND_1_POINTS = 10;
@@ -132,41 +129,40 @@ export async function recalculateAllUserScores(
 
 	// Calculate and upsert scores for each user
 	let updated = 0;
+	const errors: Array<{ userId: string; error: unknown }> = [];
+
 	for (const userId of userIds) {
 		const userPredictions = predictionsByUser.get(userId) || [];
 		const scores = calculateScoresForUser(userPredictions, results);
 
-		// Check if score record exists
-		const existing = await db
-			.select()
-			.from(schema.userScore)
-			.where(eq(schema.userScore.userId, userId))
-			.limit(1);
-
-		if (existing.length > 0) {
+		try {
 			await db
-				.update(schema.userScore)
-				.set({
+				.insert(schema.userScore)
+				.values({
+					id: crypto.randomUUID(),
+					userId,
 					round1Score: scores.round1Score,
 					round2Score: scores.round2Score,
 					round3Score: scores.round3Score,
 					round4Score: scores.round4Score,
 					totalScore: scores.totalScore,
 				})
-				.where(eq(schema.userScore.userId, userId));
-		} else {
-			await db.insert(schema.userScore).values({
-				id: crypto.randomUUID(),
-				userId,
-				round1Score: scores.round1Score,
-				round2Score: scores.round2Score,
-				round3Score: scores.round3Score,
-				round4Score: scores.round4Score,
-				totalScore: scores.totalScore,
-			});
+				.onConflictDoUpdate({
+					target: schema.userScore.userId,
+					set: {
+						round1Score: scores.round1Score,
+						round2Score: scores.round2Score,
+						round3Score: scores.round3Score,
+						round4Score: scores.round4Score,
+						totalScore: scores.totalScore,
+					},
+				});
+			updated++;
+		} catch (error) {
+			console.error(`Failed to upsert score for userId ${userId}:`, error);
+			errors.push({ userId, error });
 		}
-		updated++;
 	}
 
-	return { updated };
+	return { updated, errors: errors.length > 0 ? errors : undefined };
 }

@@ -4,10 +4,7 @@ import { createDb } from "@/db";
 import { isAdminUser } from "@/lib/admin";
 import { requireAuth } from "@/lib/middleware/auth";
 import { recalculateAllUserScores } from "@/lib/scoring";
-import {
-	SIMULATION_STAGES,
-	type SimulationStage,
-} from "@/lib/simulation";
+import { SIMULATION_STAGES, type SimulationStage } from "@/lib/simulation";
 
 export const Route = createFileRoute("/api/leaderboard/calculate")({
 	server: {
@@ -34,33 +31,50 @@ export const Route = createFileRoute("/api/leaderboard/calculate")({
 					};
 					if (
 						body.simulationStage &&
-						SIMULATION_STAGES.includes(
-							body.simulationStage as SimulationStage,
-						)
+						SIMULATION_STAGES.includes(body.simulationStage as SimulationStage)
 					) {
-						simulationStage =
-							body.simulationStage as SimulationStage;
+						simulationStage = body.simulationStage as SimulationStage;
 					}
 				} catch {
 					// No body or invalid JSON — use real results
 				}
 
-				const result = await recalculateAllUserScores(
-					env.DB,
-					simulationStage,
-				);
+				try {
+					const result = await recalculateAllUserScores(
+						env.DB,
+						simulationStage,
+					);
 
-				return new Response(
-					JSON.stringify({
-						success: true,
-						updated: result.updated,
-						simulated: !!simulationStage,
-					}),
-					{
-						status: 200,
-						headers: { "Content-Type": "application/json" },
-					},
-				);
+					return new Response(
+						JSON.stringify({
+							success: true,
+							updated: result.updated,
+							simulated: !!simulationStage,
+							errors: result.errors
+								? result.errors.map((e) => ({
+										userId: e.userId,
+										message: String(e.error),
+									}))
+								: undefined,
+						}),
+						{
+							status: 200,
+							headers: { "Content-Type": "application/json" },
+						},
+					);
+				} catch (error) {
+					console.error("Score recalculation failed:", error);
+					return new Response(
+						JSON.stringify({
+							error: "Score recalculation failed",
+							message: error instanceof Error ? error.message : String(error),
+						}),
+						{
+							status: 500,
+							headers: { "Content-Type": "application/json" },
+						},
+					);
+				}
 			},
 		},
 	},
