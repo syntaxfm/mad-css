@@ -1,4 +1,5 @@
 import { env } from "cloudflare:workers";
+import * as Sentry from "@sentry/tanstackstart-react";
 import { createFileRoute } from "@tanstack/react-router";
 import { eq } from "drizzle-orm";
 import { BRACKET_DEADLINE } from "@/data/players";
@@ -10,7 +11,6 @@ import { predictionsArraySchema } from "@/lib/schemas/prediction";
 export const Route = createFileRoute("/api/predictions/")({
 	server: {
 		handlers: {
-			// GET: Fetch user's predictions
 			GET: async ({ request }) => {
 				const authResult = await requireAuth(request, env.DB);
 				if (!authResult.success) return authResult.response;
@@ -18,14 +18,17 @@ export const Route = createFileRoute("/api/predictions/")({
 				const db = createDb(env.DB);
 				const userId = authResult.user.id;
 
-				// Fetch predictions
-				const predictions = await db
-					.select({
-						gameId: schema.userPrediction.gameId,
-						predictedWinnerId: schema.userPrediction.predictedWinnerId,
-					})
-					.from(schema.userPrediction)
-					.where(eq(schema.userPrediction.userId, userId));
+				const predictions = await Sentry.startSpan(
+					{ name: "predictions.fetch", op: "db" },
+					() =>
+						db
+							.select({
+								gameId: schema.userPrediction.gameId,
+								predictedWinnerId: schema.userPrediction.predictedWinnerId,
+							})
+							.from(schema.userPrediction)
+							.where(eq(schema.userPrediction.userId, userId)),
+				);
 
 				return new Response(
 					JSON.stringify({
@@ -39,7 +42,6 @@ export const Route = createFileRoute("/api/predictions/")({
 				);
 			},
 
-			// POST: Save predictions (reject if past deadline)
 			POST: async ({ request }) => {
 				const authResult = await requireAuth(request, env.DB);
 				if (!authResult.success) return authResult.response;
@@ -47,7 +49,6 @@ export const Route = createFileRoute("/api/predictions/")({
 				const db = createDb(env.DB);
 				const userId = authResult.user.id;
 
-				// Check deadline
 				const now = new Date();
 				if (now > new Date(BRACKET_DEADLINE)) {
 					return new Response(
@@ -59,7 +60,6 @@ export const Route = createFileRoute("/api/predictions/")({
 					);
 				}
 
-				// Parse and validate request body
 				let body: unknown;
 				try {
 					body = await request.json();
@@ -89,22 +89,25 @@ export const Route = createFileRoute("/api/predictions/")({
 
 				const predictions = result.data;
 
-				// Delete all existing predictions for this user, then insert new ones
-				await db
-					.delete(schema.userPrediction)
-					.where(eq(schema.userPrediction.userId, userId));
+				await Sentry.startSpan(
+					{ name: "predictions.save", op: "db" },
+					async () => {
+						await db
+							.delete(schema.userPrediction)
+							.where(eq(schema.userPrediction.userId, userId));
 
-				// Batch insert all predictions
-				if (predictions.length > 0) {
-					await db.insert(schema.userPrediction).values(
-						predictions.map((prediction) => ({
-							id: crypto.randomUUID(),
-							userId,
-							gameId: prediction.gameId,
-							predictedWinnerId: prediction.predictedWinnerId,
-						})),
-					);
-				}
+						if (predictions.length > 0) {
+							await db.insert(schema.userPrediction).values(
+								predictions.map((prediction) => ({
+									id: crypto.randomUUID(),
+									userId,
+									gameId: prediction.gameId,
+									predictedWinnerId: prediction.predictedWinnerId,
+								})),
+							);
+						}
+					},
+				);
 
 				return new Response(JSON.stringify({ success: true }), {
 					status: 200,

@@ -3,28 +3,24 @@ import "../instrument.server.mjs";
 import * as Sentry from "@sentry/tanstackstart-react";
 import handler, { createServerEntry } from "@tanstack/react-start/server-entry";
 
-// Global error handler to catch unhandled errors
+// Global error handler
 addEventListener("error", (event) => {
-	console.error("=== Global Error Handler ===");
-	console.error("Error:", event.error);
 	if (event.error instanceof Error) {
 		Sentry.captureException(event.error);
-		console.error("Message:", event.error.message);
-		console.error("Stack:", event.error.stack);
+		Sentry.logger.error("Global error handler caught error", {
+			message: event.error.message,
+		});
 	}
-	console.error("===========================");
 });
 
 addEventListener("unhandledrejection", (event: any) => {
 	if (event.reason instanceof Error && "statusCode" in event.reason) return;
-	console.error("=== Unhandled Promise Rejection ===");
-	console.error("Reason:", event.reason);
 	if (event.reason instanceof Error) {
 		Sentry.captureException(event.reason);
-		console.error("Message:", event.reason.message);
-		console.error("Stack:", event.reason.stack);
+		Sentry.logger.error("Unhandled promise rejection", {
+			message: event.reason.message,
+		});
 	}
-	console.error("===================================");
 });
 
 export default createServerEntry({

@@ -10,6 +10,8 @@ import {
 } from "@xyflow/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "@xyflow/react/dist/style.css";
+import { LoginSectionShare } from "@/components/LoginSection";
+import { Scoreboard } from "@/components/scoreboard/Scoreboard";
 import { usePredictionsContext } from "@/context/PredictionsContext";
 import {
 	ALL_GAME_IDS,
@@ -19,10 +21,8 @@ import {
 	TOTAL_GAMES,
 } from "@/data/players";
 import { useCountdown } from "@/hooks/useCountdown";
-import { Scoreboard } from "@/components/scoreboard/Scoreboard";
 import { getPickablePlayersForGame } from "@/hooks/usePredictions";
 import { authClient } from "@/lib/auth-client";
-import { LoginSectionShare } from "@/components/LoginSection";
 import type { NodeContext } from "./bracketTypes";
 import {
 	generateChampionshipNode,
@@ -101,13 +101,12 @@ function NextResultsCountdown() {
 	const nextGameCountdown = useCountdown(nextGame?.time);
 	const nextGameLabel = nextGame ? ROUND_LABELS[nextGame.round] : null;
 
-	if (!session?.user || !nextGame || nextGameCountdown.totalMs <= 0) return null;
+	if (!session?.user || !nextGame || nextGameCountdown.totalMs <= 0)
+		return null;
 
 	return (
 		<div className="cta-next-results">
-			<span className="next-results-label">
-				{nextGameLabel} results in:
-			</span>
+			<span className="next-results-label">{nextGameLabel} results in:</span>
 			<Scoreboard countdown={nextGameCountdown} isUrgent={false} />
 		</div>
 	);
@@ -135,7 +134,8 @@ function BracketToolbar() {
 		? `https://bsky.app/intent/compose?text=${encodeURIComponent(`Check out my March Mad CSS bracket picks! 🏀\n\n${shareUrl}`)}`
 		: null;
 	const isBracketComplete = pickCount === TOTAL_GAMES;
-	const showShare = isLoggedIn && (isBracketComplete || isDeadlinePassed) && !!shareUrl;
+	const showShare =
+		isLoggedIn && (isBracketComplete || isDeadlinePassed) && !!shareUrl;
 
 	const handleCopyLink = async () => {
 		if (!shareUrl) return;
@@ -677,7 +677,8 @@ function BracketContent({
 	const onPick = ctx?.setPrediction ?? propsOnPick;
 	const isDeadlinePassed = ctx?.isDeadlinePassed ?? false;
 
-	const isPickingEnabled = isInteractive && isAuthenticated && !isDeadlinePassed;
+	const isPickingEnabled =
+		isInteractive && isAuthenticated && !isDeadlinePassed;
 
 	const nodes = useMemo(
 		() =>

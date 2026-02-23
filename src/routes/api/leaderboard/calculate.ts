@@ -4,10 +4,7 @@ import { createDb } from "@/db";
 import { isAdminUser } from "@/lib/admin";
 import { requireAuth } from "@/lib/middleware/auth";
 import { recalculateAllUserScores } from "@/lib/scoring";
-import {
-	SIMULATION_STAGES,
-	type SimulationStage,
-} from "@/lib/simulation";
+import { SIMULATION_STAGES, type SimulationStage } from "@/lib/simulation";
 
 export const Route = createFileRoute("/api/leaderboard/calculate")({
 	server: {
@@ -34,21 +31,15 @@ export const Route = createFileRoute("/api/leaderboard/calculate")({
 					};
 					if (
 						body.simulationStage &&
-						SIMULATION_STAGES.includes(
-							body.simulationStage as SimulationStage,
-						)
+						SIMULATION_STAGES.includes(body.simulationStage as SimulationStage)
 					) {
-						simulationStage =
-							body.simulationStage as SimulationStage;
+						simulationStage = body.simulationStage as SimulationStage;
 					}
 				} catch {
 					// No body or invalid JSON — use real results
 				}
 
-				const result = await recalculateAllUserScores(
-					env.DB,
-					simulationStage,
-				);
+				const result = await recalculateAllUserScores(env.DB, simulationStage);
 
 				return new Response(
 					JSON.stringify({

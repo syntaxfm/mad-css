@@ -145,14 +145,12 @@ export const userPrediction = sqliteTable(
 	],
 );
 
-
 export const userPredictionRelations = relations(userPrediction, ({ one }) => ({
 	user: one(user, {
 		fields: [userPrediction.userId],
 		references: [user.id],
 	}),
 }));
-
 
 // =============================================================================
 // USER SCORES (LEADERBOARD)
