@@ -1,4 +1,5 @@
 import "@/styles/ticket.css";
+
 export function Ticket() {
 	return (
 		<div className="ticket_wrapper">

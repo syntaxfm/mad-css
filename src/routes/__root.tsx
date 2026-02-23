@@ -13,6 +13,7 @@ import { AdminButton } from "@/components/AdminButton";
 import { Footer } from "@/components/footer/Footer";
 import { Header } from "@/components/Header";
 import { NotFound } from "@/components/NotFound";
+import { Schedule } from "@/components/Schedule";
 import appCss from "../styles/styles.css?url";
 
 const queryClient = new QueryClient({
@@ -137,6 +138,7 @@ function RootDocument() {
 			</head>
 			<body>
 				<QueryClientProvider client={queryClient}>
+					<Schedule />
 					<Header />
 					<Outlet />
 					<Footer />
