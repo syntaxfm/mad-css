@@ -155,7 +155,7 @@ export function LoginSection() {
 			<p className="cta-headline font_block">Think you can call it?</p>
 			<p className="cta-sub">
 				Make your predictions before <strong>March 6</strong> for a chance to
-				win some amazing prizes!
+				win some <a href="#prizes">amazing prizes!</a>
 			</p>
 			{deadline && countdown.totalMs > 0 ? (
 				<Scoreboard countdown={countdown} isUrgent={isUrgent} />

@@ -64,6 +64,10 @@ p {
 	font-weight: 500;
 }
 
+a {
+	color: var(--black);
+}
+
 .font_block {
 	font-family: var(--font-block);
 }

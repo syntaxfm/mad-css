@@ -1,4 +1,4 @@
-.prizes-section {
+.section.prizes-section {
 	--max-width: 1200px;
 	background: var(--yellow);
 	background-image: url("../../styles/assets/textures/Texture-02-small.png");

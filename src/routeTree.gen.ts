@@ -9,7 +9,6 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TestRouteImport } from './routes/test'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BracketUsernameRouteImport } from './routes/bracket/$username'
@@ -21,11 +20,6 @@ import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiAdminUsersRouteImport } from './routes/api/admin/users'
 import { Route as ApiAdminCheckRouteImport } from './routes/api/admin/check'
 
-const TestRoute = TestRouteImport.update({
-  id: '/test',
-  path: '/test',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -80,7 +74,6 @@ const ApiAdminCheckRoute = ApiAdminCheckRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
-  '/test': typeof TestRoute
   '/bracket/$username': typeof BracketUsernameRoute
   '/api/admin/check': typeof ApiAdminCheckRoute
   '/api/admin/users': typeof ApiAdminUsersRoute
@@ -93,7 +86,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
-  '/test': typeof TestRoute
   '/bracket/$username': typeof BracketUsernameRoute
   '/api/admin/check': typeof ApiAdminCheckRoute
   '/api/admin/users': typeof ApiAdminUsersRoute
@@ -107,7 +99,6 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
-  '/test': typeof TestRoute
   '/bracket/$username': typeof BracketUsernameRoute
   '/api/admin/check': typeof ApiAdminCheckRoute
   '/api/admin/users': typeof ApiAdminUsersRoute
@@ -122,7 +113,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
-    | '/test'
     | '/bracket/$username'
     | '/api/admin/check'
     | '/api/admin/users'
@@ -135,7 +125,6 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin'
-    | '/test'
     | '/bracket/$username'
     | '/api/admin/check'
     | '/api/admin/users'
@@ -148,7 +137,6 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
-    | '/test'
     | '/bracket/$username'
     | '/api/admin/check'
     | '/api/admin/users'
@@ -162,7 +150,6 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
-  TestRoute: typeof TestRoute
   BracketUsernameRoute: typeof BracketUsernameRoute
   ApiAdminCheckRoute: typeof ApiAdminCheckRoute
   ApiAdminUsersRoute: typeof ApiAdminUsersRoute
@@ -175,13 +162,6 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/test': {
-      id: '/test'
-      path: '/test'
-      fullPath: '/test'
-      preLoaderRoute: typeof TestRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/admin': {
       id: '/admin'
       path: '/admin'
@@ -258,7 +238,6 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
-  TestRoute: TestRoute,
   BracketUsernameRoute: BracketUsernameRoute,
   ApiAdminCheckRoute: ApiAdminCheckRoute,
   ApiAdminUsersRoute: ApiAdminUsersRoute,
