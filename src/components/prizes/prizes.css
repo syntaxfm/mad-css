@@ -1,8 +1,13 @@
 .prizes-section {
 	--max-width: 1200px;
 	background: var(--yellow);
-	background-image: url("../../styles/assets/textures/Texture-02.png");
+	background-image: url("../../styles/assets/textures/Texture-02-small.png");
 	background-size: cover;
+	h2 {
+		color: var(--black);
+		text-shadow: none;
+		filter: none;
+	}
 }
 
 .prizes-toggle {
