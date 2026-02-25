@@ -278,7 +278,7 @@ const prizeImages: PrizeImage[] = [
 	{
 		src: "/prizes/prize-22.png",
 		label: "MadCSS Bomber Jacket",
-		link: "#",
+		link: "https://checkout.sentry.shop/collections/syntax-march-madcss",
 		level: 3,
 		left: 5893,
 		top: 4480 - Y_OFFSET,
