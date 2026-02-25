@@ -343,7 +343,7 @@ export function Prizes() {
 	const activeIndex = PLACES.findIndex((p) => p.level === activePlace);
 
 	return (
-		<section className="section prizes-section">
+		<section id="prizes" className="section prizes-section">
 			<div className="section-content">
 				<h2>Prizes</h2>
 				<div className="prizes-toggle">
@@ -357,6 +357,7 @@ export function Prizes() {
 								key={p.level}
 								type="button"
 								className={`prizes-toggle-option${activePlace === p.level ? " active" : ""}`}
+								onMouseEnter={() => setActivePlace(p.level)}
 								onClick={() => setActivePlace(p.level)}
 							>
 								{p.label}
