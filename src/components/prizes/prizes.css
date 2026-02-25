@@ -84,7 +84,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	filter: drop-shadow(6px 6px 0 rgba(0, 0, 0, 0.4));
+	filter: drop-shadow(6px 6px 0 rgba(0, 0, 0, 0.1));
 	cursor: pointer;
 	text-decoration: none;
 	transition: opacity 0.3s ease;
@@ -99,8 +99,8 @@
 	height: 100%;
 	object-fit: contain;
 	transition:
-		transform 0.2s ease,
-		filter 0.2s ease;
+		transform 0.25s cubic-bezier(0.34, 1.4, 0.64, 1),
+		filter 0.25s cubic-bezier(0.34, 1.4, 0.64, 1);
 }
 
 .prize-label {
@@ -118,13 +118,43 @@
 	text-align: center;
 	white-space: nowrap;
 	opacity: 0;
-	transition: opacity 0.2s ease;
+	transform: translate(-50%, -100%) scale(0.92);
+	transition:
+		opacity 0.2s cubic-bezier(0.34, 1.4, 0.64, 1),
+		transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 	pointer-events: none;
 }
 
 .prize-image-wrapper.dimmed {
-	opacity: 0.2;
 	pointer-events: none;
+}
+
+.prize-image-wrapper.dimmed .prize-image {
+	opacity: 0;
+}
+
+.prize-image-wrapper.dimmed::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: var(--black);
+	opacity: 1;
+	mask-image: var(--prize-img);
+	mask-size: contain;
+	mask-position: center;
+	mask-repeat: no-repeat;
+}
+
+.prize-image-wrapper.dimmed::before {
+	content: "";
+	inset: 0;
+	position: absolute;
+	z-index: 1;
+	background: var(--yellow);
+	mask-image: var(--prize-img);
+	mask-size: contain;
+	mask-position: center;
+	mask-repeat: no-repeat;
 }
 
 .prize-image-wrapper:hover {
@@ -133,9 +163,10 @@
 
 .prize-image-wrapper:hover .prize-image {
 	transform: scale(1.15);
-	filter: drop-shadow(10px 10px 0 rgba(0, 0, 0, 0.5));
+	filter: drop-shadow(10px 10px 0 rgba(0, 0, 0, 0.3));
 }
 
 .prize-image-wrapper:hover .prize-label {
 	opacity: 1;
+	transform: translate(-50%, -100%) scale(1);
 }

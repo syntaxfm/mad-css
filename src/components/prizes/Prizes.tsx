@@ -49,7 +49,7 @@ const prizeImages: PrizeImage[] = [
 		src: "/prizes/prize-1.png",
 		label: "Syntax Hoodie",
 		link: "https://checkout.sentry.shop/products/syntax-hoodie",
-		level: 2,
+		level: 3,
 		left: 1186,
 		top: 11152 - Y_OFFSET,
 		width: 4688,
@@ -61,7 +61,7 @@ const prizeImages: PrizeImage[] = [
 		src: "/prizes/prize-2.png",
 		label: "Blazing Fast Tee",
 		link: "https://checkout.sentry.shop/products/syntax-blazing-fast-tee",
-		level: 1,
+		level: 3,
 		left: 8292,
 		top: 12184 - Y_OFFSET,
 		width: 4533,
@@ -85,7 +85,7 @@ const prizeImages: PrizeImage[] = [
 		src: "/prizes/prize-4.png",
 		label: "Sick Pick Tee",
 		link: "https://checkout.sentry.shop/products/syntax-sick-pick-tee",
-		level: 2,
+		level: 3,
 		left: 3248,
 		top: 12236 - Y_OFFSET,
 		width: 4533,
@@ -97,7 +97,7 @@ const prizeImages: PrizeImage[] = [
 		src: "/prizes/prize-5.png",
 		label: "Drizzle Tee",
 		link: "https://checkout.sentry.shop/products/syntax-drizzle-tee",
-		level: 1,
+		level: 3,
 		left: 10600,
 		top: 11331 - Y_OFFSET,
 		width: 4532,
@@ -121,7 +121,7 @@ const prizeImages: PrizeImage[] = [
 		src: "/prizes/prize-7.png",
 		label: "Syntax Beanie",
 		link: "https://checkout.sentry.shop/products/syntax-beanie",
-		level: 2,
+		level: 3,
 		left: 1300,
 		top: 8148 - Y_OFFSET,
 		width: 3334,
@@ -146,7 +146,7 @@ const prizeImages: PrizeImage[] = [
 		src: "/prizes/prize-9.png",
 		label: "Syntax Key Caps",
 		link: "https://checkout.sentry.shop/products/syntax-keycaps",
-		level: 3,
+		level: 1,
 		left: 14543,
 		top: 8221 - Y_OFFSET,
 		width: 1921,
@@ -156,8 +156,8 @@ const prizeImages: PrizeImage[] = [
 	},
 	{
 		src: "/prizes/prize-10.png",
-		label: "Syntax Blue Cap",
-		link: "#",
+		label: "Syntax Rope Hat",
+		link: "https://checkout.sentry.shop/products/syntax-rope-cap",
 		level: 2,
 		left: 3262,
 		top: 9208 - Y_OFFSET,
@@ -170,7 +170,7 @@ const prizeImages: PrizeImage[] = [
 		src: "/prizes/prize-11.png",
 		label: "Syntax Felt Cap",
 		link: "https://checkout.sentry.shop/products/syntax-felt-cap",
-		level: 1,
+		level: 3,
 		left: 5110,
 		top: 9815 - Y_OFFSET,
 		width: 2301,
@@ -194,7 +194,7 @@ const prizeImages: PrizeImage[] = [
 		src: "/prizes/prize-13.png",
 		label: "Syntax Nalgene",
 		link: "#",
-		level: 2,
+		level: 1,
 		left: -795,
 		top: 5464 - Y_OFFSET,
 		width: 3210,
@@ -208,6 +208,7 @@ const prizeImages: PrizeImage[] = [
 		label: "MadCSS Sticker",
 		link: "#",
 		level: 1,
+
 		left: 5057,
 		top: 3830 - Y_OFFSET,
 		width: 2407,
@@ -219,9 +220,10 @@ const prizeImages: PrizeImage[] = [
 		src: "/prizes/prize-15.png",
 		label: "$69 Taco Bell Gift Card",
 		link: "#",
-		level: 3,
+		level: 1,
 		alts: {
-			3: { src: "/prizes/prize-15.png", label: "$6.90 Taco Bell Gift Card" },
+			2: { src: "/prizes/taco-bell-sixteen-ninety.png", label: "$16.90 Taco Bell Gift Card" },
+			3: { src: "/prizes/taco-bell-six-nine.png", label: "$6.90 Taco Bell Gift Card" },
 		},
 		left: 11299,
 		top: 2653 - Y_OFFSET,
@@ -235,7 +237,7 @@ const prizeImages: PrizeImage[] = [
 		src: "/prizes/prize-19.png",
 		label: "MadCSS Tee",
 		link: "#",
-		level: 2,
+		level: 1,
 		left: 2580,
 		top: 5115 - Y_OFFSET,
 		width: 5385,
@@ -259,7 +261,7 @@ const prizeImages: PrizeImage[] = [
 		src: "/prizes/prize-21.png",
 		label: "Syntax Basketball",
 		link: "https://checkout.sentry.shop/products/syntax-basketball",
-		level: 3,
+		level: 2,
 		left: 12508,
 		top: 8736 - Y_OFFSET,
 		width: 3170,
@@ -271,7 +273,7 @@ const prizeImages: PrizeImage[] = [
 		src: "/prizes/prize-22.png",
 		label: "MadCSS Bomber Jacket",
 		link: "#",
-		level: 2,
+		level: 3,
 		left: 5893,
 		top: 4480 - Y_OFFSET,
 		width: 9277,
@@ -370,14 +372,22 @@ export function Prizes() {
 						const alt = img.alts?.[activePlace];
 						const imgSrc = alt?.src ?? img.src;
 						const imgLabel = alt?.label ?? img.label;
+						const hasLink = img.link && img.link !== "#";
+						const Tag = hasLink ? "a" : "div";
 						return (
-							<a
+							<Tag
 								key={img.src}
-								href={img.link}
+								{...(hasLink
+									? {
+											href: img.link,
+											target: "_blank",
+											rel: "noopener noreferrer",
+											title: imgLabel,
+										}
+									: {})}
 								className={`prize-image-wrapper${active ? "" : " dimmed"}`}
-								target="_blank"
-								rel="noopener noreferrer"
 								style={{
+									"--prize-img": `url(${imgSrc})`,
 									left: `${pct(img.left)}%`,
 									top: `${pct(img.top)}%`,
 									width: `${pct(img.width)}%`,
@@ -390,7 +400,7 @@ export function Prizes() {
 											.join(" ")
 											.trim() || undefined,
 									zIndex: img.zIndex ?? 1,
-								}}
+								} as React.CSSProperties}
 							>
 								<img
 									src={imgSrc}
@@ -399,7 +409,7 @@ export function Prizes() {
 									loading="lazy"
 								/>
 								<span className="prize-label">{imgLabel}</span>
-							</a>
+							</Tag>
 						);
 					})}
 				</div>
