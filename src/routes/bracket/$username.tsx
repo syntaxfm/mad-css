@@ -168,7 +168,7 @@ function BracketPage() {
 							</span>
 						</div>
 					</div>
-					<a href="/test" className="btn btn-primary">
+					<a href="/" className="btn btn-primary">
 						Make Your Own Picks
 					</a>
 				</div>

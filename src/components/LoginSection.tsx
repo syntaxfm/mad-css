@@ -176,7 +176,7 @@ export function LoginSection() {
 				onClick={() =>
 					authClient.signIn.social({
 						provider: "github",
-						callbackURL: "/test",
+						callbackURL: "/",
 					})
 				}
 			>

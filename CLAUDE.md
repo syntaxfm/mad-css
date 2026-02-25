@@ -77,14 +77,14 @@ BETTER_AUTH_URL=http://localhost:3000
 1. Go to GitHub Settings > Developer settings > OAuth Apps > New OAuth App
 2. Fill in:
    - **Application name:** Mad CSS (Local) or similar
-   - **Homepage URL:** `http://localhost:3000/test`
+   - **Homepage URL:** `http://localhost:3000`
    - **Authorization callback URL:**
      `http://localhost:3000/api/auth/callback/github`
 3. Click "Register application"
 4. Copy the **Client ID** to `GITHUB_CLIENT_ID` in `.dev.vars`
 5. Generate a new **Client Secret** and copy to `GITHUB_CLIENT_SECRET`
 
-The login flow redirects to `/test` after authentication.
+The login flow redirects to `/` after authentication.
 
 ### Production Deployment
 
@@ -131,11 +131,11 @@ ticket stubs, torn paper textures, and classic sports programs.
 ### Color Palette
 
 ```css
---orange: #f3370e;   /* Primary accent, CTAs, highlights */
---yellow: #ffae00;   /* Secondary accent, warnings, badges */
---black: #000000;    /* Borders, shadows, text */
---white: #ffffff;    /* Text on dark backgrounds */
---beige: #f5eeda;    /* Paper/background color */
+--orange: #f3370e; /* Primary accent, CTAs, highlights */
+--yellow: #ffae00; /* Secondary accent, warnings, badges */
+--black: #000000; /* Borders, shadows, text */
+--white: #ffffff; /* Text on dark backgrounds */
+--beige: #f5eeda; /* Paper/background color */
 ```
 
 ### Typography
@@ -148,24 +148,28 @@ ticket stubs, torn paper textures, and classic sports programs.
 ### Key Design Patterns
 
 **Borders & Shadows:**
+
 - 3-4px solid black borders on interactive elements
 - 4px black box-shadows that shift on hover/active states
 - Button hover: `transform: translate(2px, 2px)` + reduced shadow
 - Button active: `transform: translate(4px, 4px)` + no shadow
 
 **Torn Paper Edges:**
+
 - Use CSS `mask-image` with paper texture PNGs
 - Top edge: `repeating-paper-top.png`
 - Bottom edge: `repeating-paper-bottom.png`
 - Combined with `mask-composite: exclude`
 
 **Ticket Stub Elements:**
+
 - Dashed tear lines (4px dashed borders)
 - Notched edges using radial gradients
 - Barcode decorations
 - "ADMIT ONE" style typography
 
 **Buttons:**
+
 ```css
 .button {
   background: var(--yellow);
@@ -174,7 +178,9 @@ ticket stubs, torn paper textures, and classic sports programs.
   font-family: var(--font-block);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  transition: transform 0.1s, box-shadow 0.1s;
+  transition:
+    transform 0.1s,
+    box-shadow 0.1s;
 }
 .button:hover {
   transform: translate(2px, 2px);
@@ -187,11 +193,13 @@ ticket stubs, torn paper textures, and classic sports programs.
 ```
 
 **Cards/Containers:**
+
 - Beige (`--beige`) or yellow (`--yellow`) backgrounds
 - Thick black borders (4-6px)
 - Optional torn paper mask on edges
 
 **Status Badges:**
+
 - Uppercase, small font (0.625-0.75rem)
 - Solid fill for active states (yellow bg, black text)
 - Outline style for inactive states (transparent bg, colored border)
@@ -213,12 +221,14 @@ ticket stubs, torn paper textures, and classic sports programs.
 ## Bracket System
 
 **Tournament structure (FEEDER_GAMES in Bracket.tsx):**
+
 - 16 players, single elimination bracket
 - Left side games: r1-0, r1-1, r1-2, r1-3 → qf-0, qf-1 → sf-0
 - Right side games: r1-4, r1-5, r1-6, r1-7 → qf-2, qf-3 → sf-1
 - Finals: sf-0 winner vs sf-1 winner
 
 **Tournament stages (sequential order):**
+
 1. Left R1 - games r1-0, r1-1, r1-2, r1-3
 2. Right R1 - games r1-4, r1-5, r1-6, r1-7
 3. QF - games qf-0, qf-1, qf-2, qf-3 (all together)
@@ -226,6 +236,7 @@ ticket stubs, torn paper textures, and classic sports programs.
 5. Finals
 
 **Node sizing logic (`isNodeLarge()` in Bracket.tsx):**
+
 - A node is "large" (`round1` class, ~130px with bio) when:
   - Its feeder game IS decided (we know the player)
   - The current game is NOT decided (active round)
@@ -234,16 +245,19 @@ ticket stubs, torn paper textures, and classic sports programs.
   - The current game IS already decided (completed)
 
 **Dynamic Y positioning:**
+
 - Node Y offsets adjust based on `isNodeLarge()` to center nodes properly
 - QF: 0.5 (large) vs 0.62 (small)
 - SF: 1.35 (large) vs 1.5 (small)
 - Finals: 3.35 (large) vs 3.5 (small)
 
 **Key constants (Bracket.tsx):**
+
 - `NODE_HEIGHT = 70`, `VERTICAL_GAP = 76`, `MATCH_GAP = 146`
 - `ROUND_GAP = 220` (horizontal spacing between rounds)
 
 **User picking flow:**
+
 - Users can pick winners for games where both players are known
 - Picks stored in `predictions` object keyed by game ID
 - `isPickable` flag enables click handlers on player nodes
