@@ -193,7 +193,7 @@ const prizeImages: PrizeImage[] = [
 	{
 		src: "/prizes/prize-13.png",
 		label: "Syntax Nalgene",
-		link: "#",
+		link: "https://checkout.sentry.shop/products/syntax-march-madcss-nalgene-bottle",
 		level: 1,
 		left: -795,
 		top: 5464 - Y_OFFSET,
@@ -206,7 +206,7 @@ const prizeImages: PrizeImage[] = [
 	{
 		src: "/prizes/prize-14.png",
 		label: "MadCSS Sticker",
-		link: "#",
+		link: "https://checkout.sentry.shop/products/syntax-march-madcss-sticker",
 		level: 1,
 
 		left: 5057,
@@ -219,7 +219,7 @@ const prizeImages: PrizeImage[] = [
 	{
 		src: "/prizes/prize-15.png",
 		label: "$69 Taco Bell Gift Card",
-		link: "#",
+		link: "https:/tacobell.com",
 		level: 1,
 		alts: {
 			2: {
@@ -242,7 +242,7 @@ const prizeImages: PrizeImage[] = [
 	{
 		src: "/prizes/prize-19.png",
 		label: "MadCSS Tee",
-		link: "#",
+		link: "https://checkout.sentry.shop/products/syntax-march-madcss-t-shirt",
 		level: 1,
 		left: 2580,
 		top: 5115 - Y_OFFSET,
@@ -254,7 +254,7 @@ const prizeImages: PrizeImage[] = [
 	{
 		src: "/prizes/prize-20.png",
 		label: "MadCSS Tee",
-		link: "#",
+		link: "https://checkout.sentry.shop/products/syntax-march-madcss-t-shirt",
 		level: 1,
 		left: 569,
 		top: 3731 - Y_OFFSET,
