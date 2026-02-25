@@ -6,6 +6,7 @@ import { Activity } from "@/components/leaderboard/Activity";
 import { Leaderboard } from "@/components/leaderboard/Leaderboard";
 import { Roster } from "@/components/roster/Roster";
 import { Rules } from "@/components/rules/Rules";
+import { Prizes } from "@/components/prizes/Prizes";
 import { Ticket } from "@/components/Ticket";
 import { PredictionsProvider } from "@/context/PredictionsContext";
 import { getResultsFromBracket } from "@/data/players";
@@ -88,6 +89,7 @@ function TestPage() {
 				</div>
 			</PredictionsProvider>
 			<Leaderboard />
+			<Prizes />
 			<Rules />
 		</div>
 	);
