@@ -1,9 +1,14 @@
+import { useState } from "react";
 import "./prizes.css";
+
+type PrizeLevel = 1 | 2 | 3;
 
 interface PrizeImage {
 	src: string;
 	label: string;
 	link: string;
+	level: PrizeLevel;
+	alts?: Partial<Record<PrizeLevel, { src: string; label: string }>>;
 	left: number;
 	top: number;
 	width: number;
@@ -12,6 +17,12 @@ interface PrizeImage {
 	scale?: number;
 	zIndex?: number;
 }
+
+const PLACES: { level: PrizeLevel; label: string }[] = [
+	{ level: 3, label: "3rd" },
+	{ level: 2, label: "2nd" },
+	{ level: 1, label: "1st" },
+];
 
 const VIEWBOX = 16295;
 
@@ -24,262 +35,324 @@ const Y_OFFSET = 2653;
 const prizeImages: PrizeImage[] = [
 	{
 		src: "/prizes/prize-0.png",
-		label: "Prize 1",
-		link: "#",
-		left: 0,
+		label: "Syntax Skate Deck",
+		link: "https://checkout.sentry.shop/products/syntax-skate-deck",
+		level: 3,
+		left: -500,
 		top: 8724 - Y_OFFSET,
 		width: 3149,
 		height: 7878,
-		scale: 1.5,
+		scale: 0.9,
 		zIndex: 1,
 	},
 	{
 		src: "/prizes/prize-1.png",
-		label: "Prize 2",
-		link: "#",
+		label: "Syntax Hoodie",
+		link: "https://checkout.sentry.shop/products/syntax-hoodie",
+		level: 2,
 		left: 1186,
 		top: 11152 - Y_OFFSET,
 		width: 4688,
 		height: 5643,
-		scale: 1.5,
+		scale: 0.9,
 		zIndex: 6,
 	},
 	{
 		src: "/prizes/prize-2.png",
-		label: "Prize 3",
-		link: "#",
+		label: "Blazing Fast Tee",
+		link: "https://checkout.sentry.shop/products/syntax-blazing-fast-tee",
+		level: 1,
 		left: 8292,
 		top: 12184 - Y_OFFSET,
 		width: 4533,
 		height: 4590,
-		scale: 1.5,
+		scale: 0.9,
 		zIndex: 6,
 	},
 	{
 		src: "/prizes/prize-3.png",
-		label: "Prize 4",
-		link: "#",
+		label: "Syntax Panther Tee",
+		link: "https://checkout.sentry.shop/products/syntax-panther-tee",
+		level: 3,
 		left: 6562,
 		top: 12236 - Y_OFFSET,
 		width: 2878,
 		height: 4318,
-		scale: 1.5,
+		scale: 0.9,
 		zIndex: 6,
 	},
 	{
 		src: "/prizes/prize-4.png",
-		label: "Prize 5",
-		link: "#",
+		label: "Sick Pick Tee",
+		link: "https://checkout.sentry.shop/products/syntax-sick-pick-tee",
+		level: 2,
 		left: 3248,
 		top: 12236 - Y_OFFSET,
 		width: 4533,
 		height: 4485,
-		scale: 1.5,
+		scale: 0.9,
 		zIndex: 6,
 	},
 	{
 		src: "/prizes/prize-5.png",
-		label: "Prize 6",
-		link: "#",
+		label: "Drizzle Tee",
+		link: "https://checkout.sentry.shop/products/syntax-drizzle-tee",
+		level: 1,
 		left: 10600,
 		top: 11331 - Y_OFFSET,
 		width: 4532,
 		height: 5665,
-		scale: 1.5,
+		scale: 0.9,
 		zIndex: 5,
 	},
 	{
 		src: "/prizes/prize-6.png",
-		label: "Prize 7",
-		link: "#",
+		label: "Webmaster Tee",
+		link: "https://checkout.sentry.shop/products/syntax-webmaster-tee",
+		level: 3,
 		left: 13410,
-		top: 12269 - Y_OFFSET,
-		width: 3003,
-		height: 4305,
-		scale: 1.5,
+		top: 11269 - Y_OFFSET,
+		width: 3503,
+		height: 5305,
+		scale: 0.9,
 		zIndex: 6,
 	},
 	{
 		src: "/prizes/prize-7.png",
-		label: "Prize 8",
-		link: "#",
+		label: "Syntax Beanie",
+		link: "https://checkout.sentry.shop/products/syntax-beanie",
+		level: 2,
 		left: 1300,
 		top: 8148 - Y_OFFSET,
 		width: 3334,
 		height: 3334,
-		scale: 1.5,
+		scale: 0.9,
 		zIndex: 7,
 	},
 	{
 		src: "/prizes/prize-8.png",
-		label: "Prize 9",
-		link: "#",
+		label: "Web Dev Pin Pack #1",
+		link: "https://checkout.sentry.shop/products/syntax-web-dev-pin-pack-1",
+		level: 1,
 		left: 10206,
 		top: 9810 - Y_OFFSET,
 		width: 2419,
 		height: 2354,
 		rotate: 7.44,
-		scale: 1.5,
+		scale: 1.3,
 		zIndex: 8,
 	},
 	{
 		src: "/prizes/prize-9.png",
-		label: "Prize 10",
-		link: "#",
+		label: "Syntax Key Caps",
+		link: "https://checkout.sentry.shop/products/syntax-keycaps",
+		level: 3,
 		left: 14543,
 		top: 8221 - Y_OFFSET,
 		width: 1921,
 		height: 1979,
-		scale: 1.5,
+		scale: 1.4,
 		zIndex: 7,
 	},
 	{
 		src: "/prizes/prize-10.png",
-		label: "Prize 11",
+		label: "Syntax Blue Cap",
 		link: "#",
+		level: 2,
 		left: 3262,
 		top: 9208 - Y_OFFSET,
 		width: 3061,
 		height: 3061,
-		scale: 1.5,
+		scale: 0.9,
 		zIndex: 8,
 	},
 	{
 		src: "/prizes/prize-11.png",
-		label: "Prize 12",
-		link: "#",
+		label: "Syntax Felt Cap",
+		link: "https://checkout.sentry.shop/products/syntax-felt-cap",
+		level: 1,
 		left: 5110,
 		top: 9815 - Y_OFFSET,
 		width: 2301,
 		height: 3500,
-		scale: 1.5,
+		scale: 1.2,
 		zIndex: 8,
 	},
 	{
 		src: "/prizes/prize-12.png",
-		label: "Prize 13",
-		link: "#",
+		label: "Syntax Koozie",
+		link: "https://checkout.sentry.shop/products/syntax-can-holder",
+		level: 3,
 		left: 1348,
 		top: 10292 - Y_OFFSET,
 		width: 2463,
 		height: 2463,
-		scale: 1.5,
+		scale: 0.9,
 		zIndex: 9,
 	},
 	{
 		src: "/prizes/prize-13.png",
-		label: "Prize 14",
+		label: "Syntax Nalgene",
 		link: "#",
+		level: 2,
 		left: -795,
 		top: 5464 - Y_OFFSET,
 		width: 3210,
-		height: 3210,
+		height: 5500,
 		rotate: -6.24,
-		scale: 1.5,
+		scale: 0.9,
 		zIndex: 3,
 	},
 	{
 		src: "/prizes/prize-14.png",
-		label: "Prize 15",
+		label: "MadCSS Sticker",
 		link: "#",
+		level: 1,
 		left: 5057,
 		top: 3830 - Y_OFFSET,
 		width: 2407,
 		height: 2407,
-		scale: 1.5,
+		scale: 0.9,
 		zIndex: 4,
 	},
 	{
 		src: "/prizes/prize-15.png",
-		label: "Prize 16",
+		label: "$69 Taco Bell Gift Card",
 		link: "#",
+		level: 3,
+		alts: {
+			3: { src: "/prizes/prize-15.png", label: "$6.90 Taco Bell Gift Card" },
+		},
 		left: 11299,
 		top: 2653 - Y_OFFSET,
 		width: 7774,
 		height: 5183,
 		rotate: 11.77,
-		scale: 1.5,
+		scale: 0.9,
 		zIndex: 2,
 	},
 	{
 		src: "/prizes/prize-19.png",
-		label: "Prize 17",
+		label: "MadCSS Tee",
 		link: "#",
+		level: 2,
 		left: 2580,
 		top: 5115 - Y_OFFSET,
 		width: 5385,
 		height: 5385,
-		scale: 1.5,
+		scale: 0.9,
 		zIndex: 4,
 	},
 	{
 		src: "/prizes/prize-20.png",
-		label: "Prize 18",
+		label: "MadCSS Tee",
 		link: "#",
+		level: 1,
 		left: 569,
 		top: 3731 - Y_OFFSET,
 		width: 5385,
 		height: 5385,
-		scale: 1.5,
+		scale: 0.9,
 		zIndex: 3,
 	},
 	{
 		src: "/prizes/prize-21.png",
-		label: "Prize 19",
-		link: "#",
+		label: "Syntax Basketball",
+		link: "https://checkout.sentry.shop/products/syntax-basketball",
+		level: 3,
 		left: 12508,
 		top: 8736 - Y_OFFSET,
 		width: 3170,
 		height: 3882,
-		scale: 1.5,
+		scale: 0.9,
 		zIndex: 7,
 	},
 	{
 		src: "/prizes/prize-22.png",
-		label: "Prize 20",
+		label: "MadCSS Bomber Jacket",
 		link: "#",
+		level: 2,
 		left: 5893,
 		top: 4480 - Y_OFFSET,
 		width: 9277,
 		height: 5936,
 		rotate: 5.14,
-		scale: 1.5,
+		scale: 0.9,
 		zIndex: 5,
 	},
 	{
-		src: "/prizes/prize-23.png",
-		label: "Prize 21",
-		link: "#",
-		left: 7733,
-		top: 10408 - Y_OFFSET,
-		width: 792,
-		height: 727,
+		src: "/prizes/sentry-1-year.png",
+		label: "1 Year of Sentry",
+		link: "https://sentry.io",
+		level: 1,
+		alts: {
+			2: { src: "/prizes/sentry-6-months.png", label: "6 Months of Sentry" },
+			3: { src: "/prizes/sentry-3-months.png", label: "3 Months of Sentry" },
+		},
+		left: 5522,
+		top: 8987 - Y_OFFSET,
+		width: 2500,
+		height: 2500,
 		rotate: 6.78,
-		scale: 1.5,
+		scale: 0.9,
 		zIndex: 10,
 	},
 	{
 		src: "/prizes/prize-24.png",
-		label: "Prize 22",
-		link: "#",
+		label: "Internet Hat",
+		link: "https://checkout.sentry.shop/products/internet-hat",
+		level: 3,
 		left: 7392,
 		top: 9422 - Y_OFFSET,
 		width: 3189,
 		height: 2718,
-		scale: 1.5,
+		scale: 0.9,
 		zIndex: 9,
 	},
 ];
 
+function isVisible(itemLevel: PrizeLevel, activePlace: PrizeLevel): boolean {
+	if (activePlace === 1) return true;
+	if (activePlace === 2) return itemLevel <= 2;
+	return itemLevel <= 1;
+}
+
+const PLACE_VALUES: Record<PrizeLevel, string> = {
+	1: "$1,500",
+	2: "$630",
+	3: "$300",
+};
+
 export function Prizes() {
+	const [activePlace, setActivePlace] = useState<PrizeLevel>(1);
+	const activeIndex = PLACES.findIndex((p) => p.level === activePlace);
+
 	return (
 		<section className="section prizes-section">
 			<div className="section-content">
 				<h2>Prizes</h2>
+				<div className="prizes-toggle">
+					<div className="prizes-toggle-track">
+						<div
+							className="prizes-toggle-thumb"
+							style={{ left: `${(activeIndex / PLACES.length) * 100}%` }}
+						/>
+						{PLACES.map((p) => (
+							<button
+								key={p.level}
+								type="button"
+								className={`prizes-toggle-option${activePlace === p.level ? " active" : ""}`}
+								onClick={() => setActivePlace(p.level)}
+							>
+								{p.label}
+							</button>
+						))}
+					</div>
+					<p className="prizes-value">{PLACE_VALUES[activePlace]} value!</p>
+				</div>
 			</div>
 			<div className="prizes-collage">
 				<div className="prizes-collage-inner">
-					{/* Red jagged shape */}
 					<svg
 						className="prizes-red-shape"
 						viewBox={`0 ${Y_OFFSET} 16295 16295`}
@@ -292,37 +365,43 @@ export function Prizes() {
 						/>
 					</svg>
 
-					{prizeImages.map((img) => (
-						<a
-							key={img.src}
-							href={img.link}
-							className="prize-image-wrapper"
-							target="_blank"
-							rel="noopener noreferrer"
-							style={{
-								left: `${pct(img.left)}%`,
-								top: `${pct(img.top)}%`,
-								width: `${pct(img.width)}%`,
-								height: `${pct(img.height)}%`,
-								transform:
-									[
-										img.rotate ? `rotate(${img.rotate}deg)` : "",
-										// img.scale ? `scale(${img.scale})` : "",
-									]
-										.join(" ")
-										.trim() || undefined,
-								zIndex: img.zIndex ?? 1,
-							}}
-						>
-							<img
-								src={img.src}
-								alt={img.label}
-								className="prize-image"
-								loading="lazy"
-							/>
-							<span className="prize-label">{img.label}</span>
-						</a>
-					))}
+					{prizeImages.map((img) => {
+						const active = isVisible(img.level, activePlace);
+						const alt = img.alts?.[activePlace];
+						const imgSrc = alt?.src ?? img.src;
+						const imgLabel = alt?.label ?? img.label;
+						return (
+							<a
+								key={img.src}
+								href={img.link}
+								className={`prize-image-wrapper${active ? "" : " dimmed"}`}
+								target="_blank"
+								rel="noopener noreferrer"
+								style={{
+									left: `${pct(img.left)}%`,
+									top: `${pct(img.top)}%`,
+									width: `${pct(img.width)}%`,
+									height: `${pct(img.height)}%`,
+									transform:
+										[
+											img.rotate ? `rotate(${img.rotate}deg)` : "",
+											img.scale ? `scale(${img.scale})` : "",
+										]
+											.join(" ")
+											.trim() || undefined,
+									zIndex: img.zIndex ?? 1,
+								}}
+							>
+								<img
+									src={imgSrc}
+									alt={imgLabel}
+									className="prize-image"
+									loading="lazy"
+								/>
+								<span className="prize-label">{imgLabel}</span>
+							</a>
+						);
+					})}
 				</div>
 			</div>
 		</section>

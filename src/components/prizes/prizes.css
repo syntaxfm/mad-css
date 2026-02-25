@@ -1,6 +1,62 @@
 .prizes-section {
 	--max-width: 1200px;
 	background: var(--yellow);
+	background-image: url("../../styles/assets/textures/Texture-02.png");
+	background-size: cover;
+}
+
+.prizes-toggle {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 12px;
+	margin-bottom: 20px;
+}
+
+.prizes-toggle-track {
+	position: relative;
+	display: flex;
+	background: var(--black);
+	border: 3px solid var(--black);
+	box-shadow: 4px 4px 0 var(--black);
+}
+
+.prizes-toggle-thumb {
+	position: absolute;
+	top: 0;
+	height: 100%;
+	width: calc(100% / 3);
+	background: var(--yellow);
+	transition: left 0.2s ease;
+	pointer-events: none;
+}
+
+.prizes-toggle-option {
+	position: relative;
+	z-index: 1;
+	padding: 10px 24px;
+	background: none;
+	border: none;
+	color: var(--white);
+	font-family: var(--font-block);
+	font-size: 0.875rem;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	cursor: pointer;
+	transition: color 0.2s ease;
+}
+
+.prizes-toggle-option.active {
+	color: var(--black);
+}
+
+.prizes-value {
+	font-family: var(--font-block);
+	font-size: 1.5rem;
+	color: var(--black);
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	margin: 0;
 }
 
 .prizes-collage {
@@ -12,7 +68,6 @@
 	position: relative;
 	width: 100%;
 	padding-bottom: 100%;
-	background: var(--yellow);
 }
 
 .prizes-red-shape {
@@ -32,17 +87,17 @@
 	filter: drop-shadow(6px 6px 0 rgba(0, 0, 0, 0.4));
 	cursor: pointer;
 	text-decoration: none;
-	/* border: 4px solid var(--black); */
+	transition: opacity 0.3s ease;
 	&:hover {
-		border: 4px solid var(--black);
+		/* border: 4px solid var(--black); */
 	}
 }
 
 .prize-image-wrapper .prize-image {
 	display: block;
 	width: 100%;
-	/* height: 100%; */
-	/* object-fit: cover; */
+	height: 100%;
+	object-fit: contain;
 	transition:
 		transform 0.2s ease,
 		filter 0.2s ease;
@@ -57,13 +112,18 @@
 	background: var(--black);
 	color: var(--yellow);
 	font-family: var(--font-block);
-	font-size: 0.75rem;
+	font-size: 20px;
 	text-transform: uppercase;
 	letter-spacing: 0.05em;
 	text-align: center;
 	white-space: nowrap;
 	opacity: 0;
 	transition: opacity 0.2s ease;
+	pointer-events: none;
+}
+
+.prize-image-wrapper.dimmed {
+	opacity: 0.2;
 	pointer-events: none;
 }
 
