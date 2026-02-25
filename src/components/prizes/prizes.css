@@ -3,6 +3,7 @@
 	background: var(--yellow);
 	background-image: url("../../styles/assets/textures/Texture-02-small.png");
 	background-size: cover;
+	overflow: hidden;
 	h2 {
 		color: var(--black);
 		text-shadow: none;
