@@ -92,7 +92,6 @@
 	filter: drop-shadow(6px 6px 0 rgba(0, 0, 0, 0.1));
 	cursor: pointer;
 	text-decoration: none;
-	transition: opacity 0.3s ease;
 	&:hover {
 		/* border: 4px solid var(--black); */
 	}

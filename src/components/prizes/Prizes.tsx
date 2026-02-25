@@ -19,9 +19,9 @@ interface PrizeImage {
 }
 
 const PLACES: { level: PrizeLevel; label: string }[] = [
-	{ level: 3, label: "3rd" },
-	{ level: 2, label: "2nd" },
 	{ level: 1, label: "1st" },
+	{ level: 2, label: "2nd" },
+	{ level: 3, label: "3rd" },
 ];
 
 const VIEWBOX = 16295;
@@ -222,8 +222,14 @@ const prizeImages: PrizeImage[] = [
 		link: "#",
 		level: 1,
 		alts: {
-			2: { src: "/prizes/taco-bell-sixteen-ninety.png", label: "$16.90 Taco Bell Gift Card" },
-			3: { src: "/prizes/taco-bell-six-nine.png", label: "$6.90 Taco Bell Gift Card" },
+			2: {
+				src: "/prizes/taco-bell-sixteen-ninety.png",
+				label: "$16.90 Taco Bell Gift Card",
+			},
+			3: {
+				src: "/prizes/taco-bell-six-nine.png",
+				label: "$6.90 Taco Bell Gift Card",
+			},
 		},
 		left: 11299,
 		top: 2653 - Y_OFFSET,
@@ -313,6 +319,13 @@ const prizeImages: PrizeImage[] = [
 	},
 ];
 
+const ROTATION_JITTER = prizeImages.map((_, i) => {
+	const seed = Math.sin(i * 9301 + 4927) * 10000;
+	const magnitude = 1 + (seed - Math.floor(seed)) * 2;
+	const sign = Math.sin(i * 1741 + 3137) > 0 ? 1 : -1;
+	return magnitude * sign;
+});
+
 function isVisible(itemLevel: PrizeLevel, activePlace: PrizeLevel): boolean {
 	if (activePlace === 1) return true;
 	if (activePlace === 2) return itemLevel <= 2;
@@ -367,13 +380,20 @@ export function Prizes() {
 						/>
 					</svg>
 
-					{prizeImages.map((img) => {
+					{prizeImages.map((img, i) => {
 						const active = isVisible(img.level, activePlace);
 						const alt = img.alts?.[activePlace];
 						const imgSrc = alt?.src ?? img.src;
 						const imgLabel = alt?.label ?? img.label;
 						const hasLink = img.link && img.link !== "#";
 						const Tag = hasLink ? "a" : "div";
+						const jitter =
+							activePlace === 2
+								? ROTATION_JITTER[i]
+								: activePlace === 3
+									? -ROTATION_JITTER[i]
+									: 0;
+						const rotate = (img.rotate ?? 0) + jitter;
 						return (
 							<Tag
 								key={img.src}
@@ -386,21 +406,23 @@ export function Prizes() {
 										}
 									: {})}
 								className={`prize-image-wrapper${active ? "" : " dimmed"}`}
-								style={{
-									"--prize-img": `url(${imgSrc})`,
-									left: `${pct(img.left)}%`,
-									top: `${pct(img.top)}%`,
-									width: `${pct(img.width)}%`,
-									height: `${pct(img.height)}%`,
-									transform:
-										[
-											img.rotate ? `rotate(${img.rotate}deg)` : "",
-											img.scale ? `scale(${img.scale})` : "",
-										]
-											.join(" ")
-											.trim() || undefined,
-									zIndex: img.zIndex ?? 1,
-								} as React.CSSProperties}
+								style={
+									{
+										"--prize-img": `url(${imgSrc})`,
+										left: `${pct(img.left)}%`,
+										top: `${pct(img.top)}%`,
+										width: `${pct(img.width)}%`,
+										height: `${pct(img.height)}%`,
+										transform:
+											[
+												rotate ? `rotate(${rotate}deg)` : "",
+												img.scale ? `scale(${img.scale})` : "",
+											]
+												.join(" ")
+												.trim() || undefined,
+										zIndex: img.zIndex ?? 1,
+									} as React.CSSProperties
+								}
 							>
 								<img
 									src={imgSrc}
