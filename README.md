@@ -18,7 +18,7 @@ The website behind [madcss.com](https://madcss.com) — The Ultimate CSS Tournam
 - **Framework:** [TanStack Start](https://tanstack.com/start)
 - **Styling:** Plain CSS + custom properties
 - **Database:** Cloudflare D1 + Drizzle ORM
-- **Auth:** better-auth (GitHub OAuth)
+- **Auth:** better-auth with GitHub OAuth
 - **Bracket Viz:** React Flow
 - **OG Images:** workers-og
 - **Monitoring:** Sentry
@@ -85,5 +85,4 @@ pnpm db:studio         # Browse the database
 
 ## Created By
 
-Thanks to [Serg](https://x.com/sergical) from [Sentry](https://sentry.io) and [Wes][https://x.com/wesbos] for building
-
+Thanks to [Serg](https://x.com/sergical) from [Sentry](https://sentry.io) and [Wes](https://x.com/wesbos) for building
