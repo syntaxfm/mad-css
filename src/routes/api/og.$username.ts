@@ -7,6 +7,44 @@ import { bracket, type Player, players } from "@/data/players";
 import { createDb } from "@/db";
 import * as schema from "@/db/schema";
 
+// workers-og internally calls console.log with "init RESVG" and the
+// "Already initialized" Error on every render. Mute that noise.
+async function suppressWasmNoise<T>(fn: () => Promise<T>): Promise<T> {
+	const orig = console.log;
+	console.log = (...args: unknown[]) => {
+		const first = args[0];
+		if (first === "init RESVG") return;
+		if (first instanceof Error && first.message.includes("Already initialized")) return;
+		orig.apply(console, args);
+	};
+	try {
+		return await fn();
+	} finally {
+		console.log = orig;
+	}
+}
+
+// Pre-warm the WASM modules (resvg + yoga) on first use.
+// ImageResponse inits WASM on every call; the first is expensive (~200ms+),
+// subsequent calls hit "Already initialized" and bail, but still pay for the
+// try/catch + Promise.allSettled overhead. By warming up once with a tiny
+// no-op render, we ensure the WASM is compiled before real requests arrive.
+let wasmReady: Promise<void> | null = null;
+function ensureWasmReady(): Promise<void> {
+	if (!wasmReady) {
+		const t = performance.now();
+		wasmReady = suppressWasmNoise(() =>
+			new ImageResponse("<div style=\"display:flex\"></div>", {
+				width: 1,
+				height: 1,
+			}).arrayBuffer(),
+		).then(() => {
+			console.log(`[OG] WASM warm-up: ${(performance.now() - t).toFixed(1)}ms`);
+		});
+	}
+	return wasmReady;
+}
+
 // Generate a basic OG image for cases where user doesn't exist or bracket isn't locked
 function generateBasicOgImage(baseUrl: string): Response {
 	const logoUrl = `${baseUrl}/mad-css-logo.png`;
@@ -44,47 +82,67 @@ export const Route = createFileRoute("/api/og/$username")({
 	server: {
 		handlers: {
 			GET: async ({ params, request }) => {
-				return Sentry.startSpan(
-					{ name: "og.generateImage", op: "function" },
-					async () => {
-						const { username } = params;
-						const url = new URL(request.url);
-						const baseUrl = `${url.protocol}//${url.host}`;
-						const db = createDb(env.DB);
+			return Sentry.startSpan(
+				{ name: "og.generateImage", op: "function" },
+				async () => {
+					const t0 = performance.now();
+					const { username } = params;
+					const url = new URL(request.url);
+					const baseUrl = `${url.protocol}//${url.host}`;
+					const db = createDb(env.DB);
 
-						// Find user by username
-						const users = await db
-							.select({
-								id: schema.user.id,
-								name: schema.user.name,
-								image: schema.user.image,
-								username: schema.user.username,
-							})
-							.from(schema.user)
-							.where(eq(schema.user.username, username))
-							.limit(1);
+					const wasmPromise = ensureWasmReady();
 
-						if (users.length === 0 || !users[0].username) {
-							return generateBasicOgImage(baseUrl);
-						}
+					const users = await Sentry.startSpan(
+						{ name: "og.userQuery", op: "db.query" },
+						async () => {
+							const t = performance.now();
+							const result = await db
+								.select({
+									id: schema.user.id,
+									name: schema.user.name,
+									image: schema.user.image,
+									username: schema.user.username,
+								})
+								.from(schema.user)
+								.where(eq(schema.user.username, username))
+								.limit(1);
+							console.log(`[OG] User query: ${(performance.now() - t).toFixed(1)}ms`);
+							return result;
+						},
+					);
 
-						const user = users[0];
+					if (users.length === 0 || !users[0].username) {
+						console.log(`[OG] No user found, returning basic image. Total: ${(performance.now() - t0).toFixed(1)}ms`);
+						return generateBasicOgImage(baseUrl);
+					}
 
-						// Get ALL predictions
-						const predictions = await db
-							.select({
-								gameId: schema.userPrediction.gameId,
-								predictedWinnerId: schema.userPrediction.predictedWinnerId,
-							})
-							.from(schema.userPrediction)
-							.where(eq(schema.userPrediction.userId, users[0].id));
+					const user = users[0];
 
-						if (predictions.length === 0) {
-							return generateBasicOgImage(baseUrl);
-						}
+					const predictions = await Sentry.startSpan(
+						{ name: "og.predictionsQuery", op: "db.query" },
+						async () => {
+							const t = performance.now();
+							const result = await db
+								.select({
+									gameId: schema.userPrediction.gameId,
+									predictedWinnerId: schema.userPrediction.predictedWinnerId,
+								})
+								.from(schema.userPrediction)
+								.where(eq(schema.userPrediction.userId, users[0].id));
+							console.log(`[OG] Predictions query: ${(performance.now() - t).toFixed(1)}ms (${result.length} rows)`);
+							return result;
+						},
+					);
 
-						// Build prediction map
-						const predictionMap = new Map<string, string>();
+					if (predictions.length === 0) {
+						console.log(`[OG] No predictions, returning basic image. Total: ${(performance.now() - t0).toFixed(1)}ms`);
+						return generateBasicOgImage(baseUrl);
+					}
+
+					const buildSpan = Sentry.startInactiveSpan({ name: "og.bracketHtmlBuild", op: "serialize" });
+					const tBuildStart = performance.now();
+					const predictionMap = new Map<string, string>();
 						for (const p of predictions) {
 							predictionMap.set(p.gameId, p.predictedWinnerId);
 						}
@@ -270,8 +328,8 @@ export const Route = createFileRoute("/api/og/$username")({
 						let bracketHtml = "";
 
 						// Side colors
-						const COLOR_LEFT = "#0f73ff"; // Blue
-						const COLOR_RIGHT = "#f3370e"; // Red
+						const COLOR_LEFT = "#f3370e"; // Blue
+						const COLOR_RIGHT = "#5CE1E6"; // Red
 						const BG_PICKED = "#ffae00"; // Yellow/orange for picked players
 						const BG_UNPICKED = "#666"; // Gray for unpicked players
 
@@ -513,11 +571,7 @@ export const Route = createFileRoute("/api/og/$username")({
 					<span style="position: absolute; left: ${CENTER_X}px; top: ${CHAMP_Y + SIZE_CHAMP / 2 + 8}px; transform: translateX(-50%); color: #fff; font-size: 24px; font-weight: 900; font-family: system-ui; text-shadow: 0 2px 8px #000, 0 0 20px #000;">${champion?.name ?? "Champion"}</span>
 				`;
 
-						// ============================================
-						// FULL HTML
-						// ============================================
-
-						const html = `
+					const html = `
 				<div style="display: flex; width: 1200px; height: 630px; position: relative;">
 					<!-- Background -->
 					<img src="${bgImageUrl}" width="1200" height="630" style="position: absolute; top: 0; left: 0; width: 1200px; height: 630px; object-fit: cover;" />
@@ -544,17 +598,42 @@ export const Route = createFileRoute("/api/og/$username")({
 					${bracketHtml}
 				</div>`;
 
-						const response = new ImageResponse(html, {
-							width: 1200,
-							height: 630,
-						});
+					console.log(`[OG] Bracket HTML build: ${(performance.now() - tBuildStart).toFixed(1)}ms`);
+					buildSpan.end();
 
-						response.headers.set(
-							"Cache-Control",
-							"public, max-age=3600, s-maxage=86400",
-						);
+					await Sentry.startSpan(
+						{ name: "og.wasmWait", op: "resource.wasm" },
+						async () => {
+							const t = performance.now();
+							await wasmPromise;
+							console.log(`[OG] WASM wait: ${(performance.now() - t).toFixed(1)}ms`);
+						},
+					);
 
-						return response;
+					const buf = await Sentry.startSpan(
+						{ name: "og.render", op: "function" },
+						async () => {
+							const t = performance.now();
+							const result = await suppressWasmNoise(() =>
+								new ImageResponse(html, {
+									width: 1200,
+									height: 630,
+								}).arrayBuffer(),
+							);
+							console.log(`[OG] ImageResponse render: ${(performance.now() - t).toFixed(1)}ms (${result.byteLength} bytes)`);
+							return result;
+						},
+					);
+
+					const response = new Response(buf, {
+						headers: {
+							"Content-Type": "image/png",
+							"Cache-Control": "public, max-age=3600, s-maxage=86400",
+						},
+					});
+
+					console.log(`[OG] Total: ${(performance.now() - t0).toFixed(1)}ms`);
+					return response;
 					},
 				);
 			},
