@@ -12,12 +12,14 @@ The website behind [madcss.com](https://madcss.com) — The Ultimate CSS Tournam
 - Personalized ticket stubs with OG image generation
 - Live schedule and results
 - Player roster with bios
+- Merch store powered by Shopify (cached via Cloudflare KV)
 
 ## The Stack
 
 - **Framework:** [TanStack Start](https://tanstack.com/start)
 - **Styling:** Plain CSS + custom properties
 - **Database:** Cloudflare D1 + Drizzle ORM
+- **Cache:** Cloudflare KV (merch product data)
 - **Auth:** better-auth with GitHub OAuth
 - **Bracket Viz:** React Flow
 - **OG Images:** workers-og
@@ -65,7 +67,15 @@ BETTER_AUTH_URL=http://localhost:3000
 pnpm db:setup  # Generates Drizzle migrations + applies them locally
 ```
 
-### 6. Run it
+### 6. Create a KV namespace (optional, for merch caching)
+
+```bash
+npx wrangler kv namespace create mad-css-kv
+```
+
+Copy the `id` from the output into the `kv_namespaces` section of `wrangler.jsonc`. The merch section fetches products from the Sentry Shop Shopify store and caches them in KV for 1 hour. If no KV binding is available, it fetches directly from Shopify on every request.
+
+### 7. Run it
 
 ```bash
 pnpm dev

@@ -30,6 +30,13 @@
       "destinations": ["sentry-logs"],
     },
   },
+	"kv_namespaces": [
+		{
+			"binding": "KV",
+			// Create your own KV namespace: npx wrangler kv namespace create mad-css-kv
+			"id": "b7e087b6ed6a4e048c2522476297ed7f"
+		}
+	],
 	"d1_databases": [
 		{
 			"binding": "DB",
