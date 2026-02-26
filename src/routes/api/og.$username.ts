@@ -7,23 +7,6 @@ import { bracket, type Player, players } from "@/data/players";
 import { createDb } from "@/db";
 import * as schema from "@/db/schema";
 
-// workers-og internally calls console.log with "init RESVG" and the
-// "Already initialized" Error on every render. Mute that noise.
-async function suppressWasmNoise<T>(fn: () => Promise<T>): Promise<T> {
-	const orig = console.log;
-	console.log = (...args: unknown[]) => {
-		const first = args[0];
-		if (first === "init RESVG") return;
-		if (first instanceof Error && first.message.includes("Already initialized")) return;
-		orig.apply(console, args);
-	};
-	try {
-		return await fn();
-	} finally {
-		console.log = orig;
-	}
-}
-
 // Pre-warm the WASM modules (resvg + yoga) on first use.
 // ImageResponse inits WASM on every call; the first is expensive (~200ms+),
 // subsequent calls hit "Already initialized" and bail, but still pay for the
@@ -33,14 +16,16 @@ let wasmReady: Promise<void> | null = null;
 function ensureWasmReady(): Promise<void> {
 	if (!wasmReady) {
 		const t = performance.now();
-		wasmReady = suppressWasmNoise(() =>
-			new ImageResponse("<div style=\"display:flex\"></div>", {
-				width: 1,
-				height: 1,
-			}).arrayBuffer(),
-		).then(() => {
-			console.log(`[OG] WASM warm-up: ${(performance.now() - t).toFixed(1)}ms`);
-		});
+		wasmReady = new ImageResponse('<div style="display:flex"></div>', {
+			width: 1,
+			height: 1,
+		})
+			.arrayBuffer()
+			.then(() => {
+				console.log(
+					`[OG] WASM warm-up: ${(performance.now() - t).toFixed(1)}ms`,
+				);
+			});
 	}
 	return wasmReady;
 }
@@ -82,67 +67,63 @@ export const Route = createFileRoute("/api/og/$username")({
 	server: {
 		handlers: {
 			GET: async ({ params, request }) => {
-			return Sentry.startSpan(
-				{ name: "og.generateImage", op: "function" },
-				async () => {
-					const t0 = performance.now();
-					const { username } = params;
-					const url = new URL(request.url);
-					const baseUrl = `${url.protocol}//${url.host}`;
-					const db = createDb(env.DB);
+				return Sentry.startSpan(
+					{ name: "og.generateImage", op: "function" },
+					async () => {
+						const t0 = performance.now();
+						const { username } = params;
+						const url = new URL(request.url);
+						const baseUrl = `${url.protocol}//${url.host}`;
+						const db = createDb(env.DB);
 
-					const wasmPromise = ensureWasmReady();
+						// Kick off WASM warm-up in parallel with the DB query
+						const wasmPromise = ensureWasmReady();
 
-					const users = await Sentry.startSpan(
-						{ name: "og.userQuery", op: "db.query" },
-						async () => {
-							const t = performance.now();
-							const result = await db
-								.select({
-									id: schema.user.id,
-									name: schema.user.name,
-									image: schema.user.image,
-									username: schema.user.username,
-								})
-								.from(schema.user)
-								.where(eq(schema.user.username, username))
-								.limit(1);
-							console.log(`[OG] User query: ${(performance.now() - t).toFixed(1)}ms`);
-							return result;
-						},
-					);
+						const tUserQuery = performance.now();
+						const users = await db
+							.select({
+								id: schema.user.id,
+								name: schema.user.name,
+								image: schema.user.image,
+								username: schema.user.username,
+							})
+							.from(schema.user)
+							.where(eq(schema.user.username, username))
+							.limit(1);
+						console.log(
+							`[OG] User query: ${(performance.now() - tUserQuery).toFixed(1)}ms`,
+						);
 
-					if (users.length === 0 || !users[0].username) {
-						console.log(`[OG] No user found, returning basic image. Total: ${(performance.now() - t0).toFixed(1)}ms`);
-						return generateBasicOgImage(baseUrl);
-					}
+						if (users.length === 0 || !users[0].username) {
+							console.log(
+								`[OG] No user found, returning basic image. Total: ${(performance.now() - t0).toFixed(1)}ms`,
+							);
+							return generateBasicOgImage(baseUrl);
+						}
 
-					const user = users[0];
+						const user = users[0];
 
-					const predictions = await Sentry.startSpan(
-						{ name: "og.predictionsQuery", op: "db.query" },
-						async () => {
-							const t = performance.now();
-							const result = await db
-								.select({
-									gameId: schema.userPrediction.gameId,
-									predictedWinnerId: schema.userPrediction.predictedWinnerId,
-								})
-								.from(schema.userPrediction)
-								.where(eq(schema.userPrediction.userId, users[0].id));
-							console.log(`[OG] Predictions query: ${(performance.now() - t).toFixed(1)}ms (${result.length} rows)`);
-							return result;
-						},
-					);
+						const tPredictions = performance.now();
+						const predictions = await db
+							.select({
+								gameId: schema.userPrediction.gameId,
+								predictedWinnerId: schema.userPrediction.predictedWinnerId,
+							})
+							.from(schema.userPrediction)
+							.where(eq(schema.userPrediction.userId, users[0].id));
+						console.log(
+							`[OG] Predictions query: ${(performance.now() - tPredictions).toFixed(1)}ms (${predictions.length} rows)`,
+						);
 
-					if (predictions.length === 0) {
-						console.log(`[OG] No predictions, returning basic image. Total: ${(performance.now() - t0).toFixed(1)}ms`);
-						return generateBasicOgImage(baseUrl);
-					}
+						if (predictions.length === 0) {
+							console.log(
+								`[OG] No predictions, returning basic image. Total: ${(performance.now() - t0).toFixed(1)}ms`,
+							);
+							return generateBasicOgImage(baseUrl);
+						}
 
-					const buildSpan = Sentry.startInactiveSpan({ name: "og.bracketHtmlBuild", op: "serialize" });
-					const tBuildStart = performance.now();
-					const predictionMap = new Map<string, string>();
+						const tBuildStart = performance.now();
+						const predictionMap = new Map<string, string>();
 						for (const p of predictions) {
 							predictionMap.set(p.gameId, p.predictedWinnerId);
 						}
@@ -252,7 +233,7 @@ export const Route = createFileRoute("/api/og/$username")({
 								html += `<div style="display: flex; position: absolute; left: ${bgLeft}px; top: ${bgTop}px; width: ${size}px; height: ${size}px; border-radius: 50%; background-color: #333; border: ${border}px solid ${borderColor};"></div>`;
 							} else {
 								// Satori requires width/height as HTML attributes, not just CSS
-								html += `<img src="${getPhotoUrl(player)}" width="${size}" height="${imgHeight}" style="position: absolute; left: ${imgLeft}px; top: ${imgTop}px; width: ${size}px; height: ${imgHeight}px; border-radius: 50%; object-fit: cover; object-position: top; ${filter}" />`;
+								// html += `<img src="${getPhotoUrl(player)}" width="${size}" height="${imgHeight}" style="position: absolute; left: ${imgLeft}px; top: ${imgTop}px; width: ${size}px; height: ${imgHeight}px; border-radius: 50%; object-fit: cover; object-position: top; ${filter}" />`;
 							}
 
 							if (showName && player) {
@@ -558,7 +539,7 @@ export const Route = createFileRoute("/api/og/$username")({
 
 						if (champion) {
 							bracketHtml += `
-						<img src="${getPhotoUrl(champion)}" width="${SIZE_CHAMP}" height="${champImgHeight}" style="position: absolute; left: ${champLeft}px; top: ${champImgTop}px; width: ${SIZE_CHAMP}px; height: ${champImgHeight}px; border-radius: 50%; object-fit: cover; object-position: top;" />
+						<!-- <img src="${getPhotoUrl(champion)}" width="${SIZE_CHAMP}" height="${champImgHeight}" style="position: absolute; left: ${champLeft}px; top: ${champImgTop}px; width: ${SIZE_CHAMP}px; height: ${champImgHeight}px; border-radius: 50%; object-fit: cover; object-position: top;" /> -->
 					`;
 						} else {
 							bracketHtml += `
@@ -571,16 +552,20 @@ export const Route = createFileRoute("/api/og/$username")({
 					<span style="position: absolute; left: ${CENTER_X}px; top: ${CHAMP_Y + SIZE_CHAMP / 2 + 8}px; transform: translateX(-50%); color: #fff; font-size: 24px; font-weight: 900; font-family: system-ui; text-shadow: 0 2px 8px #000, 0 0 20px #000;">${champion?.name ?? "Champion"}</span>
 				`;
 
-					const html = `
+						console.log(
+							`[OG] Bracket HTML build: ${(performance.now() - tBuildStart).toFixed(1)}ms`,
+						);
+
+						const html = /* html*/ `
 				<div style="display: flex; width: 1200px; height: 630px; position: relative;">
 					<!-- Background -->
-					<img src="${bgImageUrl}" width="1200" height="630" style="position: absolute; top: 0; left: 0; width: 1200px; height: 630px; object-fit: cover;" />
+					<!-- <img src="${bgImageUrl}" width="1200" height="630" style="position: absolute; top: 0; left: 0; width: 1200px; height: 630px; object-fit: cover;" /> -->
 
 					<!-- Dark overlay -->
 					<div style="display: flex; position: absolute; top: 0; left: 0; width: 1200px; height: 630px; background-color: #000; opacity: 0.5;"></div>
 
 					<!-- Logo (top center, 120px square, centered at Y=90) -->
-					<img src="${logoUrl}" width="120" height="120" style="position: absolute; left: ${CENTER_X}px; top: ${LOGO_Y - 60}px; transform: translateX(-50%); width: 120px; height: 120px;" />
+					<!-- <img src="${logoUrl}" width="120" height="120" style="position: absolute; left: ${CENTER_X}px; top: ${LOGO_Y - 60}px; transform: translateX(-50%); width: 120px; height: 120px;" />
 
 					<!-- User info (bottom center, 60px avatar, 28px text, Y=570) -->
 					<div style="display: flex; position: absolute; left: ${CENTER_X}px; top: ${USER_Y}px; transform: translate(-50%, -50%); align-items: center; gap: 12px;">
@@ -598,42 +583,34 @@ export const Route = createFileRoute("/api/og/$username")({
 					${bracketHtml}
 				</div>`;
 
-					console.log(`[OG] Bracket HTML build: ${(performance.now() - tBuildStart).toFixed(1)}ms`);
-					buildSpan.end();
+						const tWasmWait = performance.now();
+						await wasmPromise;
+						console.log(
+							`[OG] WASM wait: ${(performance.now() - tWasmWait).toFixed(1)}ms`,
+						);
 
-					await Sentry.startSpan(
-						{ name: "og.wasmWait", op: "resource.wasm" },
-						async () => {
-							const t = performance.now();
-							await wasmPromise;
-							console.log(`[OG] WASM wait: ${(performance.now() - t).toFixed(1)}ms`);
-						},
-					);
+						const tRender = performance.now();
+						const imgResponse = new ImageResponse(html, {
+							width: 1200,
+							height: 630,
+						});
+						// Force the stream to be consumed — ImageResponse defers
+						// the actual satori + resvg render until the body is read
+						const buf = await imgResponse.arrayBuffer();
+						console.log(
+							`[OG] ImageResponse render: ${(performance.now() - tRender).toFixed(1)}ms (${buf.byteLength} bytes)`,
+						);
 
-					const buf = await Sentry.startSpan(
-						{ name: "og.render", op: "function" },
-						async () => {
-							const t = performance.now();
-							const result = await suppressWasmNoise(() =>
-								new ImageResponse(html, {
-									width: 1200,
-									height: 630,
-								}).arrayBuffer(),
-							);
-							console.log(`[OG] ImageResponse render: ${(performance.now() - t).toFixed(1)}ms (${result.byteLength} bytes)`);
-							return result;
-						},
-					);
+						const response = new Response(buf, {
+							headers: imgResponse.headers,
+						});
+						response.headers.set(
+							"Cache-Control",
+							"public, max-age=3600, s-maxage=86400",
+						);
 
-					const response = new Response(buf, {
-						headers: {
-							"Content-Type": "image/png",
-							"Cache-Control": "public, max-age=3600, s-maxage=86400",
-						},
-					});
-
-					console.log(`[OG] Total: ${(performance.now() - t0).toFixed(1)}ms`);
-					return response;
+						console.log(`[OG] Total: ${(performance.now() - t0).toFixed(1)}ms`);
+						return response;
 					},
 				);
 			},
