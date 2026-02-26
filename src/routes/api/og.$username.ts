@@ -7,12 +7,40 @@ import { bracket, type Player, players } from "@/data/players";
 import { createDb } from "@/db";
 import * as schema from "@/db/schema";
 
+// Pre-warm the WASM modules (resvg + yoga) on first use.
+// ImageResponse inits WASM on every call; the first is expensive (~200ms+),
+// subsequent calls hit "Already initialized" and bail, but still pay for the
+// try/catch + Promise.allSettled overhead. By warming up once with a tiny
+// no-op render, we ensure the WASM is compiled before real requests arrive.
+let wasmReady: Promise<void> | null = null;
+function ensureWasmReady(): Promise<void> {
+	if (!wasmReady) {
+		const t = performance.now();
+		wasmReady = new ImageResponse('<div style="display:flex"></div>', {
+			width: 1,
+			height: 1,
+		})
+			.arrayBuffer()
+			.then(() => {
+				console.log(
+					`[OG] WASM warm-up: ${(performance.now() - t).toFixed(1)}ms`,
+				);
+			});
+	}
+	return wasmReady;
+}
+
+const isDev = import.meta.env.DEV;
+
+const proxyUrl = (url: string) =>
+	isDev ? url : `https://wsrv.nl/?url=${encodeURIComponent(url)}`;
+
 // Generate a basic OG image for cases where user doesn't exist or bracket isn't locked
 function generateBasicOgImage(baseUrl: string): Response {
-	const logoUrl = `${baseUrl}/mad-css-logo.png`;
-	const bgImageUrl = `${baseUrl}/madcss-wide.jpg`;
+	const logoUrl = proxyUrl(`${baseUrl}/mad-css-logo.png`);
+	const bgImageUrl = proxyUrl(`${baseUrl}/madcss-wide.jpg`);
 
-	const html = `
+	const html = /* html */ `
 	<div style="display: flex; width: 1200px; height: 630px; position: relative; flex-direction: column; align-items: center; justify-content: center;">
 		<!-- Background -->
 		<img src="${bgImageUrl}" width="1200" height="630" style="position: absolute; top: 0; left: 0; width: 1200px; height: 630px; object-fit: cover;" />
@@ -44,15 +72,32 @@ export const Route = createFileRoute("/api/og/$username")({
 	server: {
 		handlers: {
 			GET: async ({ params, request }) => {
+				const cache = isDev
+					? null
+					: (caches as unknown as { default: Cache }).default;
+				const cacheKey = new Request(request.url);
+				if (cache) {
+					const cached = await cache.match(cacheKey);
+					if (cached) {
+						console.log("[OG] Cache HIT");
+						return cached;
+					}
+					console.log("[OG] Cache MISS");
+				}
+
 				return Sentry.startSpan(
 					{ name: "og.generateImage", op: "function" },
 					async () => {
+						const t0 = performance.now();
 						const { username } = params;
 						const url = new URL(request.url);
 						const baseUrl = `${url.protocol}//${url.host}`;
 						const db = createDb(env.DB);
 
-						// Find user by username
+						// Kick off WASM warm-up in parallel with the DB query
+						const wasmPromise = ensureWasmReady();
+
+						const tUserQuery = performance.now();
 						const users = await db
 							.select({
 								id: schema.user.id,
@@ -63,14 +108,22 @@ export const Route = createFileRoute("/api/og/$username")({
 							.from(schema.user)
 							.where(eq(schema.user.username, username))
 							.limit(1);
+						console.log(
+							`[OG] User query: ${(performance.now() - tUserQuery).toFixed(1)}ms`,
+						);
 
 						if (users.length === 0 || !users[0].username) {
-							return generateBasicOgImage(baseUrl);
+							console.log(
+								`[OG] No user found, returning basic image. Total: ${(performance.now() - t0).toFixed(1)}ms`,
+							);
+							const basic = generateBasicOgImage(baseUrl);
+							cache?.put(cacheKey, basic.clone());
+							return basic;
 						}
 
 						const user = users[0];
 
-						// Get ALL predictions
+						const tPredictions = performance.now();
 						const predictions = await db
 							.select({
 								gameId: schema.userPrediction.gameId,
@@ -78,12 +131,20 @@ export const Route = createFileRoute("/api/og/$username")({
 							})
 							.from(schema.userPrediction)
 							.where(eq(schema.userPrediction.userId, users[0].id));
+						console.log(
+							`[OG] Predictions query: ${(performance.now() - tPredictions).toFixed(1)}ms (${predictions.length} rows)`,
+						);
 
 						if (predictions.length === 0) {
-							return generateBasicOgImage(baseUrl);
+							console.log(
+								`[OG] No predictions, returning basic image. Total: ${(performance.now() - t0).toFixed(1)}ms`,
+							);
+							const basic = generateBasicOgImage(baseUrl);
+							cache?.put(cacheKey, basic.clone());
+							return basic;
 						}
 
-						// Build prediction map
+						const tBuildStart = performance.now();
 						const predictionMap = new Map<string, string>();
 						for (const p of predictions) {
 							predictionMap.set(p.gameId, p.predictedWinnerId);
@@ -99,17 +160,18 @@ export const Route = createFileRoute("/api/og/$username")({
 							return winnerId ? getPlayer(winnerId) : null;
 						};
 
-						// Build absolute URLs
-						const logoUrl = `${baseUrl}/mad-css-logo.png`;
-						const bgImageUrl = `${baseUrl}/madcss-wide.jpg`;
-						const userAvatarUrl = user.image || "";
+						const logoUrl = proxyUrl(`${baseUrl}/mad-css-logo.png`);
+						const bgImageUrl = proxyUrl(`${baseUrl}/madcss-wide.jpg`);
+						const userAvatarUrl = user.image ? proxyUrl(user.image) : "";
 
 						const getPhotoUrl = (player: Player | null): string => {
 							if (!player) return "";
-							if (player.photo.startsWith("http")) return player.photo;
-							// Photos are stored as /avatars/name.png but actual files are in /avatars/color/name.png
+							if (player.photo.startsWith("http"))
+								return proxyUrl(player.photo);
 							const filename = player.photo.replace("/avatars/", "");
-							return `${baseUrl}/avatars/color/${encodeURI(filename)}`;
+							return proxyUrl(
+								`${baseUrl}/avatars/color/${encodeURI(filename)}`,
+							);
 						};
 
 						// ============================================
@@ -181,7 +243,7 @@ export const Route = createFileRoute("/api/og/$username")({
 
 							// Background circle with colored border
 							const bgLeft = x - size / 2;
-							const bgTop = y - size / 2;
+							const bgTop = y - size / 2 + border;
 							let html = `<div style="display: flex; position: absolute; left: ${bgLeft}px; top: ${bgTop}px; width: ${size}px; height: ${size}px; border-radius: 50%; background-color: ${backgroundColor}; border: ${border}px solid ${borderColor};"></div>`;
 
 							// Image is taller and positioned higher so head pops out top
@@ -270,8 +332,8 @@ export const Route = createFileRoute("/api/og/$username")({
 						let bracketHtml = "";
 
 						// Side colors
-						const COLOR_LEFT = "#0f73ff"; // Blue
-						const COLOR_RIGHT = "#f3370e"; // Red
+						const COLOR_LEFT = "#f3370e"; // Blue
+						const COLOR_RIGHT = "#5CE1E6"; // Red
 						const BG_PICKED = "#ffae00"; // Yellow/orange for picked players
 						const BG_UNPICKED = "#666"; // Gray for unpicked players
 
@@ -496,7 +558,7 @@ export const Route = createFileRoute("/api/og/$username")({
 						// Champion image - taller with head popping out
 						const champPopOut = Math.round(SIZE_CHAMP * 0.15);
 						const champImgHeight = SIZE_CHAMP + champPopOut;
-						const champImgTop = champTop - champPopOut;
+						const champImgTop = champTop - champPopOut - 1.5;
 
 						if (champion) {
 							bracketHtml += `
@@ -513,14 +575,14 @@ export const Route = createFileRoute("/api/og/$username")({
 					<span style="position: absolute; left: ${CENTER_X}px; top: ${CHAMP_Y + SIZE_CHAMP / 2 + 8}px; transform: translateX(-50%); color: #fff; font-size: 24px; font-weight: 900; font-family: system-ui; text-shadow: 0 2px 8px #000, 0 0 20px #000;">${champion?.name ?? "Champion"}</span>
 				`;
 
-						// ============================================
-						// FULL HTML
-						// ============================================
+						console.log(
+							`[OG] Bracket HTML build: ${(performance.now() - tBuildStart).toFixed(1)}ms`,
+						);
 
-						const html = `
+						const html = /* html*/ `
 				<div style="display: flex; width: 1200px; height: 630px; position: relative;">
 					<!-- Background -->
-					<img src="${bgImageUrl}" width="1200" height="630" style="position: absolute; top: 0; left: 0; width: 1200px; height: 630px; object-fit: cover;" />
+					 <img src="${bgImageUrl}" width="1200" height="630" style="position: absolute; top: 0; left: 0; width: 1200px; height: 630px; object-fit: cover;" />
 
 					<!-- Dark overlay -->
 					<div style="display: flex; position: absolute; top: 0; left: 0; width: 1200px; height: 630px; background-color: #000; opacity: 0.5;"></div>
@@ -544,16 +606,33 @@ export const Route = createFileRoute("/api/og/$username")({
 					${bracketHtml}
 				</div>`;
 
-						const response = new ImageResponse(html, {
+						const tWasmWait = performance.now();
+						await wasmPromise;
+						console.log(
+							`[OG] WASM wait: ${(performance.now() - tWasmWait).toFixed(1)}ms`,
+						);
+
+						const tRender = performance.now();
+						const imgResponse = new ImageResponse(html, {
 							width: 1200,
 							height: 630,
 						});
-
-						response.headers.set(
-							"Cache-Control",
-							"public, max-age=3600, s-maxage=86400",
+						// Force the stream to be consumed — ImageResponse defers
+						// the actual satori + resvg render until the body is read
+						const buf = await imgResponse.arrayBuffer();
+						console.log(
+							`[OG] ImageResponse render: ${(performance.now() - tRender).toFixed(1)}ms (${buf.byteLength} bytes)`,
 						);
 
+						const response = new Response(buf, {
+							headers: {
+								"Content-Type": "image/png",
+								"Cache-Control": "public, max-age=3600, s-maxage=86400",
+							},
+						});
+
+						console.log(`[OG] Total: ${(performance.now() - t0).toFixed(1)}ms`);
+						cache?.put(cacheKey, response.clone());
 						return response;
 					},
 				);
