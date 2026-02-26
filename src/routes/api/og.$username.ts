@@ -7,21 +7,45 @@ import { bracket, type Player, players } from "@/data/players";
 import { createDb } from "@/db";
 import * as schema from "@/db/schema";
 
-// Generate a basic OG image for cases where user doesn't exist or bracket isn't locked
-function generateBasicOgImage(baseUrl: string): Response {
-	const logoUrl = `${baseUrl}/mad-css-logo.png`;
-	const bgImageUrl = `${baseUrl}/madcss-wide.jpg`;
+// Workers can't fetch their own origin (loops back to the Worker).
+// Use ASSETS binding for local files, regular fetch for external URLs.
+async function toDataUri(url: string, baseUrl: string): Promise<string> {
+	if (!url) return "";
+	try {
+		const isLocal = url.startsWith(baseUrl) || url.startsWith("/");
+		const res = await (isLocal && env.ASSETS
+			? env.ASSETS.fetch(url)
+			: fetch(url));
+		if (!res.ok) return url;
+		const buf = await res.arrayBuffer();
+		const ct = res.headers.get("content-type") || "image/png";
+		const bytes = new Uint8Array(buf);
+		let bin = "";
+		for (let i = 0; i < bytes.length; i += 8192) {
+			bin += String.fromCharCode(...bytes.subarray(i, i + 8192));
+		}
+		return `data:${ct};base64,${btoa(bin)}`;
+	} catch {
+		return url;
+	}
+}
+
+async function generateBasicOgImage(baseUrl: string): Promise<Response> {
+	const [logoUri, bgUri] = await Promise.all([
+		toDataUri(`${baseUrl}/mad-css-logo.png`, baseUrl),
+		toDataUri(`${baseUrl}/madcss-wide.jpg`, baseUrl),
+	]);
 
 	const html = `
 	<div style="display: flex; width: 1200px; height: 630px; position: relative; flex-direction: column; align-items: center; justify-content: center;">
 		<!-- Background -->
-		<img src="${bgImageUrl}" width="1200" height="630" style="position: absolute; top: 0; left: 0; width: 1200px; height: 630px; object-fit: cover;" />
+		<img src="${bgUri}" width="1200" height="630" style="position: absolute; top: 0; left: 0; width: 1200px; height: 630px; object-fit: cover;" />
 
 		<!-- Dark overlay -->
 		<div style="display: flex; position: absolute; top: 0; left: 0; width: 1200px; height: 630px; background-color: #000; opacity: 0.6;"></div>
 
 		<!-- Logo (top center) -->
-		<img src="${logoUrl}" width="160" height="160" style="position: absolute; top: 80px; left: 520px; width: 160px; height: 160px;" />
+		<img src="${logoUri}" width="160" height="160" style="position: absolute; top: 80px; left: 520px; width: 160px; height: 160px;" />
 
 		<!-- Main text -->
 		<span style="position: absolute; top: 280px; color: #fff; font-size: 72px; font-weight: 900; font-family: system-ui; text-shadow: 0 4px 16px #000;">March Mad CSS</span>
@@ -65,7 +89,7 @@ export const Route = createFileRoute("/api/og/$username")({
 							.limit(1);
 
 						if (users.length === 0 || !users[0].username) {
-							return generateBasicOgImage(baseUrl);
+							return await generateBasicOgImage(baseUrl);
 						}
 
 						const user = users[0];
@@ -80,7 +104,7 @@ export const Route = createFileRoute("/api/og/$username")({
 							.where(eq(schema.userPrediction.userId, users[0].id));
 
 						if (predictions.length === 0) {
-							return generateBasicOgImage(baseUrl);
+							return await generateBasicOgImage(baseUrl);
 						}
 
 						// Build prediction map
@@ -99,17 +123,25 @@ export const Route = createFileRoute("/api/og/$username")({
 							return winnerId ? getPlayer(winnerId) : null;
 						};
 
-						// Build absolute URLs
-						const logoUrl = `${baseUrl}/mad-css-logo.png`;
-						const bgImageUrl = `${baseUrl}/madcss-wide.jpg`;
-						const userAvatarUrl = user.image || "";
+						// Pre-convert all images to data URIs (Workers can't fetch own origin)
+						const photoMap = new Map<string, string>();
+						await Promise.all(
+							players.map(async (p) => {
+								const filename = p.photo.replace("/avatars/", "");
+								const url = `${baseUrl}/avatars/color/${encodeURI(filename)}`;
+								photoMap.set(p.id, await toDataUri(url, baseUrl));
+							}),
+						);
+
+						const [logoUrl, bgImageUrl, userAvatarUrl] = await Promise.all([
+							toDataUri(`${baseUrl}/mad-css-logo.png`, baseUrl),
+							toDataUri(`${baseUrl}/madcss-wide.jpg`, baseUrl),
+							user.image ? toDataUri(user.image, baseUrl) : Promise.resolve(""),
+						]);
 
 						const getPhotoUrl = (player: Player | null): string => {
 							if (!player) return "";
-							if (player.photo.startsWith("http")) return player.photo;
-							// Photos are stored as /avatars/name.png but actual files are in /avatars/color/name.png
-							const filename = player.photo.replace("/avatars/", "");
-							return `${baseUrl}/avatars/color/${encodeURI(filename)}`;
+							return photoMap.get(player.id) || "";
 						};
 
 						// ============================================
