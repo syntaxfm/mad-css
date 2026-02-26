@@ -30,8 +30,10 @@ function ensureWasmReady(): Promise<void> {
 	return wasmReady;
 }
 
+const isDev = import.meta.env.DEV;
+
 const proxyUrl = (url: string) =>
-	`https://wsrv.nl/?url=${encodeURIComponent(url)}`;
+	isDev ? url : `https://wsrv.nl/?url=${encodeURIComponent(url)}`;
 
 // Generate a basic OG image for cases where user doesn't exist or bracket isn't locked
 function generateBasicOgImage(baseUrl: string): Response {
@@ -70,14 +72,18 @@ export const Route = createFileRoute("/api/og/$username")({
 	server: {
 		handlers: {
 			GET: async ({ params, request }) => {
-				const cache = (caches as unknown as { default: Cache }).default;
+				const cache = isDev
+					? null
+					: (caches as unknown as { default: Cache }).default;
 				const cacheKey = new Request(request.url);
-				const cached = await cache.match(cacheKey);
-				if (cached) {
-					console.log("[OG] Cache HIT");
-					return cached;
+				if (cache) {
+					const cached = await cache.match(cacheKey);
+					if (cached) {
+						console.log("[OG] Cache HIT");
+						return cached;
+					}
+					console.log("[OG] Cache MISS");
 				}
-				console.log("[OG] Cache MISS");
 
 				return Sentry.startSpan(
 					{ name: "og.generateImage", op: "function" },
@@ -111,7 +117,7 @@ export const Route = createFileRoute("/api/og/$username")({
 								`[OG] No user found, returning basic image. Total: ${(performance.now() - t0).toFixed(1)}ms`,
 							);
 							const basic = generateBasicOgImage(baseUrl);
-							cache.put(cacheKey, basic.clone());
+							cache?.put(cacheKey, basic.clone());
 							return basic;
 						}
 
@@ -134,7 +140,7 @@ export const Route = createFileRoute("/api/og/$username")({
 								`[OG] No predictions, returning basic image. Total: ${(performance.now() - t0).toFixed(1)}ms`,
 							);
 							const basic = generateBasicOgImage(baseUrl);
-							cache.put(cacheKey, basic.clone());
+							cache?.put(cacheKey, basic.clone());
 							return basic;
 						}
 
@@ -160,9 +166,12 @@ export const Route = createFileRoute("/api/og/$username")({
 
 						const getPhotoUrl = (player: Player | null): string => {
 							if (!player) return "";
-							if (player.photo.startsWith("http")) return proxyUrl(player.photo);
+							if (player.photo.startsWith("http"))
+								return proxyUrl(player.photo);
 							const filename = player.photo.replace("/avatars/", "");
-							return proxyUrl(`${baseUrl}/avatars/color/${encodeURI(filename)}`);
+							return proxyUrl(
+								`${baseUrl}/avatars/color/${encodeURI(filename)}`,
+							);
 						};
 
 						// ============================================
@@ -234,7 +243,7 @@ export const Route = createFileRoute("/api/og/$username")({
 
 							// Background circle with colored border
 							const bgLeft = x - size / 2;
-							const bgTop = y - size / 2;
+							const bgTop = y - size / 2 + border;
 							let html = `<div style="display: flex; position: absolute; left: ${bgLeft}px; top: ${bgTop}px; width: ${size}px; height: ${size}px; border-radius: 50%; background-color: ${backgroundColor}; border: ${border}px solid ${borderColor};"></div>`;
 
 							// Image is taller and positioned higher so head pops out top
@@ -549,7 +558,7 @@ export const Route = createFileRoute("/api/og/$username")({
 						// Champion image - taller with head popping out
 						const champPopOut = Math.round(SIZE_CHAMP * 0.15);
 						const champImgHeight = SIZE_CHAMP + champPopOut;
-						const champImgTop = champTop - champPopOut;
+						const champImgTop = champTop - champPopOut - 1.5;
 
 						if (champion) {
 							bracketHtml += `
@@ -623,8 +632,7 @@ export const Route = createFileRoute("/api/og/$username")({
 						});
 
 						console.log(`[OG] Total: ${(performance.now() - t0).toFixed(1)}ms`);
-						// Store in Cloudflare CDN cache (non-blocking)
-						cache.put(cacheKey, response.clone());
+						cache?.put(cacheKey, response.clone());
 						return response;
 					},
 				);
