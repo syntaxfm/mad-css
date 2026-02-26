@@ -30,12 +30,10 @@ function ensureWasmReady(): Promise<void> {
 	return wasmReady;
 }
 
-const proxyUrl = (url: string) =>
-	`https://wsrv.nl/?url=${encodeURIComponent(url)}`;
-
+// Generate a basic OG image for cases where user doesn't exist or bracket isn't locked
 function generateBasicOgImage(baseUrl: string): Response {
-	const logoUrl = proxyUrl(`${baseUrl}/mad-css-logo.png`);
-	const bgImageUrl = proxyUrl(`${baseUrl}/madcss-wide.jpg`);
+	const logoUrl = `${baseUrl}/mad-css-logo.png`;
+	const bgImageUrl = `${baseUrl}/madcss-wide.jpg`;
 
 	const html = `
 	<div style="display: flex; width: 1200px; height: 630px; position: relative; flex-direction: column; align-items: center; justify-content: center;">
@@ -153,16 +151,17 @@ export const Route = createFileRoute("/api/og/$username")({
 							return winnerId ? getPlayer(winnerId) : null;
 						};
 
-						const logoUrl = proxyUrl(`${baseUrl}/mad-css-logo.png`);
-						const bgImageUrl = proxyUrl(`${baseUrl}/madcss-wide.jpg`);
-						const userAvatarUrl = user.image ? proxyUrl(user.image) : "";
+						// Build absolute URLs
+						const logoUrl = `${baseUrl}/mad-css-logo.png`;
+						const bgImageUrl = `${baseUrl}/madcss-wide.jpg`;
+						const userAvatarUrl = user.image || "";
 
 						const getPhotoUrl = (player: Player | null): string => {
 							if (!player) return "";
-							const raw = player.photo.startsWith("http")
-								? player.photo
-								: `${baseUrl}/avatars/color/${encodeURI(player.photo.replace("/avatars/", ""))}`;
-							return proxyUrl(raw);
+							if (player.photo.startsWith("http")) return player.photo;
+							// Photos are stored as /avatars/name.png but actual files are in /avatars/color/name.png
+							const filename = player.photo.replace("/avatars/", "");
+							return `${baseUrl}/avatars/color/${encodeURI(filename)}`;
 						};
 
 						// ============================================
