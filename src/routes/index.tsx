@@ -4,9 +4,10 @@ import { Bracket } from "@/components/bracket/Bracket";
 import { LoginSection } from "@/components/LoginSection";
 import { Activity } from "@/components/leaderboard/Activity";
 import { Leaderboard } from "@/components/leaderboard/Leaderboard";
+import { Merch } from "@/components/merch/Merch";
+import { Prizes } from "@/components/prizes/Prizes";
 import { Roster } from "@/components/roster/Roster";
 import { Rules } from "@/components/rules/Rules";
-import { Prizes } from "@/components/prizes/Prizes";
 import { Ticket } from "@/components/Ticket";
 import { PredictionsProvider } from "@/context/PredictionsContext";
 import { getResultsFromBracket } from "@/data/players";
@@ -84,6 +85,7 @@ function App() {
 			</PredictionsProvider>
 			<Leaderboard />
 			<Prizes />
+			<Merch />
 			<Rules />
 		</div>
 	);
