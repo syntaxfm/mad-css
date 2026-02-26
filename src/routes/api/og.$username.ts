@@ -67,6 +67,15 @@ export const Route = createFileRoute("/api/og/$username")({
 	server: {
 		handlers: {
 			GET: async ({ params, request }) => {
+				const cache = caches.default;
+				const cacheKey = new Request(request.url);
+				const cached = await cache.match(cacheKey);
+				if (cached) {
+					console.log("[OG] Cache HIT");
+					return cached;
+				}
+				console.log("[OG] Cache MISS");
+
 				return Sentry.startSpan(
 					{ name: "og.generateImage", op: "function" },
 					async () => {
@@ -98,7 +107,9 @@ export const Route = createFileRoute("/api/og/$username")({
 							console.log(
 								`[OG] No user found, returning basic image. Total: ${(performance.now() - t0).toFixed(1)}ms`,
 							);
-							return generateBasicOgImage(baseUrl);
+							const basic = generateBasicOgImage(baseUrl);
+							cache.put(cacheKey, basic.clone());
+							return basic;
 						}
 
 						const user = users[0];
@@ -119,7 +130,9 @@ export const Route = createFileRoute("/api/og/$username")({
 							console.log(
 								`[OG] No predictions, returning basic image. Total: ${(performance.now() - t0).toFixed(1)}ms`,
 							);
-							return generateBasicOgImage(baseUrl);
+							const basic = generateBasicOgImage(baseUrl);
+							cache.put(cacheKey, basic.clone());
+							return basic;
 						}
 
 						const tBuildStart = performance.now();
@@ -602,14 +615,15 @@ export const Route = createFileRoute("/api/og/$username")({
 						);
 
 						const response = new Response(buf, {
-							headers: imgResponse.headers,
+							headers: {
+								"Content-Type": "image/png",
+								"Cache-Control": "public, max-age=3600, s-maxage=86400",
+							},
 						});
-						response.headers.set(
-							"Cache-Control",
-							"public, max-age=3600, s-maxage=86400",
-						);
 
 						console.log(`[OG] Total: ${(performance.now() - t0).toFixed(1)}ms`);
+						// Store in Cloudflare CDN cache (non-blocking)
+						cache.put(cacheKey, response.clone());
 						return response;
 					},
 				);
