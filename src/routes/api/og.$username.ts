@@ -233,7 +233,7 @@ export const Route = createFileRoute("/api/og/$username")({
 								html += `<div style="display: flex; position: absolute; left: ${bgLeft}px; top: ${bgTop}px; width: ${size}px; height: ${size}px; border-radius: 50%; background-color: #333; border: ${border}px solid ${borderColor};"></div>`;
 							} else {
 								// Satori requires width/height as HTML attributes, not just CSS
-								// html += `<img src="${getPhotoUrl(player)}" width="${size}" height="${imgHeight}" style="position: absolute; left: ${imgLeft}px; top: ${imgTop}px; width: ${size}px; height: ${imgHeight}px; border-radius: 50%; object-fit: cover; object-position: top; ${filter}" />`;
+								html += `<img src="${getPhotoUrl(player)}" width="${size}" height="${imgHeight}" style="position: absolute; left: ${imgLeft}px; top: ${imgTop}px; width: ${size}px; height: ${imgHeight}px; border-radius: 50%; object-fit: cover; object-position: top; ${filter}" />`;
 							}
 
 							if (showName && player) {
@@ -539,7 +539,7 @@ export const Route = createFileRoute("/api/og/$username")({
 
 						if (champion) {
 							bracketHtml += `
-						<!-- <img src="${getPhotoUrl(champion)}" width="${SIZE_CHAMP}" height="${champImgHeight}" style="position: absolute; left: ${champLeft}px; top: ${champImgTop}px; width: ${SIZE_CHAMP}px; height: ${champImgHeight}px; border-radius: 50%; object-fit: cover; object-position: top;" /> -->
+						<img src="${getPhotoUrl(champion)}" width="${SIZE_CHAMP}" height="${champImgHeight}" style="position: absolute; left: ${champLeft}px; top: ${champImgTop}px; width: ${SIZE_CHAMP}px; height: ${champImgHeight}px; border-radius: 50%; object-fit: cover; object-position: top;" />
 					`;
 						} else {
 							bracketHtml += `
@@ -559,13 +559,13 @@ export const Route = createFileRoute("/api/og/$username")({
 						const html = /* html*/ `
 				<div style="display: flex; width: 1200px; height: 630px; position: relative;">
 					<!-- Background -->
-					<!-- <img src="${bgImageUrl}" width="1200" height="630" style="position: absolute; top: 0; left: 0; width: 1200px; height: 630px; object-fit: cover;" /> -->
+					 <img src="${bgImageUrl}" width="1200" height="630" style="position: absolute; top: 0; left: 0; width: 1200px; height: 630px; object-fit: cover;" />
 
 					<!-- Dark overlay -->
 					<div style="display: flex; position: absolute; top: 0; left: 0; width: 1200px; height: 630px; background-color: #000; opacity: 0.5;"></div>
 
 					<!-- Logo (top center, 120px square, centered at Y=90) -->
-					<!-- <img src="${logoUrl}" width="120" height="120" style="position: absolute; left: ${CENTER_X}px; top: ${LOGO_Y - 60}px; transform: translateX(-50%); width: 120px; height: 120px;" />
+					<img src="${logoUrl}" width="120" height="120" style="position: absolute; left: ${CENTER_X}px; top: ${LOGO_Y - 60}px; transform: translateX(-50%); width: 120px; height: 120px;" />
 
 					<!-- User info (bottom center, 60px avatar, 28px text, Y=570) -->
 					<div style="display: flex; position: absolute; left: ${CENTER_X}px; top: ${USER_Y}px; transform: translate(-50%, -50%); align-items: center; gap: 12px;">
