@@ -1,11 +1,16 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
-import { createServerFn } from "@tanstack/react-start";
+import { createIsomorphicFn, createServerFn } from "@tanstack/react-start";
+import { getRequestUrl } from "@tanstack/react-start/server";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { Bracket } from "@/components/bracket/Bracket";
 import { NotFound } from "@/components/NotFound";
 import { getResultsFromBracket } from "@/data/players";
 import "@/styles/share-bracket.css";
+
+const getLocation = createIsomorphicFn()
+	.server(() => getRequestUrl())
+	.client(() => new URL(window.location.href));
 
 const usernameInputSchema = z.object({
 	username: z
@@ -84,7 +89,8 @@ export const Route = createFileRoute("/bracket/$username")({
 	),
 	head: ({ params }) => {
 		const { username } = params;
-		const ogImageUrl = `/api/og/${username}`;
+		const url = getLocation();
+		const ogImageUrl = `${url.origin}/api/og/${username}`;
 		return {
 			meta: [
 				{ title: `${username}'s Bracket | March Mad CSS` },
