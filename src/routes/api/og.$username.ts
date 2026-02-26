@@ -35,7 +35,7 @@ function generateBasicOgImage(baseUrl: string): Response {
 	const logoUrl = `${baseUrl}/mad-css-logo.png`;
 	const bgImageUrl = `${baseUrl}/madcss-wide.jpg`;
 
-	const html = `
+	const html = /* html */ `
 	<div style="display: flex; width: 1200px; height: 630px; position: relative; flex-direction: column; align-items: center; justify-content: center;">
 		<!-- Background -->
 		<img src="${bgImageUrl}" width="1200" height="630" style="position: absolute; top: 0; left: 0; width: 1200px; height: 630px; object-fit: cover;" />
