@@ -1,4 +1,4 @@
-# CLAUDE.md
+# AGENTS.md
 
 ## Project Overview
 
@@ -29,10 +29,11 @@ pnpm test         # Run Vitest tests
 
 # Database
 pnpm db:generate      # Generate Drizzle migrations from schema
-pnpm db:migrate:local # Apply migrations to local D1
-pnpm db:migrate:prod  # Apply migrations to production D1
-pnpm db:studio        # Open Drizzle Studio
-pnpm db:setup         # Generate + migrate local (full setup)
+pnpm db:migrate:local    # Apply migrations to local D1
+pnpm db:migrate:staging  # Apply migrations to staging D1
+pnpm db:migrate:prod     # Apply migrations to production D1
+pnpm db:studio           # Open Drizzle Studio
+pnpm db:setup            # Generate + migrate local (full setup)
 ```
 
 ## Architecture
@@ -47,18 +48,23 @@ auto-generates `src/routeTree.gen.ts` - don't edit this file manually.
 - `src/routes/` - Page components and API routes
 - `src/routes/__root.tsx` - Root layout, includes Header and devtools
 - `src/components/` - Reusable components (Header, Ticket, LoginSection,
-  bracket/, roster/, footer/, rules/)
-- `src/lib/` - Auth setup (better-auth) and utilities (cfImage.ts for Cloudflare
-  Images)
-- `src/data/` - Player data (players.ts with 16 contestants)
+  bracket/, roster/, footer/, rules/, leaderboard/, merch/, prizes/, scoreboard/)
+- `src/context/` - React context providers (PredictionsContext for tournament
+  prediction state)
+- `src/hooks/` - Custom hooks (useCountdown, usePredictions, usePredictionsQuery)
+- `src/lib/` - Auth (better-auth), utilities (cfImage.ts, scoring.ts,
+  simulation.ts, users.server.ts, admin.ts), middleware/, schemas/
+- `src/db/` - Drizzle database schema (index.ts, schema.ts)
+- `src/data/` - Player data (players.ts with 16 contestants, bracket config,
+  FEEDER_GAMES, GAME_SCHEDULE)
 - `src/styles/` - CSS files imported directly into components
-- `public/` - Static assets (logos, images, card artwork)
+- `public/` - Static assets (logos, images, card artwork, fonts)
 
 **Path alias:** `@/*` maps to `./src/*`
 
 **Styling:** Plain CSS with CSS custom properties defined in
-`src/styles/styles.css`. Uses custom fonts (Kaltjer, CollegiateBlackFLF, Inter)
-and texture backgrounds.
+`src/styles/styles.css`. Uses custom fonts (custom "serif" face from
+`public/fonts/serif.woff2`, Alfa Slab One, Inter) and texture backgrounds.
 
 ## Design System & Aesthetic
 
@@ -68,11 +74,12 @@ ticket stubs, torn paper textures, and classic sports programs.
 ### Color Palette
 
 ```css
---orange: #f3370e; /* Primary accent, CTAs, highlights */
---yellow: #ffae00; /* Secondary accent, warnings, badges */
---black: #000000; /* Borders, shadows, text */
---white: #ffffff; /* Text on dark backgrounds */
---beige: #f5eeda; /* Paper/background color */
+--orange: #f3370e;  /* Primary accent, CTAs, highlights */
+--yellow: #ffae00;  /* Secondary accent, warnings, badges */
+--black: #000000;   /* Borders, shadows, text */
+--white: #ffffff;   /* Text on dark backgrounds */
+--beige: #f5eeda;   /* Paper/background color */
+--bluesky: #0f73ff; /* Bluesky brand color */
 ```
 
 ### Typography
@@ -181,11 +188,11 @@ inherit naturally.
 
 - Biome for linting/formatting (tabs, double quotes)
 - TypeScript strict mode
-- React Flow library for tournament bracket visualization
+- `@xyflow/react` (React Flow / XY Flow) for tournament bracket visualization
 
 ## Bracket System
 
-**Tournament structure (FEEDER_GAMES in Bracket.tsx):**
+**Tournament structure (FEEDER_GAMES in `src/data/players.ts`):**
 
 - 16 players, single elimination bracket
 - Left side games: r1-0, r1-1, r1-2, r1-3 → qf-0, qf-1 → sf-0
@@ -200,23 +207,14 @@ inherit naturally.
 4. SF - games sf-0, sf-1 (semifinals)
 5. Finals
 
-**Node sizing logic (`isNodeLarge()` in Bracket.tsx):**
+**Node sizing logic (`round` prop on `PlayerNode`, defined in `nodeGenerators.ts`):**
 
-- A node is "large" (`round1` class, ~130px with bio) when:
-  - Its feeder game IS decided (we know the player)
-  - The current game is NOT decided (active round)
-- A node is "small" (`later` class, ~90px, no bio) when:
-  - Its feeder is NOT decided (TBD state), OR
-  - The current game IS already decided (completed)
+- A node is `"round1"` (~130px with bio) when the player is known and the game
+  is active (not yet decided)
+- A node is `"later"` (~90px, no bio) when the player is TBD or the game is
+  already completed
 
-**Dynamic Y positioning:**
-
-- Node Y offsets adjust based on `isNodeLarge()` to center nodes properly
-- QF: 0.5 (large) vs 0.62 (small)
-- SF: 1.35 (large) vs 1.5 (small)
-- Finals: 3.35 (large) vs 3.5 (small)
-
-**Key constants (Bracket.tsx):**
+**Key constants (`src/components/bracket/nodeGenerators.ts`):**
 
 - `NODE_HEIGHT = 70`, `VERTICAL_GAP = 76`, `MATCH_GAP = 146`
 - `ROUND_GAP = 220` (horizontal spacing between rounds)
