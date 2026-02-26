@@ -182,7 +182,7 @@
 	background: var(--bg);
 	/* biome-ignore lint/correctness/noUnknownProperty: Progressive enhancement. Not yet added to biome https://github.com/biomejs/biome/issues/7625 */
 	corner-shape: scoop;
-	border-radius: 12px;
+	border-radius: var(--radius);
 	&.empty {
 		opacity: 1;
 	}
@@ -195,8 +195,9 @@
 		border: 2px solid var(--border-color);
 		margin: 8px 0;
 		gap: 2px;
+		/* biome-ignore lint/correctness/noUnknownProperty: Progressive enhancement */
 		corner-shape: scoop;
-		border-radius: 12px;
+		border-radius: var(--radius);
 	}
 	& .label {
 		font-family: var(--font-block);
@@ -273,6 +274,34 @@
 @media (max-width: 800px) {
 	.drink-ticket {
 		zoom: 0.5;
+	}
+}
+
+/* biome-ignore lint/correctness/noUnknownProperty: Progressive enhancement - this is the feature we're detecting */
+@supports not (corner-shape: scoop) {
+	.drink-ticket {
+		border-radius: 0;
+		mask-image:
+			radial-gradient(circle var(--radius) at 0 0, transparent 98%, black),
+			radial-gradient(circle var(--radius) at 100% 0, transparent 98%, black),
+			radial-gradient(circle var(--radius) at 0 100%, transparent 98%, black),
+			radial-gradient(circle var(--radius) at 100% 100%, transparent 98%, black),
+			linear-gradient(black, black);
+		mask-composite: exclude, exclude, exclude, exclude;
+		& .inner {
+			border-radius: 0;
+			mask-image:
+				radial-gradient(circle var(--radius) at 0 0, transparent 98%, black),
+				radial-gradient(circle var(--radius) at 100% 0, transparent 98%, black),
+				radial-gradient(circle var(--radius) at 0 100%, transparent 98%, black),
+				radial-gradient(
+					circle var(--radius) at 100% 100%,
+					transparent 98%,
+					black
+				),
+				linear-gradient(black, black);
+			mask-composite: exclude, exclude, exclude, exclude;
+		}
 	}
 }
 
