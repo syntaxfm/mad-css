@@ -237,7 +237,7 @@ export function Activity() {
 	if (visible.length === 0) return null;
 
 	return (
-		<div className="activity">
+		<div id="activity" className="activity">
 			<ul className="activity-list">
 				{visible.map((item) => (
 					<li key={item.key} className="activity-item">

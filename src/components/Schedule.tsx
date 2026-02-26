@@ -100,7 +100,7 @@ function EmptyTicket() {
 
 export function Schedule() {
 	return (
-		<div className="drink-tickets-wrapper">
+		<div id="schedule" className="drink-tickets-wrapper">
 			<div className="drink-tickets">
 				{["v", "w", "x", "y", "z"].map((id) => (
 					<EmptyTicket key={id} />

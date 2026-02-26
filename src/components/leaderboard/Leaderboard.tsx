@@ -77,7 +77,7 @@ export function Leaderboard() {
 	const entries = data ?? [];
 
 	return (
-		<section className="section leaderboard-section">
+		<section id="leaderboard" className="section leaderboard-section">
 			<div className="section-content">
 				<h2>The Leaderboard</h2>
 				<div className="leaderboard-wrapper">

@@ -1,0 +1,91 @@
+@property --nav-gap {
+	syntax: "<length>";
+	inherits: false;
+	initial-value: 2px;
+}
+
+@property --nav-opacity {
+	syntax: "<number>";
+	inherits: false;
+	initial-value: 1;
+}
+
+.section-nav {
+	position: sticky;
+	top: 5px;
+	z-index: 50;
+	margin-bottom: -30px;
+
+	.section-nav-tickets {
+		display: flex;
+		justify-content: center;
+		flex-wrap: nowrap;
+		gap: var(--nav-gap);
+		--radius: 15px;
+		filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.8));
+		overflow: hidden;
+		rotate: 1.2deg;
+		zoom: 0.65;
+		animation: nav-straighten linear both;
+		animation-timeline: scroll();
+		animation-range: 0 300px;
+
+		.empty {
+			opacity: var(--nav-opacity);
+			display: none;
+		}
+
+		.drink-ticket {
+			--bg: var(--beige);
+			cursor: pointer;
+			transition: --bg 0.2s ease;
+
+			&:hover {
+				--bg: var(--yellow);
+			}
+
+			&.active {
+				--bg: var(--yellow);
+			}
+		}
+		@media (max-width: 800px) {
+			gap: 0 !important;
+			.drink-ticket {
+				display: block;
+				min-height: 0;
+				min-width: 0;
+				width: auto;
+				aspect-ratio: unset;
+				border-radius: 0;
+				corner-shape: none;
+				mask-image: none;
+				top: 0;
+				&:before,
+				&:after {
+					display: none;
+				}
+				zoom: 1;
+				.inner {
+					margin: 0;
+					padding: 15px 10px;
+					border: 0;
+				}
+				.side {
+					display: none;
+				}
+				.label {
+					font-size: 3.4vw;
+				}
+			}
+		}
+	}
+}
+
+@keyframes nav-straighten {
+	to {
+		rotate: 0deg;
+		--nav-gap: 15px;
+		--nav-opacity: 1;
+		gap: var(--nav-gap);
+	}
+}

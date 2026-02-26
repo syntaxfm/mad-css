@@ -64,7 +64,7 @@ function App() {
 	return (
 		<div>
 			<Ticket />
-			<div className="section">
+			<div id="roster" className="section">
 				<div className="section-content">
 					<Roster />
 				</div>
