@@ -5,6 +5,7 @@ import {
 	HeadContent,
 	Outlet,
 	Scripts,
+	useMatchRoute,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { createIsomorphicFn } from "@tanstack/react-start";
@@ -132,6 +133,8 @@ export const Route = createRootRoute({
 });
 
 function RootDocument() {
+	const matchRoute = useMatchRoute();
+	const isIndex = matchRoute({ to: "/" });
 	return (
 		<html lang="en">
 			<head>
@@ -140,7 +143,7 @@ function RootDocument() {
 			<body>
 				<QueryClientProvider client={queryClient}>
 					<Schedule />
-					<SectionNav />
+					{isIndex && <SectionNav />}
 					<Header />
 					<Outlet />
 					<Footer />
