@@ -14,6 +14,7 @@ import { Footer } from "@/components/footer/Footer";
 import { Header } from "@/components/Header";
 import { NotFound } from "@/components/NotFound";
 import { Schedule } from "@/components/Schedule";
+import { SectionNav } from "@/components/SectionNav";
 import appCss from "../styles/styles.css?url";
 
 const queryClient = new QueryClient({
@@ -139,6 +140,7 @@ function RootDocument() {
 			<body>
 				<QueryClientProvider client={queryClient}>
 					<Schedule />
+					<SectionNav />
 					<Header />
 					<Outlet />
 					<Footer />

@@ -2,7 +2,7 @@ import "./rules.css";
 
 export function Rules() {
 	return (
-		<section className="section rules">
+		<section id="rules" className="section rules">
 			<div className="section-content">
 				<h2>The Rules</h2>
 

@@ -7,7 +7,7 @@ const SHOPIFY_STORE = "4a31e6-3.myshopify.com";
 const COLLECTION_HANDLE = "syntax-march-madcss";
 const STORE_URL = "https://checkout.sentry.shop";
 const CACHE_KEY = `merch:${COLLECTION_HANDLE}`;
-const CACHE_TTL = import.meta.env.DEV ? 10 : 60 * 60; // 1 hour in production, 10 seconds in development
+const CACHE_TTL = import.meta.env.DEV ? 60 : 60 * 60; // 1 hour in production, 10 seconds in development
 
 export type MerchProduct = {
 	id: number;
@@ -56,25 +56,20 @@ type ShopifyProduct = {
 
 const getMerchProducts = createServerFn({ method: "GET" }).handler(
 	async (): Promise<MerchProduct[]> => {
-		console.log("[merch] getMerchProducts called");
 		const kv = "KV" in env ? (env.KV as KVNamespace) : undefined;
-		console.log("[merch] KV available:", !!kv);
 
 		if (kv) {
 			try {
 				const cached = await kv.get(CACHE_KEY, "json");
 				if (cached) {
-					console.log("[merch] returning cached products");
 					return cached as MerchProduct[];
 				}
-				console.log("[merch] no cache hit");
 			} catch (e) {
 				console.error("[merch] KV read failed:", e);
 			}
 		}
 
 		const url = `https://${SHOPIFY_STORE}/collections/${COLLECTION_HANDLE}/products.json?country=US`;
-		console.log("[merch] fetching from:", url);
 		const res = await fetch(url, {
 			headers: {
 				Accept: "application/json",
@@ -85,7 +80,6 @@ const getMerchProducts = createServerFn({ method: "GET" }).handler(
 				Cookie: "localization=US",
 			},
 		});
-		console.log("[merch] fetch status:", res.status, res.statusText);
 
 		if (!res.ok) {
 			const body = await res.text();
@@ -94,20 +88,13 @@ const getMerchProducts = createServerFn({ method: "GET" }).handler(
 		}
 
 		const data = (await res.json()) as { products: ShopifyProduct[] };
-		console.log("[merch] raw product count:", data.products?.length ?? 0);
 		const products = parseProducts(data.products ?? []);
-		console.log(
-			"[merch] parsed products:",
-			products.length,
-			products.map((p) => p.title),
-		);
 
 		if (kv) {
 			try {
 				await kv.put(CACHE_KEY, JSON.stringify(products), {
 					expirationTtl: CACHE_TTL,
 				});
-				console.log("[merch] wrote to KV cache");
 			} catch (e) {
 				console.error("[merch] KV write failed:", e);
 			}
@@ -128,15 +115,6 @@ export function Merch() {
 		queryFn: () => getMerchProducts(),
 		staleTime: 1000 * 60 * 15,
 	});
-
-	console.log(
-		"[merch client] isLoading:",
-		isLoading,
-		"data:",
-		data,
-		"error:",
-		error,
-	);
 
 	const products = data ?? [];
 
@@ -180,9 +158,7 @@ export function Merch() {
 							</h3>
 							<span className="merch-cta">
 								Inspect
-								<span className="price">
-									{formatPrice(product.price)}
-								</span>
+								<span className="price">{formatPrice(product.price)}</span>
 							</span>
 						</a>
 					))}

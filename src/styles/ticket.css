@@ -147,6 +147,7 @@
 .drink-tickets-wrapper {
 	width: 100%;
 	overflow-x: clip;
+	margin-bottom: 30px;
 }
 
 .drink-tickets {

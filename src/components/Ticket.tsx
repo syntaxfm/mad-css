@@ -2,7 +2,7 @@ import "@/styles/ticket.css";
 
 export function Ticket() {
 	return (
-		<div className="ticket_wrapper">
+		<div id="ticket" className="ticket_wrapper">
 			<div className="ticket">
 				<div className="ticket_body">
 					<h2>The Ultimate CSS Tournament</h2>
