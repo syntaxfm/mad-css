@@ -7,8 +7,45 @@ import { bracket, type Player, players } from "@/data/players";
 import { createDb } from "@/db";
 import * as schema from "@/db/schema";
 
-// Generate a basic OG image for cases where user doesn't exist or bracket isn't locked
-function generateBasicOgImage(baseUrl: string): Response {
+let wasmInitPromise: Promise<void> | null = null;
+
+/**
+ * Creates an ImageResponse while guarding against the workers-og WASM
+ * concurrency bug: the first call that initializes WASM must finish
+ * before any other ImageResponse can be constructed, otherwise the
+ * resvg/yoga "Already initialized" error corrupts rendering state.
+ */
+async function safeImageResponse(
+	html: string,
+	options: { width: number; height: number },
+): Promise<Response> {
+	if (!wasmInitPromise) {
+		let resolveInit!: () => void;
+		let rejectInit!: (err: unknown) => void;
+		wasmInitPromise = new Promise<void>((res, rej) => {
+			resolveInit = res;
+			rejectInit = rej;
+		});
+
+		try {
+			const response = new ImageResponse(html, options);
+			const buffer = await response.arrayBuffer();
+			resolveInit();
+			return new Response(buffer, {
+				headers: response.headers,
+			});
+		} catch (err) {
+			wasmInitPromise = null;
+			rejectInit(err);
+			throw err;
+		}
+	}
+
+	await wasmInitPromise;
+	return new ImageResponse(html, options);
+}
+
+async function generateBasicOgImage(baseUrl: string): Promise<Response> {
 	const logoUrl = `${baseUrl}/mad-css-logo.png`;
 	const bgImageUrl = `${baseUrl}/madcss-wide.jpg`;
 
@@ -30,7 +67,7 @@ function generateBasicOgImage(baseUrl: string): Response {
 		<span style="position: absolute; top: 380px; color: #ffae00; font-size: 42px; font-weight: 700; font-family: system-ui; text-shadow: 0 2px 8px #000;">Fill out your bracket!</span>
 	</div>`;
 
-	const response = new ImageResponse(html, {
+	const response = await safeImageResponse(html, {
 		width: 1200,
 		height: 630,
 	});
@@ -65,7 +102,7 @@ export const Route = createFileRoute("/api/og/$username")({
 							.limit(1);
 
 						if (users.length === 0 || !users[0].username) {
-							return generateBasicOgImage(baseUrl);
+							return await generateBasicOgImage(baseUrl);
 						}
 
 						const user = users[0];
@@ -80,7 +117,7 @@ export const Route = createFileRoute("/api/og/$username")({
 							.where(eq(schema.userPrediction.userId, users[0].id));
 
 						if (predictions.length === 0) {
-							return generateBasicOgImage(baseUrl);
+							return await generateBasicOgImage(baseUrl);
 						}
 
 						// Build prediction map
@@ -544,7 +581,7 @@ export const Route = createFileRoute("/api/og/$username")({
 					${bracketHtml}
 				</div>`;
 
-						const response = new ImageResponse(html, {
+						const response = await safeImageResponse(html, {
 							width: 1200,
 							height: 630,
 						});
