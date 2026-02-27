@@ -11,10 +11,15 @@ import {
 	STAGE_CONFIG,
 } from "@/lib/simulation";
 import { deleteUserFn, generateTestUserFn } from "@/lib/users.server";
-import type { AdminStats, AdminUser } from "@/routes/api/admin/users";
+import type {
+	AdminStats,
+	AdminUser,
+	MostPickedPersonStat,
+} from "@/routes/api/admin/users";
 import "@/styles/admin.css";
 
 const PAGE_SIZE = 20;
+const TOP_PICKED_LIMIT = 5;
 
 const adminDataInputSchema = z.object({
 	page: z.number().int().positive().default(1),
@@ -65,6 +70,7 @@ const getAdminDataFn = createServerFn({ method: "GET" })
 		const { isAdminUser } = await import("@/lib/admin");
 		const { count, desc, like, sql } = await import("drizzle-orm");
 		const schema = await import("@/db/schema");
+		const { players } = await import("@/data/players");
 
 		const page = data.page;
 		const searchRaw = data.search.trim();
@@ -185,9 +191,52 @@ const getAdminDataFn = createServerFn({ method: "GET" })
 			})
 			.from(schema.userPrediction);
 
+		const pickCountsByPerson = await db
+			.select({
+				predictedWinnerId: schema.userPrediction.predictedWinnerId,
+				pickCount: count(),
+				pickedByUsers: sql<number>`COUNT(DISTINCT ${schema.userPrediction.userId})`,
+			})
+			.from(schema.userPrediction)
+			.groupBy(schema.userPrediction.predictedWinnerId);
+
+		const totalPredictions = pickCountsByPerson.reduce(
+			(sum, row) => sum + row.pickCount,
+			0,
+		);
+
+		const playerMap = new Map(players.map((player) => [player.id, player]));
+		const mostPickedPeople: MostPickedPersonStat[] = pickCountsByPerson
+			.flatMap((row) => {
+				const player = playerMap.get(row.predictedWinnerId);
+				if (!player) return [];
+				return [
+					{
+						playerId: player.id,
+						playerName: player.name,
+						playerPhoto: player.photo,
+						pickCount: row.pickCount,
+						pickedByUsers: row.pickedByUsers,
+						pickSharePct:
+							totalPredictions > 0
+								? (row.pickCount / totalPredictions) * 100
+								: 0,
+					},
+				];
+			})
+			.sort((a, b) => {
+				if (b.pickCount !== a.pickCount) {
+					return b.pickCount - a.pickCount;
+				}
+				return a.playerName.localeCompare(b.playerName);
+			})
+			.slice(0, TOP_PICKED_LIMIT);
+
 		const stats: AdminStats = {
 			totalUsers: allUsersCount,
 			usersWithPicks,
+			totalPredictions,
+			mostPickedPeople,
 		};
 
 		return {
@@ -249,6 +298,7 @@ function StatCard({ label, value }: { label: string; value: number }) {
 
 function AdminPage() {
 	const loaderData = Route.useLoaderData();
+	const formatPercentage = (value: number) => `${value.toFixed(1)}%`;
 
 	const [users, setUsers] = useState<AdminUser[]>(loaderData.users);
 	const [stats, setStats] = useState<AdminStats>(loaderData.stats);
@@ -405,6 +455,47 @@ function AdminPage() {
 			<div className="admin-stats">
 				<StatCard label="Total Users" value={stats.totalUsers} />
 				<StatCard label="Users with Picks" value={stats.usersWithPicks} />
+				<StatCard label="Total Picks" value={stats.totalPredictions} />
+			</div>
+
+			<div className="most-picked-section">
+				<div className="most-picked-header">
+					<h2>Most Picked People</h2>
+					<span className="most-picked-subtitle">
+						Top {stats.mostPickedPeople.length} by total picks
+					</span>
+				</div>
+				{stats.mostPickedPeople.length === 0 ? (
+					<div className="most-picked-empty">No picks submitted yet.</div>
+				) : (
+					<ul className="most-picked-list">
+						{stats.mostPickedPeople.map((person, index) => (
+							<li key={person.playerId} className="most-picked-row">
+								<span className="most-picked-rank">#{index + 1}</span>
+								<div className="most-picked-player">
+									<img
+										src={person.playerPhoto}
+										alt={person.playerName}
+										className="most-picked-avatar"
+									/>
+									<span className="most-picked-name">{person.playerName}</span>
+								</div>
+								<div className="most-picked-metrics">
+									<span className="most-picked-metric">
+										<strong>{person.pickCount}</strong> picks
+									</span>
+									<span className="most-picked-metric">
+										<strong>{person.pickedByUsers}</strong> users
+									</span>
+									<span className="most-picked-metric percent">
+										<strong>{formatPercentage(person.pickSharePct)}</strong>{" "}
+										share
+									</span>
+								</div>
+							</li>
+						))}
+					</ul>
+				)}
 			</div>
 
 			{message && (
