@@ -134,7 +134,7 @@ strong {
 .win-all-header img {
 	width: 7.4rem;
 	height: 7.4rem;
-	object-fit: contain;
+	object-fit: cover;
 	border: 3px solid var(--black);
 	box-shadow: 3px 3px 0 var(--black);
 	background: var(--beige);
@@ -597,7 +597,6 @@ strong {
 	.win-all-cards {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
-
 }
 
 @media (max-width: 680px) {
