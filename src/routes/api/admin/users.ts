@@ -1,6 +1,7 @@
 import { env } from "cloudflare:workers";
 import { createFileRoute } from "@tanstack/react-router";
-import { count, desc } from "drizzle-orm";
+import { count, desc, sql } from "drizzle-orm";
+import { players } from "@/data/players";
 import { createDb } from "@/db";
 import * as schema from "@/db/schema";
 import { isAdminUser } from "@/lib/admin";
@@ -15,10 +16,23 @@ export type AdminUser = {
 	totalScore: number;
 };
 
+export type MostPickedPersonStat = {
+	playerId: string;
+	playerName: string;
+	playerPhoto: string;
+	pickCount: number;
+	pickedByUsers: number;
+	pickSharePct: number;
+};
+
 export type AdminStats = {
 	totalUsers: number;
 	usersWithPicks: number;
+	totalPredictions: number;
+	mostPickedPeople: MostPickedPersonStat[];
 };
+
+const TOP_PICKED_LIMIT = 5;
 
 export const Route = createFileRoute("/api/admin/users")({
 	server: {
@@ -85,9 +99,51 @@ export const Route = createFileRoute("/api/admin/users")({
 
 				// Calculate stats
 				const usersWithPicks = predictionCounts.length;
+				const playerMap = new Map(players.map((player) => [player.id, player]));
+				const pickCountsByPerson = await db
+					.select({
+						predictedWinnerId: schema.userPrediction.predictedWinnerId,
+						pickCount: count(),
+						pickedByUsers: sql<number>`COUNT(DISTINCT ${schema.userPrediction.userId})`,
+					})
+					.from(schema.userPrediction)
+					.groupBy(schema.userPrediction.predictedWinnerId);
+
+				const totalPredictions = pickCountsByPerson.reduce(
+					(sum, row) => sum + row.pickCount,
+					0,
+				);
+				const mostPickedPeople: MostPickedPersonStat[] = pickCountsByPerson
+					.flatMap((row) => {
+						const player = playerMap.get(row.predictedWinnerId);
+						if (!player) return [];
+						return [
+							{
+								playerId: player.id,
+								playerName: player.name,
+								playerPhoto: player.photo,
+								pickCount: row.pickCount,
+								pickedByUsers: row.pickedByUsers,
+								pickSharePct:
+									totalPredictions > 0
+										? (row.pickCount / totalPredictions) * 100
+										: 0,
+							},
+						];
+					})
+					.sort((a, b) => {
+						if (b.pickCount !== a.pickCount) {
+							return b.pickCount - a.pickCount;
+						}
+						return a.playerName.localeCompare(b.playerName);
+					})
+					.slice(0, TOP_PICKED_LIMIT);
+
 				const stats: AdminStats = {
 					totalUsers: users.length,
 					usersWithPicks,
+					totalPredictions,
+					mostPickedPeople,
 				};
 
 				return new Response(JSON.stringify({ users: adminUsers, stats }), {

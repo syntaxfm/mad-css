@@ -121,6 +121,135 @@
 }
 
 /* ============================================
+   Most Picked People
+   ============================================ */
+
+.most-picked-section {
+	margin-bottom: 1.5rem;
+	background: var(--white);
+	border: 4px solid var(--black);
+}
+
+.most-picked-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 0.9rem 1rem;
+	background: var(--black);
+	color: var(--yellow);
+	flex-wrap: wrap;
+}
+
+.most-picked-header h2 {
+	margin: 0;
+	font-family: var(--font-block);
+	font-size: 0.85rem;
+	text-transform: uppercase;
+	letter-spacing: 0.1em;
+}
+
+.most-picked-subtitle {
+	font-family: var(--font-block);
+	font-size: 0.65rem;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+}
+
+.most-picked-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.most-picked-row {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	padding: 0.9rem 1rem;
+	border-bottom: 2px solid var(--black);
+}
+
+.most-picked-row:last-child {
+	border-bottom: none;
+}
+
+.most-picked-rank {
+	min-width: 48px;
+	padding: 0.35rem 0.45rem;
+	background: var(--yellow);
+	border: 2px solid var(--black);
+	font-family: var(--font-block);
+	font-size: 0.68rem;
+	text-align: center;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+
+.most-picked-player {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	min-width: 220px;
+}
+
+.most-picked-avatar {
+	width: 2rem;
+	height: 2rem;
+	border: 2px solid var(--black);
+	object-fit: cover;
+	background: var(--beige);
+}
+
+.most-picked-name {
+	font-family: var(--font-block);
+	font-size: 0.75rem;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	color: var(--black);
+}
+
+.most-picked-metrics {
+	display: flex;
+	align-items: center;
+	gap: 0.7rem;
+	flex-wrap: wrap;
+}
+
+.most-picked-metric {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.25rem;
+	padding: 0.3rem 0.45rem;
+	border: 2px solid var(--black);
+	background: var(--beige);
+	font-family: var(--font-block);
+	font-size: 0.65rem;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	color: var(--black);
+}
+
+.most-picked-metric strong {
+	font-family: "DSEG7Classic", monospace;
+	font-size: 0.85rem;
+	color: var(--orange);
+}
+
+.most-picked-metric.percent {
+	background: var(--yellow);
+}
+
+.most-picked-empty {
+	padding: 1.1rem 1rem;
+	font-family: var(--font-block);
+	font-size: 0.75rem;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	color: #666;
+}
+
+/* ============================================
    Actions & Search
    ============================================ */
 
@@ -531,6 +660,15 @@
 	.admin-table th:nth-child(5),
 	.admin-table td:nth-child(5) {
 		display: none;
+	}
+
+	.most-picked-row {
+		align-items: flex-start;
+		flex-direction: column;
+	}
+
+	.most-picked-player {
+		min-width: 0;
 	}
 }
 

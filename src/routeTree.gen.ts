@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BracketUsernameRouteImport } from './routes/bracket/$username'
+import { Route as AdminStatsRouteImport } from './routes/admin.stats'
 import { Route as ApiPredictionsIndexRouteImport } from './routes/api/predictions/index'
 import { Route as ApiOgUsernameRouteImport } from './routes/api/og.$username'
 import { Route as ApiLeaderboardCalculateRouteImport } from './routes/api/leaderboard/calculate'
@@ -34,6 +35,11 @@ const BracketUsernameRoute = BracketUsernameRouteImport.update({
   id: '/bracket/$username',
   path: '/bracket/$username',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminStatsRoute = AdminStatsRouteImport.update({
+  id: '/stats',
+  path: '/stats',
+  getParentRoute: () => AdminRoute,
 } as any)
 const ApiPredictionsIndexRoute = ApiPredictionsIndexRouteImport.update({
   id: '/api/predictions/',
@@ -73,7 +79,8 @@ const ApiAdminCheckRoute = ApiAdminCheckRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
+  '/admin/stats': typeof AdminStatsRoute
   '/bracket/$username': typeof BracketUsernameRoute
   '/api/admin/check': typeof ApiAdminCheckRoute
   '/api/admin/users': typeof ApiAdminUsersRoute
@@ -85,7 +92,8 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
+  '/admin/stats': typeof AdminStatsRoute
   '/bracket/$username': typeof BracketUsernameRoute
   '/api/admin/check': typeof ApiAdminCheckRoute
   '/api/admin/users': typeof ApiAdminUsersRoute
@@ -98,7 +106,8 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
+  '/admin/stats': typeof AdminStatsRoute
   '/bracket/$username': typeof BracketUsernameRoute
   '/api/admin/check': typeof ApiAdminCheckRoute
   '/api/admin/users': typeof ApiAdminUsersRoute
@@ -113,6 +122,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/admin/stats'
     | '/bracket/$username'
     | '/api/admin/check'
     | '/api/admin/users'
@@ -125,6 +135,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin'
+    | '/admin/stats'
     | '/bracket/$username'
     | '/api/admin/check'
     | '/api/admin/users'
@@ -137,6 +148,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/admin/stats'
     | '/bracket/$username'
     | '/api/admin/check'
     | '/api/admin/users'
@@ -149,7 +161,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AdminRoute: typeof AdminRoute
+  AdminRoute: typeof AdminRouteWithChildren
   BracketUsernameRoute: typeof BracketUsernameRoute
   ApiAdminCheckRoute: typeof ApiAdminCheckRoute
   ApiAdminUsersRoute: typeof ApiAdminUsersRoute
@@ -182,6 +194,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/bracket/$username'
       preLoaderRoute: typeof BracketUsernameRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/stats': {
+      id: '/admin/stats'
+      path: '/stats'
+      fullPath: '/admin/stats'
+      preLoaderRoute: typeof AdminStatsRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/api/predictions/': {
       id: '/api/predictions/'
@@ -235,9 +254,19 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AdminRouteChildren {
+  AdminStatsRoute: typeof AdminStatsRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminStatsRoute: AdminStatsRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AdminRoute: AdminRoute,
+  AdminRoute: AdminRouteWithChildren,
   BracketUsernameRoute: BracketUsernameRoute,
   ApiAdminCheckRoute: ApiAdminCheckRoute,
   ApiAdminUsersRoute: ApiAdminUsersRoute,
