@@ -1,5 +1,11 @@
 import * as Sentry from "@sentry/tanstackstart-react";
-import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import {
+	Outlet,
+	createFileRoute,
+	Link,
+	redirect,
+	useRouterState,
+} from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { getRequestHeaders } from "@tanstack/react-start/server";
 import { useEffect, useState } from "react";
@@ -297,6 +303,17 @@ function StatCard({ label, value }: { label: string; value: number }) {
 }
 
 function AdminPage() {
+	const pathname = useRouterState({
+		select: (state) => state.location.pathname,
+	});
+	if (pathname !== "/admin") {
+		return <Outlet />;
+	}
+
+	return <AdminDashboardMain />;
+}
+
+function AdminDashboardMain() {
 	const loaderData = Route.useLoaderData();
 	const formatPercentage = (value: number) => `${value.toFixed(1)}%`;
 
@@ -447,9 +464,14 @@ function AdminPage() {
 		<div className="admin-page">
 			<div className="admin-header">
 				<h1>Admin Dashboard</h1>
-				<Link to="/" className="admin-btn">
-					Back to Site
-				</Link>
+				<div className="admin-action-group">
+					<a href="/admin/stats" className="admin-btn">
+						Stats Dashboard
+					</a>
+					<Link to="/" className="admin-btn">
+						Back to Site
+					</Link>
+				</div>
 			</div>
 
 			<div className="admin-stats">
