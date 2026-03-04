@@ -1,8 +1,8 @@
 import * as Sentry from "@sentry/tanstackstart-react";
 import {
-	Outlet,
 	createFileRoute,
 	Link,
+	Outlet,
 	redirect,
 	useRouterState,
 } from "@tanstack/react-router";
@@ -663,42 +663,6 @@ function AdminDashboardMain() {
 					</button>
 				</div>
 			)}
-
-			<SentryDiagnostics />
-		</div>
-	);
-}
-
-function SentryDiagnostics() {
-	const [status, setStatus] = useState<string | null>(null);
-
-	const testClientError = () => {
-		Sentry.captureException(new Error("[Sentry Test] Client error capture"));
-		setStatus("Client error sent — check Sentry Issues");
-	};
-
-	const testServer = async () => {
-		setStatus("Sending...");
-		const result = await testSentryServerFn();
-		setStatus(
-			result.success
-				? "Server error + message sent — check Sentry Issues"
-				: "Server test failed",
-		);
-	};
-
-	return (
-		<div className="admin-actions" style={{ marginTop: "2rem" }}>
-			<h2>Sentry Diagnostics</h2>
-			<div className="admin-action-group">
-				<button type="button" className="admin-btn" onClick={testClientError}>
-					Test Client Error
-				</button>
-				<button type="button" className="admin-btn" onClick={testServer}>
-					Test Server Error
-				</button>
-			</div>
-			{status && <div className="admin-message success">{status}</div>}
 		</div>
 	);
 }
