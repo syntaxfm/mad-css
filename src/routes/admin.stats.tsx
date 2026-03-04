@@ -326,6 +326,98 @@ const checkAdminStatsFn = createServerFn({ method: "GET" }).handler(
 	},
 );
 
+const exportCsvFn = createServerFn({ method: "GET" }).handler(async () => {
+	const { env } = await import("cloudflare:workers");
+	const { createAuth } = await import("@/lib/auth");
+	const { createDb } = await import("@/db");
+	const { isAdminUser } = await import("@/lib/admin");
+	const schema = await import("@/db/schema");
+
+	const headers = getRequestHeaders();
+	const auth = createAuth(env.DB);
+	const session = await auth.api.getSession({
+		headers: new Headers(headers),
+	});
+
+	if (!session?.user) {
+		return { authorized: false as const, csv: "" };
+	}
+
+	const db = createDb(env.DB);
+	const isAdmin = await isAdminUser(db, session.user.id);
+	if (!isAdmin) {
+		return { authorized: false as const, csv: "" };
+	}
+
+	const [users, predictions, accounts] = await Promise.all([
+		db
+			.select({
+				id: schema.user.id,
+				email: schema.user.email,
+				username: schema.user.username,
+				createdAt: schema.user.createdAt,
+			})
+			.from(schema.user),
+		db
+			.select({
+				userId: schema.userPrediction.userId,
+				createdAt: schema.userPrediction.createdAt,
+			})
+			.from(schema.userPrediction),
+		db
+			.select({
+				userId: schema.account.userId,
+				accountId: schema.account.accountId,
+				providerId: schema.account.providerId,
+			})
+			.from(schema.account),
+	]);
+
+	const firstPickAtByUser = new Map<string, number>();
+	for (const p of predictions) {
+		const ts = normalizeTimestamp(p.createdAt);
+		if (ts !== null) {
+			const current = firstPickAtByUser.get(p.userId);
+			if (current === undefined || ts < current) {
+				firstPickAtByUser.set(p.userId, ts);
+			}
+		}
+	}
+
+	const githubByUser = new Map<string, string>();
+	for (const acct of accounts) {
+		if (acct.providerId === "github") {
+			githubByUser.set(acct.userId, acct.accountId);
+		}
+	}
+
+	const now = new Date();
+	const months = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+	const month = months[now.getMonth()];
+	const day = now.getDate();
+	const hours = now.getHours();
+	const minutes = String(now.getMinutes()).padStart(2, "0");
+	const ampm = hours >= 12 ? "pm" : "am";
+	const h12 = hours % 12 || 12;
+	const tags = `madcss,madcss-import-${month}-${day}-${h12}:${minutes}${ampm}`;
+
+	const header = "github_username,github_id,email,pick_date,tags";
+	const rows = users.map((u) => {
+		const firstPickAt = firstPickAtByUser.get(u.id);
+		const signupAt = normalizeTimestamp(u.createdAt);
+		const sourceTime = firstPickAt ?? signupAt;
+		const pickDate =
+			sourceTime !== null
+				? new Date(sourceTime).toISOString().slice(0, 10)
+				: "";
+		const ghUsername = u.username ?? "";
+		const ghId = githubByUser.get(u.id) ?? "";
+		return `${ghUsername},${ghId},${u.email},${pickDate},"${tags}"`;
+	});
+
+	return { authorized: true as const, csv: [header, ...rows].join("\n") };
+});
+
 export const Route = createFileRoute("/admin/stats" as never)({
 	beforeLoad: async () => {
 		const result = await checkAdminStatsFn();
@@ -631,6 +723,32 @@ function AdminStatsPage() {
 							<span className="day-date">{day.date.slice(5)}</span>
 						</div>
 					))}
+				</div>
+			</section>
+
+			<section className="stats-panel">
+				<div className="stats-panel-header">
+					<h2>Export</h2>
+					<span>Download user data as CSV</span>
+				</div>
+				<div style={{ padding: "1rem" }}>
+					<button
+						type="button"
+						className="export-csv-btn"
+						onClick={async () => {
+							const result = await exportCsvFn();
+							if (!result.authorized) return;
+							const blob = new Blob([result.csv], { type: "text/csv" });
+							const url = URL.createObjectURL(blob);
+							const a = document.createElement("a");
+							a.href = url;
+							a.download = "mad-css-users.csv";
+							a.click();
+							URL.revokeObjectURL(url);
+						}}
+					>
+						Download CSV ({stats.totalUsers} users)
+					</button>
 				</div>
 			</section>
 		</div>

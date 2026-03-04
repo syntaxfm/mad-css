@@ -589,6 +589,28 @@ strong {
 	color: var(--black);
 }
 
+.export-csv-btn {
+	background: var(--yellow);
+	border: 3px solid var(--black);
+	box-shadow: 4px 4px 0 var(--black);
+	font-family: var(--font-block);
+	font-size: 18px;
+	text-transform: uppercase;
+	padding: 12px 24px;
+	cursor: pointer;
+	transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.export-csv-btn:hover {
+	transform: translate(2px, 2px);
+	box-shadow: 2px 2px 0 var(--black);
+}
+
+.export-csv-btn:active {
+	transform: translate(4px, 4px);
+	box-shadow: none;
+}
+
 @media (max-width: 980px) {
 	.admin-stats-grid {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
