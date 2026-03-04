@@ -36,7 +36,10 @@ const proxyUrl = (url: string) =>
 	isDev ? url : `https://wsrv.nl/?url=${encodeURIComponent(url)}`;
 
 // Generate a basic OG image for cases where user doesn't exist or bracket isn't locked
-function generateBasicOgImage(baseUrl: string): Response {
+async function generateBasicOgImage(
+	baseUrl: string,
+	images: ImagesBinding,
+): Promise<Response> {
 	const logoUrl = proxyUrl(`${baseUrl}/mad-css-logo.png`);
 	const bgImageUrl = proxyUrl(`${baseUrl}/madcss-wide.jpg`);
 
@@ -58,14 +61,24 @@ function generateBasicOgImage(baseUrl: string): Response {
 		<span style="position: absolute; top: 380px; color: #ffae00; font-size: 42px; font-weight: 700; font-family: system-ui; text-shadow: 0 2px 8px #000;">Fill out your bracket!</span>
 	</div>`;
 
-	const response = new ImageResponse(html, {
+	const pngResponse = new ImageResponse(html, {
 		width: 1200,
 		height: 630,
 	});
+	const pngBuf = await pngResponse.arrayBuffer();
+	const pngStream = new Response(pngBuf).body!;
 
-	response.headers.set("Cache-Control", "public, max-age=3600, s-maxage=86400");
+	const jpegResponse = await (
+		await images.input(pngStream).output({ format: "image/jpeg", quality: 80 })
+	).response();
+	const jpegBuf = await jpegResponse.arrayBuffer();
 
-	return response;
+	return new Response(jpegBuf, {
+		headers: {
+			"Content-Type": "image/jpeg",
+			"Cache-Control": "public, max-age=3600, s-maxage=86400",
+		},
+	});
 }
 
 export const Route = createFileRoute("/api/og/$username")({
@@ -75,14 +88,16 @@ export const Route = createFileRoute("/api/og/$username")({
 				const cache = isDev
 					? null
 					: (caches as unknown as { default: Cache }).default;
-				const cacheKey = new Request(request.url);
+				const cacheKey = new Request(new URL(request.url).toString());
 				if (cache) {
 					const cached = await cache.match(cacheKey);
 					if (cached) {
-						console.log("[OG] Cache HIT");
-						return cached;
+						console.log("[OG] Cache HIT", request.url);
+						const resp = new Response(cached.body, cached);
+						resp.headers.set("x-og-cache", "HIT");
+						return resp;
 					}
-					console.log("[OG] Cache MISS");
+					console.log("[OG] Cache MISS", request.url);
 				}
 
 				return Sentry.startSpan(
@@ -116,7 +131,7 @@ export const Route = createFileRoute("/api/og/$username")({
 							console.log(
 								`[OG] No user found, returning basic image. Total: ${(performance.now() - t0).toFixed(1)}ms`,
 							);
-							const basic = generateBasicOgImage(baseUrl);
+							const basic = await generateBasicOgImage(baseUrl, env.IMAGES);
 							cache?.put(cacheKey, basic.clone());
 							return basic;
 						}
@@ -139,7 +154,7 @@ export const Route = createFileRoute("/api/og/$username")({
 							console.log(
 								`[OG] No predictions, returning basic image. Total: ${(performance.now() - t0).toFixed(1)}ms`,
 							);
-							const basic = generateBasicOgImage(baseUrl);
+							const basic = await generateBasicOgImage(baseUrl, env.IMAGES);
 							cache?.put(cacheKey, basic.clone());
 							return basic;
 						}
@@ -617,22 +632,37 @@ export const Route = createFileRoute("/api/og/$username")({
 							width: 1200,
 							height: 630,
 						});
-						// Force the stream to be consumed — ImageResponse defers
-						// the actual satori + resvg render until the body is read
-						const buf = await imgResponse.arrayBuffer();
+						const pngBuf = await imgResponse.arrayBuffer();
 						console.log(
-							`[OG] ImageResponse render: ${(performance.now() - tRender).toFixed(1)}ms (${buf.byteLength} bytes)`,
+							`[OG] ImageResponse render: ${(performance.now() - tRender).toFixed(1)}ms (${pngBuf.byteLength} bytes PNG)`,
 						);
 
-						const response = new Response(buf, {
+						const tJpeg = performance.now();
+						const pngStream = new Response(pngBuf).body!;
+						const jpegResponse = await (
+							await env.IMAGES.input(pngStream)
+								.output({ format: "image/jpeg", quality: 80 })
+						).response();
+						const jpegBuf = await jpegResponse.arrayBuffer();
+						console.log(
+							`[OG] JPEG conversion: ${(performance.now() - tJpeg).toFixed(1)}ms (${jpegBuf.byteLength} bytes JPEG)`,
+						);
+
+						const response = new Response(jpegBuf, {
 							headers: {
-								"Content-Type": "image/png",
+								"Content-Type": "image/jpeg",
 								"Cache-Control": "public, max-age=3600, s-maxage=86400",
+								"x-og-cache": "MISS",
 							},
 						});
 
-						console.log(`[OG] Total: ${(performance.now() - t0).toFixed(1)}ms`);
-						cache?.put(cacheKey, response.clone());
+						console.log(
+							`[OG] Total: ${(performance.now() - t0).toFixed(1)}ms`,
+						);
+						if (cache) {
+							console.log("[OG] Storing in cache:", cacheKey.url);
+							await cache.put(cacheKey, response.clone());
+						}
 						return response;
 					},
 				);

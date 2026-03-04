@@ -37,6 +37,9 @@
 			"id": "b7e087b6ed6a4e048c2522476297ed7f"
 		}
 	],
+	"images": {
+		"binding": "IMAGES"
+	},
 	"d1_databases": [
 		{
 			"binding": "DB",
