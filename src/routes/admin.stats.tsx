@@ -332,14 +332,10 @@ export const Route = createFileRoute("/admin/stats" as never)({
 		if (!result.authorized) {
 			throw redirect({ to: "/" });
 		}
-		return result;
+		return { statsData: result.data };
 	},
-	loader: async () => {
-		const result = await checkAdminStatsFn();
-		if (!result.authorized) {
-			throw redirect({ to: "/" });
-		}
-		return result.data;
+	loader: ({ context }) => {
+		return (context as { statsData: AdminStatsDashboard }).statsData;
 	},
 	component: AdminStatsPage,
 });
@@ -356,9 +352,20 @@ function AdminStatsPage() {
 	const stats = Route.useLoaderData() as AdminStatsDashboard;
 	const [displayMode, setDisplayMode] = useState<"count" | "percent">("count");
 	const showPercent = displayMode === "percent";
+
+	const totalUsers = stats?.totalUsers ?? 0;
+	const usersWithPicks = stats?.usersWithPicks ?? 0;
+	const totalPredictions = stats?.totalPredictions ?? 0;
+	const totalChampionPicks = stats?.totalChampionPicks ?? 0;
+	const championPicks = stats?.championPicks ?? [];
+	const overallPlayerPicks = stats?.overallPlayerPicks ?? [];
+	const roundOneSplits = stats?.roundOneSplits ?? [];
+	const laterRoundCombos = stats?.laterRoundCombos ?? [];
+	const dailyPickCreation = stats?.dailyPickCreation ?? [];
+
 	const maxDailyUsers = Math.max(
 		1,
-		...stats.dailyPickCreation.map((row) => row.userCount),
+		...dailyPickCreation.map((row) => row.userCount),
 	);
 
 	return (
@@ -394,19 +401,19 @@ function AdminStatsPage() {
 			<section className="admin-stats-grid">
 				<article className="stat-card">
 					<h3>Total Users</h3>
-					<div className="stat-readout">{stats.totalUsers}</div>
+					<div className="stat-readout">{totalUsers}</div>
 				</article>
 				<article className="stat-card">
 					<h3>Users With Picks</h3>
-					<div className="stat-readout">{stats.usersWithPicks}</div>
+					<div className="stat-readout">{usersWithPicks}</div>
 				</article>
 				<article className="stat-card">
 					<h3>Total Picks Logged</h3>
-					<div className="stat-readout">{stats.totalPredictions}</div>
+					<div className="stat-readout">{totalPredictions}</div>
 				</article>
 				<article className="stat-card">
 					<h3>Champion Picks</h3>
-					<div className="stat-readout">{stats.totalChampionPicks}</div>
+					<div className="stat-readout">{totalChampionPicks}</div>
 				</article>
 			</section>
 
@@ -416,7 +423,7 @@ function AdminStatsPage() {
 					<span>Every player, ranked by championship picks</span>
 				</div>
 				<div className="win-all-cards">
-					{stats.championPicks.map((row, index) => (
+					{championPicks.map((row, index) => (
 						<article
 							key={row.playerId}
 							className={`win-all-card ${index < 3 ? "top-rank" : ""}`}
@@ -446,7 +453,7 @@ function AdminStatsPage() {
 					<span>Includes everyone so least-picked players are visible</span>
 				</div>
 				<div className="pick-distribution dense">
-					{stats.overallPlayerPicks.map((row, index) => (
+					{overallPlayerPicks.map((row, index) => (
 						<div
 							key={row.playerId}
 							className={`pick-row ${index < 3 ? "top-rank" : ""}`}
@@ -485,7 +492,7 @@ function AdminStatsPage() {
 					<span>Percent split for each of the eight opening matchups</span>
 				</div>
 				<div className="split-grid">
-					{stats.roundOneSplits.map((split) => (
+					{roundOneSplits.map((split) => (
 						<article key={split.gameId} className="split-card">
 							<div className="split-bar">
 								<div
@@ -540,7 +547,7 @@ function AdminStatsPage() {
 					</span>
 				</div>
 				<div className="combo-grid">
-					{stats.laterRoundCombos.map((comboGame) => (
+					{laterRoundCombos.map((comboGame) => (
 						<article key={comboGame.gameId} className="combo-card">
 							<h3>Top Picked Matchups for {comboGame.gameLabel}</h3>
 							{comboGame.mostCommonCombo ? (
@@ -610,12 +617,12 @@ function AdminStatsPage() {
 					</span>
 				</div>
 				<div className="daily-chart">
-					{stats.dailyPickCreation.map((day) => (
+					{dailyPickCreation.map((day) => (
 						<div key={day.date} className="day-bar">
 							<span className="day-count">
 								{showPercent
 									? formatWholePct(
-											(day.userCount / Math.max(1, stats.totalUsers)) * 100,
+											(day.userCount / Math.max(1, totalUsers)) * 100,
 										)
 									: day.userCount}
 							</span>
