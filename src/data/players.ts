@@ -305,6 +305,7 @@ export const bracket: Bracket = {
 			date: GAME_SCHEDULE["left-r1"],
 			player1: jasonLengstorf,
 			player2: kyleCook,
+			winner: kyleCook,
 		},
 		// Game 1: Adam Wathan vs Julia Miocene
 		{
@@ -312,6 +313,7 @@ export const bracket: Bracket = {
 			date: GAME_SCHEDULE["left-r1"],
 			player1: adamWathan,
 			player2: juliaMiocene,
+			winner: juliaMiocene,
 		},
 		// Game 2: Chris Coyier vs Bree Hall
 		{
@@ -319,6 +321,7 @@ export const bracket: Bracket = {
 			date: GAME_SCHEDULE["left-r1"],
 			player1: chrisCoyier,
 			player2: breeHall,
+			winner: chrisCoyier,
 		},
 		// Game 3: Scott Tolinski vs Shaundai Person
 		{
@@ -326,6 +329,7 @@ export const bracket: Bracket = {
 			date: GAME_SCHEDULE["left-r1"],
 			player1: scottTolinski,
 			player2: shaundaiPerson,
+			winner: scottTolinski,
 		},
 
 		// ----- RIGHT SIDE (games 4-7) -----
@@ -366,8 +370,8 @@ export const bracket: Bracket = {
 	// Games 0-1: LEFT side | Games 2-3: RIGHT side
 
 	quarters: [
-		{ id: "qf-0", date: GAME_SCHEDULE.qf },
-		{ id: "qf-1", date: GAME_SCHEDULE.qf },
+		{ id: "qf-0", date: GAME_SCHEDULE.qf, player1: kyleCook, player2: juliaMiocene },
+		{ id: "qf-1", date: GAME_SCHEDULE.qf, player1: chrisCoyier, player2: scottTolinski },
 		{ id: "qf-2", date: GAME_SCHEDULE.qf },
 		{ id: "qf-3", date: GAME_SCHEDULE.qf },
 	],
