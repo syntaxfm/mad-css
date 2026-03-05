@@ -1,8 +1,11 @@
 .user-menu {
 	position: absolute;
-	top: 16px;
-	right: 16px;
+	top: 20px;
+	right: 20px;
 	z-index: 100;
+	@media (max-width: 1400px) {
+		top: 50px;
+	}
 }
 
 .user-menu-trigger {
@@ -84,11 +87,6 @@
 
 /* Mobile: hide name, show avatar only */
 @media (max-width: 500px) {
-	.user-menu {
-		top: 10px;
-		right: 10px;
-	}
-
 	.user-menu-trigger {
 		padding: 3px;
 		gap: 0;

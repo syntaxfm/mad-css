@@ -15,7 +15,8 @@
 	top: 5px;
 	z-index: 50;
 	margin-bottom: -30px;
-
+	width: fit-content;
+	margin-inline: auto;
 	.section-nav-tickets {
 		display: flex;
 		justify-content: center;
