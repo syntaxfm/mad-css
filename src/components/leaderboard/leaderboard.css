@@ -163,7 +163,7 @@
 	width: 36px;
 	height: 36px;
 	border-radius: 50%;
-	border: 2px solid var(--yellow);
+	border: 1px solid var(--yellow);
 	object-fit: cover;
 	flex-shrink: 0;
 }
@@ -224,6 +224,53 @@
 
 .leaderboard-digits--total .leaderboard-digit::before {
 	color: rgba(51, 255, 51, 0.1);
+}
+
+/* Overflow row for tied players beyond the visible cap */
+.leaderboard-overflow-row td {
+	border-bottom: 2px solid #333;
+	padding: 8px;
+}
+
+.leaderboard-overflow {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 8px;
+}
+
+.leaderboard-overflow-label {
+	font-family: var(--font-sans);
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--yellow);
+	white-space: nowrap;
+}
+
+.leaderboard-overflow-avatars {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0;
+}
+
+.leaderboard-overflow-avatar-link {
+	display: block;
+	margin-inline-start: -6px;
+	transition: translate 0.1s ease;
+
+	&:first-child {
+		margin-inline-start: 0;
+	}
+
+	&:hover {
+		translate: 0 -2px;
+		z-index: 1;
+	}
+}
+
+.leaderboard-avatar--placeholder {
+	display: block;
+	background: #444;
 }
 
 /* Empty state */
