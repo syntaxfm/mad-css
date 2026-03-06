@@ -22,6 +22,9 @@ export const getRouter = () => {
 			integrations: [Sentry.tanstackRouterBrowserTracingIntegration(router)],
 			tracesSampleRate: import.meta.env.DEV ? 1.0 : 0.2,
 			enableLogs: true,
+			release:
+				(globalThis as Record<string, undefined | { id?: string }>)
+					.SENTRY_RELEASE?.id ?? import.meta.env.SENTRY_RELEASE,
 		});
 	}
 	return router;
