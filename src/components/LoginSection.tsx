@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { usePredictionsContext } from "@/context/PredictionsContext";
 import { getNextGameTime } from "@/data/players";
 import { useCountdown } from "@/hooks/useCountdown";
@@ -113,6 +114,11 @@ export function LoginSectionShare({
 }
 
 export function LoginSection() {
+	const [mounted, setMounted] = useState(false);
+	useEffect(() => {
+		setMounted(true);
+	}, []);
+
 	const ctx = usePredictionsContext();
 
 	const error = ctx?.error ?? null;
@@ -128,7 +134,7 @@ export function LoginSection() {
 	const nextGameCountdown = useCountdown(nextGame?.time);
 	const nextGameLabel = nextGame ? ROUND_LABELS[nextGame.round] : null;
 
-	if (isPending) {
+	if (!mounted || isPending) {
 		return (
 			<div className="bracket-cta">
 				<span className="login-loading">Loading...</span>

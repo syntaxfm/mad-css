@@ -22,12 +22,16 @@ function getTimeRemaining(deadline: string): CountdownTime {
 	};
 }
 
+const ZERO: CountdownTime = {
+	days: 0,
+	hours: 0,
+	minutes: 0,
+	seconds: 0,
+	totalMs: 0,
+};
+
 export function useCountdown(deadline: string | undefined): CountdownTime {
-	const [time, setTime] = useState<CountdownTime>(() =>
-		deadline
-			? getTimeRemaining(deadline)
-			: { days: 0, hours: 0, minutes: 0, seconds: 0, totalMs: 0 },
-	);
+	const [time, setTime] = useState<CountdownTime>(ZERO);
 
 	useEffect(() => {
 		if (!deadline) return;

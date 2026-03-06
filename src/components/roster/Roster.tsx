@@ -85,7 +85,7 @@ export function Roster() {
 						key={`${player.name}-${index}`}
 						style={
 							{
-								"--rotate": `${(index % 2 === 0 ? 1 : -1) * seededRandom(index) * 5}deg`,
+								"--rotate": `${Math.round((index % 2 === 0 ? 1 : -1) * seededRandom(index) * 500) / 100}deg`,
 							} as React.CSSProperties
 						}
 					>

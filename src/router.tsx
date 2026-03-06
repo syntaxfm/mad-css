@@ -22,6 +22,11 @@ export const getRouter = () => {
 			integrations: [Sentry.tanstackRouterBrowserTracingIntegration(router)],
 			tracesSampleRate: import.meta.env.DEV ? 1.0 : 0.2,
 			enableLogs: true,
+			beforeSend(event) {
+				const message = event.exception?.values?.[0]?.value ?? "";
+				if (message.includes("webkit.messageHandlers")) return null;
+				return event;
+			},
 		});
 	}
 	return router;

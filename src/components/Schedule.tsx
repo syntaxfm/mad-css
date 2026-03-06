@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { GAME_LINKS, GAME_SCHEDULE, YOUTUBE_CHANNEL } from "@/data/players";
 import "@/styles/ticket.css";
 
@@ -99,6 +100,11 @@ function EmptyTicket() {
 }
 
 export function Schedule() {
+	const [mounted, setMounted] = useState(false);
+	useEffect(() => {
+		setMounted(true);
+	}, []);
+
 	return (
 		<div id="schedule" className="drink-tickets-wrapper">
 			<div className="drink-tickets">
@@ -107,7 +113,7 @@ export function Schedule() {
 				))}
 				{ROUNDS.map(({ key, label, sideText }) => {
 					const isoDate = GAME_SCHEDULE[key];
-					const isPast = new Date(isoDate).getTime() < Date.now();
+					const isPast = mounted && new Date(isoDate).getTime() < Date.now();
 					const url = isPast ? getVideoUrlForRound(key) : YOUTUBE_CHANNEL;
 					return (
 						<DrinkTicket
