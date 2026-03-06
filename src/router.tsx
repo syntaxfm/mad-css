@@ -22,6 +22,10 @@ export const getRouter = () => {
 			integrations: [Sentry.tanstackRouterBrowserTracingIntegration(router)],
 			tracesSampleRate: import.meta.env.DEV ? 1.0 : 0.2,
 			enableLogs: true,
+			ignoreErrors: [
+				/Can't find variable: CONFIG/,
+				/Can't find variable: currentInset/,
+			],
 		});
 	}
 	return router;
