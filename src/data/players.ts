@@ -33,7 +33,7 @@ export function getAirDateForGame(gameId: string): string {
 
 export const GAME_LINKS: Record<string, string> = {
 	// YouTube video IDs keyed by game ID
-	// "r1-0": "dQw4w9WgXcQ",
+	"r1-0": "nuxSFTjXrhI",
 };
 
 export const YOUTUBE_CHANNEL = "https://www.youtube.com/@syntaxfm";
@@ -370,8 +370,18 @@ export const bracket: Bracket = {
 	// Games 0-1: LEFT side | Games 2-3: RIGHT side
 
 	quarters: [
-		{ id: "qf-0", date: GAME_SCHEDULE.qf, player1: kyleCook, player2: juliaMiocene },
-		{ id: "qf-1", date: GAME_SCHEDULE.qf, player1: chrisCoyier, player2: scottTolinski },
+		{
+			id: "qf-0",
+			date: GAME_SCHEDULE.qf,
+			player1: kyleCook,
+			player2: juliaMiocene,
+		},
+		{
+			id: "qf-1",
+			date: GAME_SCHEDULE.qf,
+			player1: chrisCoyier,
+			player2: scottTolinski,
+		},
 		{ id: "qf-2", date: GAME_SCHEDULE.qf },
 		{ id: "qf-3", date: GAME_SCHEDULE.qf },
 	],
