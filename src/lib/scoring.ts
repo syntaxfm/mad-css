@@ -1,6 +1,6 @@
 import type { D1Database } from "@cloudflare/workers-types";
 import * as Sentry from "@sentry/tanstackstart-react";
-import { eq, sql } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 import {
 	FINAL_GAME_IDS,
 	getResultsFromBracket,
@@ -8,7 +8,7 @@ import {
 	ROUND_1_GAME_IDS,
 	SEMI_GAME_IDS,
 } from "@/data/players";
-import { createDb } from "@/db";
+import { createDb, type Database } from "@/db";
 import * as schema from "@/db/schema";
 import { buildResultsUpToStage, type SimulationStage } from "@/lib/simulation";
 
@@ -63,6 +63,33 @@ export function calculateScoresForUser(
 	};
 }
 
+function buildUpsertQuery(
+	db: Database,
+	values: {
+		id: string;
+		userId: string;
+		round1Score: number;
+		round2Score: number;
+		round3Score: number;
+		round4Score: number;
+		totalScore: number;
+	},
+) {
+	return db
+		.insert(schema.userScore)
+		.values(values)
+		.onConflictDoUpdate({
+			target: schema.userScore.userId,
+			set: {
+				round1Score: sql`excluded.round1_score`,
+				round2Score: sql`excluded.round2_score`,
+				round3Score: sql`excluded.round3_score`,
+				round4Score: sql`excluded.round4_score`,
+				totalScore: sql`excluded.total_score`,
+			},
+		});
+}
+
 export async function recalculateAllUserScores(
 	database: D1Database,
 	simulationStage?: SimulationStage,
@@ -91,29 +118,17 @@ export async function recalculateAllUserScores(
 				return { updated: 0 };
 			}
 
-			const usersWithPredictions = await db
-				.selectDistinct({ userId: schema.userPrediction.userId })
-				.from(schema.userPrediction);
-
-			if (usersWithPredictions.length === 0) {
-				return { updated: 0 };
-			}
-
-			const userIds = usersWithPredictions.map((u) => u.userId);
-
 			const allPredictions = await db
 				.select({
 					userId: schema.userPrediction.userId,
 					gameId: schema.userPrediction.gameId,
 					predictedWinnerId: schema.userPrediction.predictedWinnerId,
 				})
-				.from(schema.userPrediction)
-				.where(
-					sql`${schema.userPrediction.userId} IN (${sql.join(
-						userIds.map((id) => sql`${id}`),
-						sql`, `,
-					)})`,
-				);
+				.from(schema.userPrediction);
+
+			if (allPredictions.length === 0) {
+				return { updated: 0 };
+			}
 
 			const predictionsByUser = new Map<
 				string,
@@ -128,48 +143,26 @@ export async function recalculateAllUserScores(
 				predictionsByUser.set(p.userId, existing);
 			}
 
-			let updated = 0;
-			for (const userId of userIds) {
-				const userPredictions = predictionsByUser.get(userId) || [];
+			const queries: ReturnType<typeof buildUpsertQuery>[] = [];
+			for (const [userId, userPredictions] of predictionsByUser) {
 				const scores = calculateScoresForUser(userPredictions, results);
-
-				await Sentry.startSpan(
-					{ name: "scoring.upsertUser", op: "db" },
-					async () => {
-						const existing = await db
-							.select()
-							.from(schema.userScore)
-							.where(eq(schema.userScore.userId, userId))
-							.limit(1);
-
-						if (existing.length > 0) {
-							await db
-								.update(schema.userScore)
-								.set({
-									round1Score: scores.round1Score,
-									round2Score: scores.round2Score,
-									round3Score: scores.round3Score,
-									round4Score: scores.round4Score,
-									totalScore: scores.totalScore,
-								})
-								.where(eq(schema.userScore.userId, userId));
-						} else {
-							await db.insert(schema.userScore).values({
-								id: crypto.randomUUID(),
-								userId,
-								round1Score: scores.round1Score,
-								round2Score: scores.round2Score,
-								round3Score: scores.round3Score,
-								round4Score: scores.round4Score,
-								totalScore: scores.totalScore,
-							});
-						}
-					},
+				queries.push(
+					buildUpsertQuery(db, {
+						id: crypto.randomUUID(),
+						userId,
+						...scores,
+					}),
 				);
-				updated++;
 			}
 
-			return { updated };
+			// D1 batch sends all statements in a single round trip,
+			// each with only ~7 bind params (well under D1's 100 limit)
+			await Sentry.startSpan(
+				{ name: "scoring.upsertBatch", op: "db" },
+				() => db.batch(queries as [typeof queries[0], ...typeof queries]),
+			);
+
+			return { updated: queries.length };
 		},
 	);
 }

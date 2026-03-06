@@ -17,15 +17,28 @@ type LeaderboardEntry = {
 	totalScore: number;
 };
 
+const VISIBLE_PER_RANK = 10;
+
 const getLeaderboard = createServerFn({ method: "GET" }).handler(async () => {
 	const Sentry = await import("@sentry/tanstackstart-react");
 	const { env } = await import("cloudflare:workers");
 	const { createDb } = await import("@/db");
-	const { desc, eq } = await import("drizzle-orm");
+	const { and, desc, eq, inArray, notInArray } = await import("drizzle-orm");
 	const schema = await import("@/db/schema");
+	const { ADMIN_GITHUB_IDS } = await import("@/lib/admin");
 
 	return Sentry.startSpan({ name: "leaderboard.fetch", op: "db" }, async () => {
 		const db = createDb(env.DB);
+
+		const adminUserIds = db
+			.select({ userId: schema.account.userId })
+			.from(schema.account)
+			.where(
+				and(
+					eq(schema.account.providerId, "github"),
+					inArray(schema.account.accountId, [...ADMIN_GITHUB_IDS]),
+				),
+			);
 
 		const scores = await db
 			.select({
@@ -41,8 +54,9 @@ const getLeaderboard = createServerFn({ method: "GET" }).handler(async () => {
 			})
 			.from(schema.userScore)
 			.innerJoin(schema.user, eq(schema.userScore.userId, schema.user.id))
+			.where(notInArray(schema.userScore.userId, adminUserIds))
 			.orderBy(desc(schema.userScore.totalScore))
-			.limit(100);
+			.limit(129);
 
 		let currentRank = 1;
 		return scores.map((score, index): LeaderboardEntry => {
@@ -68,6 +82,63 @@ const getLeaderboard = createServerFn({ method: "GET" }).handler(async () => {
 	});
 });
 
+function groupByRank(entries: LeaderboardEntry[]) {
+	const groups: Map<number, LeaderboardEntry[]> = new Map();
+	for (const entry of entries) {
+		const group = groups.get(entry.rank) || [];
+		group.push(entry);
+		groups.set(entry.rank, group);
+	}
+	return groups;
+}
+
+function ordinal(n: number) {
+	const s = ["th", "st", "nd", "rd"];
+	const v = n % 100;
+	return `${n}${s[(v - 20) % 10] || s[v] || s[0]}`;
+}
+
+function OverflowAvatars({
+	entries,
+	rank,
+}: {
+	entries: LeaderboardEntry[];
+	rank: number;
+}) {
+	return (
+		<tr className="leaderboard-overflow-row">
+			<td />
+			<td colSpan={2}>
+				<div className="leaderboard-overflow">
+					<span className="leaderboard-overflow-label">
+						+{entries.length} more tied for {ordinal(rank)}
+					</span>
+					<div className="leaderboard-overflow-avatars">
+						{entries.map((entry) => (
+							<a
+								key={entry.userId}
+								href={entry.username ? `/bracket/${entry.username}` : undefined}
+								className="leaderboard-overflow-avatar-link"
+								title={entry.userName}
+							>
+								{entry.userImage ? (
+									<img
+										src={entry.userImage}
+										alt={entry.userName}
+										className="leaderboard-avatar leaderboard-avatar--sm"
+									/>
+								) : (
+									<span className="leaderboard-avatar leaderboard-avatar--sm leaderboard-avatar--placeholder" />
+								)}
+							</a>
+						))}
+					</div>
+				</div>
+			</td>
+		</tr>
+	);
+}
+
 export function Leaderboard() {
 	const { data, isLoading } = useQuery<LeaderboardEntry[]>({
 		queryKey: ["leaderboard"],
@@ -75,6 +146,7 @@ export function Leaderboard() {
 		staleTime: 1000 * 60 * 5,
 	});
 	const entries = data ?? [];
+	const rankGroups = groupByRank(entries);
 
 	return (
 		<section id="leaderboard" className="section leaderboard-section">
@@ -107,48 +179,62 @@ export function Leaderboard() {
 									</tr>
 								</thead>
 								<tbody>
-									{entries.map((entry) => (
-										<tr key={entry.userId}>
-											<td className="leaderboard-rank">
-												{entry.showRank ? entry.rank : ""}
-											</td>
-											<td>
-												{entry.username ? (
-													<a
-														href={`/bracket/${entry.username}`}
-														className="leaderboard-player leaderboard-player--link"
-													>
-														{entry.userImage && (
-															<img
-																src={entry.userImage}
-																alt=""
-																className="leaderboard-avatar"
+									{[...rankGroups.entries()].map(([rank, group]) => {
+										const visible = group.slice(0, VISIBLE_PER_RANK);
+										const overflow = group.slice(VISIBLE_PER_RANK);
+										return (
+											<>
+												{visible.map((entry, i) => (
+													<tr key={entry.userId}>
+														<td className="leaderboard-rank">
+															{i === 0 ? rank : ""}
+														</td>
+														<td>
+															{entry.username ? (
+																<a
+																	href={`/bracket/${entry.username}`}
+																	className="leaderboard-player leaderboard-player--link"
+																>
+																	{entry.userImage && (
+																		<img
+																			src={entry.userImage}
+																			alt=""
+																			className="leaderboard-avatar"
+																		/>
+																	)}
+																	<span className="leaderboard-name">
+																		{entry.userName}
+																	</span>
+																</a>
+															) : (
+																<div className="leaderboard-player">
+																	{entry.userImage && (
+																		<img
+																			src={entry.userImage}
+																			alt=""
+																			className="leaderboard-avatar"
+																		/>
+																	)}
+																	<span className="leaderboard-name">
+																		{entry.userName}
+																	</span>
+																</div>
+															)}
+														</td>
+														<td className="leaderboard-total">
+															<LeaderboardScore
+																value={entry.totalScore}
+																isTotal
 															/>
-														)}
-														<span className="leaderboard-name">
-															{entry.userName}
-														</span>
-													</a>
-												) : (
-													<div className="leaderboard-player">
-														{entry.userImage && (
-															<img
-																src={entry.userImage}
-																alt=""
-																className="leaderboard-avatar"
-															/>
-														)}
-														<span className="leaderboard-name">
-															{entry.userName}
-														</span>
-													</div>
+														</td>
+													</tr>
+												))}
+												{overflow.length > 0 && (
+													<OverflowAvatars entries={overflow} rank={rank} />
 												)}
-											</td>
-											<td className="leaderboard-total">
-												<LeaderboardScore value={entry.totalScore} isTotal />
-											</td>
-										</tr>
-									))}
+											</>
+										);
+									})}
 								</tbody>
 							</table>
 						)}
