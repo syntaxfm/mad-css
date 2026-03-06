@@ -18,6 +18,8 @@ import { Schedule } from "@/components/Schedule";
 import { SectionNav } from "@/components/SectionNav";
 import appCss from "../styles/styles.css?url";
 
+const CANONICAL_ORIGIN = "https://madcss.com";
+
 const queryClient = new QueryClient({
 	defaultOptions: {
 		queries: {
@@ -27,14 +29,13 @@ const queryClient = new QueryClient({
 	},
 });
 
-const getLocation = createIsomorphicFn()
-	.server(() => getRequestUrl())
-	.client(() => new URL(window.location.href));
+const getPathname = createIsomorphicFn()
+	.server(() => getRequestUrl().pathname)
+	.client(() => window.location.pathname);
 
 export const Route = createRootRoute({
 	head: () => {
-		const url = getLocation();
-		const origin = url.origin;
+		const pathname = getPathname();
 		return {
 			meta: [
 				{
@@ -70,7 +71,7 @@ export const Route = createRootRoute({
 				},
 				{
 					property: "og:image",
-					content: `${origin}/og.jpg`,
+					content: `${CANONICAL_ORIGIN}/og.jpg`,
 				},
 				{
 					property: "og:type",
@@ -83,7 +84,7 @@ export const Route = createRootRoute({
 				},
 				{
 					name: "twitter:image",
-					content: `${origin}/og.jpg`,
+					content: `${CANONICAL_ORIGIN}/og.jpg`,
 				},
 				{
 					name: "twitter:title",
@@ -101,7 +102,7 @@ export const Route = createRootRoute({
 			links: [
 				{
 					rel: "canonical",
-					href: `https://madcss.com${url.pathname}`,
+					href: `${CANONICAL_ORIGIN}${pathname}`,
 				},
 				{
 					rel: "preconnect",
@@ -136,11 +137,11 @@ function RootDocument() {
 	const matchRoute = useMatchRoute();
 	const isIndex = matchRoute({ to: "/" });
 	return (
-		<html lang="en">
+		<html lang="en" suppressHydrationWarning>
 			<head>
 				<HeadContent />
 			</head>
-			<body>
+			<body suppressHydrationWarning>
 				<QueryClientProvider client={queryClient}>
 					<Schedule />
 					{isIndex && <SectionNav />}
