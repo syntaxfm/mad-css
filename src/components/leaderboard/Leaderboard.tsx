@@ -147,6 +147,7 @@ export function Leaderboard() {
 	});
 	const entries = data ?? [];
 	const rankGroups = groupByRank(entries);
+	const topRanks = [...rankGroups.entries()].filter(([rank]) => rank <= 10);
 
 	return (
 		<section id="leaderboard" className="section leaderboard-section">
@@ -179,7 +180,7 @@ export function Leaderboard() {
 									</tr>
 								</thead>
 								<tbody>
-									{[...rankGroups.entries()].map(([rank, group]) => {
+									{topRanks.map(([rank, group]) => {
 										const visible = group.slice(0, VISIBLE_PER_RANK);
 										const overflow = group.slice(VISIBLE_PER_RANK);
 										return (

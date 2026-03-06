@@ -17,7 +17,7 @@ const usernameInputSchema = z.object({
 		.string()
 		.min(1)
 		.max(39)
-		.regex(/^[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?$/),
+		.regex(/^[a-zA-Z0-9](?:[a-zA-Z0-9_-]*[a-zA-Z0-9])?$/),
 });
 
 const getBracketData = createServerFn({ method: "GET" })
