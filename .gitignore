@@ -17,3 +17,5 @@ todos.json
 .agents/
 .claude/skills/
 
+export.sql
+import-local.sql

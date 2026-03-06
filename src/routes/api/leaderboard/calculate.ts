@@ -1,4 +1,5 @@
 import { env } from "cloudflare:workers";
+import * as Sentry from "@sentry/tanstackstart-react";
 import { createFileRoute } from "@tanstack/react-router";
 import { createDb } from "@/db";
 import { isAdminUser } from "@/lib/admin";
@@ -35,7 +36,10 @@ export const Route = createFileRoute("/api/leaderboard/calculate")({
 					) {
 						simulationStage = body.simulationStage as SimulationStage;
 					}
-				} catch {
+				} catch (error) {
+					console.log("Error recalculating scores", error);
+					Sentry.captureException(error);
+					console.error(error);
 					// No body or invalid JSON — use real results
 				}
 
