@@ -136,11 +136,11 @@ function RootDocument() {
 	const matchRoute = useMatchRoute();
 	const isIndex = matchRoute({ to: "/" });
 	return (
-		<html lang="en">
+		<html lang="en" suppressHydrationWarning>
 			<head>
 				<HeadContent />
 			</head>
-			<body>
+			<body suppressHydrationWarning>
 				<QueryClientProvider client={queryClient}>
 					<Schedule />
 					{isIndex && <SectionNav />}
