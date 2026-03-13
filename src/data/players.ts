@@ -340,6 +340,7 @@ export const bracket: Bracket = {
 			date: GAME_SCHEDULE["right-r1"],
 			player1: kevinPowell,
 			player2: amyDutton,
+			winner: kevinPowell,
 		},
 		// Game 5: Josh Comeau vs Cassidy Williams
 		{
@@ -347,13 +348,15 @@ export const bracket: Bracket = {
 			date: GAME_SCHEDULE["right-r1"],
 			player1: joshComeau,
 			player2: cassidyWilliams,
+			winner: joshComeau,
 		},
-		// Game 6: Wes Bos vs TBD
+		// Game 6: Wes Bos vs Ben Hong
 		{
 			id: "r1-6",
 			date: GAME_SCHEDULE["right-r1"],
 			player1: wesBos,
 			player2: benHong,
+			winner: wesBos,
 		},
 		// Game 7: Ania Kubow vs Adam Argyle
 		{
@@ -361,6 +364,7 @@ export const bracket: Bracket = {
 			date: GAME_SCHEDULE["right-r1"],
 			player1: aniaKubow,
 			player2: adamArgyle,
+			winner: adamArgyle,
 		},
 	],
 
@@ -382,8 +386,18 @@ export const bracket: Bracket = {
 			player1: chrisCoyier,
 			player2: scottTolinski,
 		},
-		{ id: "qf-2", date: GAME_SCHEDULE.qf },
-		{ id: "qf-3", date: GAME_SCHEDULE.qf },
+		{
+			id: "qf-2",
+			date: GAME_SCHEDULE.qf,
+			player1: kevinPowell,
+			player2: joshComeau,
+		},
+		{
+			id: "qf-3",
+			date: GAME_SCHEDULE.qf,
+			player1: wesBos,
+			player2: adamArgyle,
+		},
 	],
 
 	// ===========================================================================
