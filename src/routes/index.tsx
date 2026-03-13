@@ -31,7 +31,7 @@ function App() {
 	const userId = session?.user?.id;
 	const [tournamentResults, setTournamentResults] =
 		useState<Record<string, string>>(getBracketResults);
-	const [showPicks, setShowPicks] = useState(true);
+	const [showPicks, setShowPicks] = useState(false);
 
 	useEffect(() => {
 		const handler = (e: Event) => {
