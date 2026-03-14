@@ -133,6 +133,9 @@ function BracketToolbar() {
 	const blueskyShareUrl = username
 		? `https://bsky.app/intent/compose?text=${encodeURIComponent(`Check out my March Mad CSS bracket picks! 🏀\n\n${shareUrl}`)}`
 		: null;
+	const mastodonShareUrl = username
+		? `https://share.joinmastodon.org/#text=${encodeURIComponent(`Check out my March Mad CSS bracket picks! 🏀\n\n${shareUrl}`)}`
+		: null;
 	const isBracketComplete = pickCount === TOTAL_GAMES;
 	const showShare =
 		isLoggedIn && (isBracketComplete || isDeadlinePassed) && !!shareUrl;
@@ -176,6 +179,7 @@ function BracketToolbar() {
 				<LoginSectionShare
 					twitterShareUrl={twitterShareUrl}
 					blueskyShareUrl={blueskyShareUrl}
+					mastodonShareUrl={mastodonShareUrl}
 					copied={copied}
 					onCopyLink={handleCopyLink}
 				/>

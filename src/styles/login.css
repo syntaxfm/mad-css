@@ -476,6 +476,11 @@
 	color: var(--white);
 }
 
+.btn-share--mastodon {
+	background: var(--mastodon);
+	color: var(--white);
+}
+
 .share-icon {
 	width: 16px;
 	height: 16px;
